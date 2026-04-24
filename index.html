@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Retro Arcade</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #07111a;
+      --bg-soft: #0d1824;
+      --panel: rgba(13, 24, 36, 0.72);
+      --panel-soft: rgba(23, 37, 53, 0.78);
+      --line: rgba(151, 194, 220, 0.16);
+      --line-strong: rgba(151, 194, 220, 0.26);
+      --text: #eef5f7;
+      --muted: #93a8b7;
+      --mint: #79f0c8;
+      --sand: #ffd36d;
+      --danger: #ff7366;
+      --sky: #7bc7ff;
+      --violet: #9ea8ff;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 24px 16px 40px;
+      background:
+        radial-gradient(circle at top, rgba(123, 199, 255, 0.16), transparent 28%),
+        radial-gradient(circle at 20% 20%, rgba(121, 240, 200, 0.08), transparent 24%),
+        linear-gradient(180deg, #091018 0%, #060b11 100%);
+      color: var(--text);
+      font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      filter: blur(70px);
+      opacity: 0.22;
+      pointer-events: none;
+      z-index: 0;
+      animation: drift 12s ease-in-out infinite;
+    }
+
+    body::before {
+      top: 60px;
+      left: -70px;
+      background: rgba(123, 199, 255, 0.34);
+    }
+
+    body::after {
+      right: -90px;
+      bottom: 40px;
+      background: rgba(121, 240, 200, 0.18);
+      animation-delay: -5s;
+    }
+
+    .title {
+      font-size: clamp(36px, 7vw, 56px);
+      letter-spacing: 0.16em;
+      color: #f3fbff;
+      margin-bottom: 8px;
+      text-align: center;
+      text-shadow: 0 0 24px rgba(123, 199, 255, 0.16);
+      position: relative;
+      z-index: 1;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    #shell {
+      width: min(1120px, 100%);
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    #main-panel {
+      min-height: 620px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #main-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.06), transparent 18%, transparent 70%, rgba(123, 199, 255, 0.06)),
+        radial-gradient(circle at top right, rgba(123, 199, 255, 0.08), transparent 26%);
+      pointer-events: none;
+    }
+
+    #menu-screen,
+    #tetris-screen,
+    #tank-screen {
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hidden { display: none !important; }
+
+    .menu-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      width: 100%;
+      margin-top: 6px;
+    }
+
+    .menu-grid::before {
+      content: "";
+      position: absolute;
+      inset: 18px auto auto 18px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(158, 168, 255, 0.16), transparent 70%);
+      filter: blur(10px);
+      pointer-events: none;
+    }
+
+    .game-card {
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)),
+        linear-gradient(180deg, rgba(20, 34, 48, 0.9), rgba(11, 21, 31, 0.96));
+      border: 1px solid rgba(151, 194, 220, 0.14);
+      border-radius: 22px;
+      padding: 22px;
+      min-height: 250px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+      transition: transform 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease;
+    }
+
+    .game-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 35%, transparent 65%, rgba(123, 199, 255, 0.08));
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .game-card::after {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      right: -40px;
+      top: -50px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(123, 199, 255, 0.2), transparent 68%);
+      pointer-events: none;
+      transition: transform 0.3s ease;
+    }
+
+    .game-card .shine {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(115deg, transparent 20%, rgba(255, 255, 255, 0.12) 50%, transparent 80%);
+      transform: translateX(-120%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .game-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--line-strong);
+      box-shadow: 0 28px 54px rgba(0, 0, 0, 0.32);
+    }
+
+    .game-card:hover::after {
+      transform: scale(1.08);
+    }
+
+    .game-card:hover .shine {
+      transform: translateX(120%);
+      opacity: 1;
+      transition: transform 0.8s ease, opacity 0.3s ease;
+    }
+
+    .card-top,
+    .card-bottom {
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .game-card h2 {
+      color: var(--text);
+      font-size: 28px;
+      letter-spacing: -0.02em;
+      margin-top: 6px;
+    }
+
+    .game-card p {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #dbe7ef;
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .cta-row,
+    .top-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      width: 100%;
+    }
+
+    button {
+      border: 1px solid rgba(151, 194, 220, 0.1);
+      border-radius: 14px;
+      background: var(--panel-soft);
+      color: var(--text);
+      padding: 12px 16px;
+      cursor: pointer;
+      font: inherit;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      border-color: var(--mint);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+    }
+
+    .primary {
+      background: linear-gradient(180deg, #f4fbff, #d9f3ff);
+      color: #09131b;
+      font-weight: 700;
+    }
+
+    .secondary {
+      border-color: rgba(151, 194, 220, 0.12);
+    }
+
+    .screen-head {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .screen-title {
+      font-size: 24px;
+      letter-spacing: 0.03em;
+      font-weight: 700;
+      color: var(--sand);
+      font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    .hud {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+    }
+
+    .hud-box {
+      background: rgba(8, 16, 24, 0.65);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .hud-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 4px;
+    }
+
+    .hud-value {
+      color: var(--text);
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    #tetris-layout {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 180px;
+      gap: 18px;
+      align-items: start;
+      margin-top: 12px;
+    }
+
+    #tetris-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #board,
+    #tank-board {
+      display: block;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #060c13;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    }
+
+    #msg,
+    #tank-msg {
+      min-height: 18px;
+      color: var(--mint);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-align: center;
+    }
+
+    #tetris-side {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #next-canvas {
+      display: block;
+      margin: 6px auto 0;
+    }
+
+    .mini-panel {
+      background: rgba(8, 16, 24, 0.56);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .tank-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .difficulty-row {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .difficulty-label {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .difficulty-btn {
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .difficulty-btn.active {
+      background: linear-gradient(180deg, rgba(121, 240, 200, 0.22), rgba(123, 199, 255, 0.18));
+      border-color: rgba(121, 240, 200, 0.4);
+      color: #f4fcff;
+      box-shadow: 0 0 0 1px rgba(121, 240, 200, 0.08), 0 12px 28px rgba(0, 0, 0, 0.2);
+    }
+
+    #tank-board {
+      background:
+        radial-gradient(circle at center, rgba(123, 199, 255, 0.08), transparent 55%),
+        linear-gradient(180deg, #061019, #08131d);
+      cursor: crosshair;
+    }
+
+    @media (max-width: 840px) {
+      #shell,
+      #tetris-layout {
+        grid-template-columns: 1fr;
+      }
+
+      #main-panel {
+        min-height: unset;
+      }
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translateY(0) translateX(0); }
+      50% { transform: translateY(-18px) translateX(10px); }
+    }
+  </style>
+</head>
+<body>
+  <h1 class="title">RETRO ARCADE</h1>
+  <p class="subtitle">pick a game and jump in</p>
+
+  <div id="shell">
+    <section id="main-panel" class="panel">
+      <div id="menu-screen">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">Game Menu</div>
+            <div class="hint">Choose a cabinet to start playing.</div>
+          </div>
+        </div>
+
+        <div class="menu-grid">
+          <article class="game-card">
+            <div class="shine"></div>
+            <div class="card-top">
+              <span class="badge">Puzzle</span>
+            </div>
+            <div class="card-bottom">
+              <h2>Tetris</h2>
+              <p>Stack blocks, clear lines, and keep the board alive as long as you can.</p>
+            </div>
+            <div class="cta-row card-bottom">
+              <button class="primary" id="open-tetris">Play Tetris</button>
+            </div>
+          </article>
+
+          <article class="game-card">
+            <div class="shine"></div>
+            <div class="card-top">
+              <span class="badge">Action</span>
+            </div>
+            <div class="card-bottom">
+              <h2>Mini Tank</h2>
+              <p>Drive a tiny tank, fire shells, dodge enemy shots, and survive the arena.</p>
+            </div>
+            <div class="cta-row card-bottom">
+              <button class="primary" id="open-tank">Play Mini Tank</button>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div id="tetris-screen" class="hidden">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">Tetris</div>
+            <div class="hint">Arrow keys or WASD. Space for hard drop.</div>
+          </div>
+          <div class="top-row">
+            <button class="secondary" id="back-from-tetris">Menu</button>
+            <button class="primary" id="start-btn">Start</button>
+          </div>
+        </div>
+
+        <div class="hud">
+          <div class="hud-box">
+            <div class="hud-label">Lines</div>
+            <div class="hud-value" id="lines-val">0</div>
+          </div>
+          <div class="hud-box">
+            <div class="hud-label">Score</div>
+            <div class="hud-value" id="score-val">0</div>
+          </div>
+          <div class="hud-box">
+            <div class="hud-label">Volume</div>
+            <div class="hud-value" id="vol-num">0</div>
+          </div>
+        </div>
+
+        <div id="tetris-layout">
+          <div id="tetris-left">
+            <canvas id="board" width="200" height="400"></canvas>
+            <div id="msg">Press Start to play</div>
+          </div>
+
+          <aside id="tetris-side">
+            <div class="mini-panel">
+              <div class="hud-label">Next</div>
+              <canvas id="next-canvas" width="80" height="80"></canvas>
+            </div>
+            <div class="mini-panel">
+              <div class="hud-label">Controls</div>
+              <p>Move: Left / Right or A / D</p>
+              <p>Rotate: Up or W</p>
+              <p>Soft drop: Down or S</p>
+              <p>Hard drop: Space</p>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <div id="tank-screen" class="hidden">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">Mini Tank</div>
+            <div class="hint">Move with WASD or arrows. Aim with mouse. Hold click to shoot.</div>
+          </div>
+          <div class="top-row">
+            <button class="secondary" id="back-from-tank">Menu</button>
+            <button class="primary" id="tank-start-btn">Start Battle</button>
+          </div>
+        </div>
+
+        <div class="difficulty-row">
+          <div class="difficulty-label">Difficulty</div>
+          <button class="difficulty-btn active" data-difficulty="easy">Easy</button>
+          <button class="difficulty-btn" data-difficulty="normal">Normal</button>
+          <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+          <button class="difficulty-btn" data-difficulty="hardcore">Hardcore</button>
+        </div>
+
+        <div class="hud">
+          <div class="hud-box">
+            <div class="hud-label">Score</div>
+            <div class="hud-value" id="tank-score">0</div>
+          </div>
+          <div class="hud-box">
+            <div class="hud-label">Lives</div>
+            <div class="hud-value" id="tank-lives">3</div>
+          </div>
+          <div class="hud-box">
+            <div class="hud-label">Wave</div>
+            <div class="hud-value" id="tank-wave">1</div>
+          </div>
+        </div>
+
+        <div class="tank-wrap">
+          <canvas id="tank-board" width="920" height="560"></canvas>
+          <div id="tank-msg">Press Start Battle to play</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const menuScreen = document.getElementById("menu-screen");
+    const tetrisScreen = document.getElementById("tetris-screen");
+    const tankScreen = document.getElementById("tank-screen");
+
+    function showScreen(name) {
+      menuScreen.classList.toggle("hidden", name !== "menu");
+      tetrisScreen.classList.toggle("hidden", name !== "tetris");
+      tankScreen.classList.toggle("hidden", name !== "tank");
+      if (name !== "tetris") stopTetris();
+      if (name !== "tank") stopTank();
+    }
+
+    document.getElementById("open-tetris").addEventListener("click", () => {
+      showScreen("tetris");
+      drawBoard();
+      drawNext();
+      updateUI();
+    });
+
+    document.getElementById("open-tank").addEventListener("click", () => {
+      showScreen("tank");
+      drawTankStartScreen();
+    });
+
+    document.getElementById("back-from-tetris").addEventListener("click", () => showScreen("menu"));
+    document.getElementById("back-from-tank").addEventListener("click", () => showScreen("menu"));
+
+    const canvas = document.getElementById("board");
+    const ctx = canvas.getContext("2d");
+    const nextCanvas = document.getElementById("next-canvas");
+    const nctx = nextCanvas.getContext("2d");
+
+    const COLS = 10;
+    const ROWS = 20;
+    const BLOCK = 20;
+
+    const COLORS = [
+      "#5DCAA5",
+      "#378ADD",
+      "#E24B4A",
+      "#EF9F27",
+      "#7F77DD",
+      "#D4537E",
+      "#97C459"
+    ];
+
+    const SHAPES = [
+      [[1, 1, 1, 1]],
+      [[1, 1], [1, 1]],
+      [[0, 1, 0], [1, 1, 1]],
+      [[1, 0, 0], [1, 1, 1]],
+      [[0, 0, 1], [1, 1, 1]],
+      [[1, 1, 0], [0, 1, 1]],
+      [[0, 1, 1], [1, 1, 0]]
+    ];
+
+    let board, piece, next, score, lines, volume, gameLoop, running;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playLineClear(vol) {
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const freq = 220 + vol * 30;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(freq * 2, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+      } catch (err) {}
+    }
+
+    function playMove() {
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = 300;
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.05);
+      } catch (err) {}
+    }
+
+    function newBoard() {
+      return Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+    }
+
+    function randomPiece() {
+      const i = Math.floor(Math.random() * SHAPES.length);
+      const shape = SHAPES[i];
+      return {
+        shape,
+        color: COLORS[i],
+        x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2),
+        y: 0
+      };
+    }
+
+    function rotate(shape) {
+      return shape[0].map((_, c) => shape.map((row) => row[c]).reverse());
+    }
+
+    function valid(b, p, ox = 0, oy = 0, nextShape = null) {
+      const shape = nextShape || p.shape;
+      for (let r = 0; r < shape.length; r++) {
+        for (let c = 0; c < shape[r].length; c++) {
+          if (!shape[r][c]) continue;
+          const nx = p.x + c + ox;
+          const ny = p.y + r + oy;
+          if (nx < 0 || nx >= COLS || ny >= ROWS) return false;
+          if (ny >= 0 && b[ny][nx]) return false;
+        }
+      }
+      return true;
+    }
+
+    function place(b, p) {
+      p.shape.forEach((row, ri) => {
+        row.forEach((value, ci) => {
+          if (value && p.y + ri >= 0) b[p.y + ri][p.x + ci] = p.color;
+        });
+      });
+    }
+
+    function clearLines(b) {
+      let cleared = 0;
+      for (let r = ROWS - 1; r >= 0; r--) {
+        if (b[r].every((cell) => cell)) {
+          b.splice(r, 1);
+          b.unshift(Array(COLS).fill(0));
+          cleared++;
+          r++;
+        }
+      }
+      return cleared;
+    }
+
+    function drawBoard() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = "rgba(255,255,255,0.04)";
+      ctx.lineWidth = 0.5;
+      for (let r = 0; r < ROWS; r++) {
+        ctx.beginPath();
+        ctx.moveTo(0, r * BLOCK);
+        ctx.lineTo(COLS * BLOCK, r * BLOCK);
+        ctx.stroke();
+      }
+      for (let c = 0; c < COLS; c++) {
+        ctx.beginPath();
+        ctx.moveTo(c * BLOCK, 0);
+        ctx.lineTo(c * BLOCK, ROWS * BLOCK);
+        ctx.stroke();
+      }
+
+      if (board) {
+        board.forEach((row, r) => {
+          row.forEach((color, c) => {
+            if (!color) return;
+            ctx.fillStyle = color;
+            ctx.fillRect(c * BLOCK + 0.5, r * BLOCK + 0.5, BLOCK - 1, BLOCK - 1);
+          });
+        });
+      }
+
+      if (!piece) return;
+
+      let ghostY = piece.y;
+      while (valid(board, piece, 0, ghostY - piece.y + 1)) ghostY++;
+      piece.shape.forEach((row, r) => {
+        row.forEach((value, c) => {
+          if (!value) return;
+          ctx.fillStyle = piece.color + "33";
+          ctx.fillRect((piece.x + c) * BLOCK + 0.5, (ghostY + r) * BLOCK + 0.5, BLOCK - 1, BLOCK - 1);
+        });
+      });
+
+      piece.shape.forEach((row, r) => {
+        row.forEach((value, c) => {
+          if (!value) return;
+          ctx.fillStyle = piece.color;
+          ctx.fillRect((piece.x + c) * BLOCK + 0.5, (piece.y + r) * BLOCK + 0.5, BLOCK - 1, BLOCK - 1);
+        });
+      });
+    }
+
+    function drawNext() {
+      nctx.clearRect(0, 0, 80, 80);
+      if (!next) return;
+      const bs = 14;
+      const ox = Math.floor((80 - next.shape[0].length * bs) / 2);
+      const oy = Math.floor((80 - next.shape.length * bs) / 2);
+      next.shape.forEach((row, r) => {
+        row.forEach((value, c) => {
+          if (!value) return;
+          nctx.fillStyle = next.color;
+          nctx.fillRect(ox + c * bs, oy + r * bs, bs - 1, bs - 1);
+        });
+      });
+    }
+
+    function updateUI() {
+      document.getElementById("lines-val").textContent = lines ?? 0;
+      document.getElementById("score-val").textContent = score ?? 0;
+      document.getElementById("vol-num").textContent = volume ?? 0;
+    }
+
+    function setMsg(text, clearAfter = 0) {
+      const msg = document.getElementById("msg");
+      msg.textContent = text;
+      if (clearAfter > 0) {
+        setTimeout(() => {
+          if (running) msg.textContent = "";
+        }, clearAfter);
+      }
+    }
+
+    function tick() {
+      if (!piece || !running) return;
+
+      if (valid(board, piece, 0, 1)) {
+        piece.y++;
+      } else {
+        place(board, piece);
+        const cleared = clearLines(board);
+
+        if (cleared > 0) {
+          lines += cleared;
+          volume += cleared;
+          score += cleared * 100 * cleared;
+          playLineClear(volume);
+          updateUI();
+
+          if (volume >= 20) {
+            setMsg("MAX VOLUME! " + volume);
+          } else {
+            setMsg("+" + cleared + " line" + (cleared > 1 ? "s" : "") + "! Volume -> " + volume, 1200);
+          }
+        }
+
+        piece = next;
+        next = randomPiece();
+        drawNext();
+
+        if (!valid(board, piece, 0, 0)) {
+          running = false;
+          clearInterval(gameLoop);
+          setMsg("Game over! Final volume: " + volume);
+          document.getElementById("start-btn").textContent = "Restart";
+          return;
+        }
+      }
+
+      drawBoard();
+    }
+
+    function startGame() {
+      initAudio();
+      board = newBoard();
+      score = 0;
+      lines = 0;
+      volume = 0;
+      piece = randomPiece();
+      next = randomPiece();
+      running = true;
+      clearInterval(gameLoop);
+      gameLoop = setInterval(tick, 500);
+      document.getElementById("start-btn").textContent = "Restart";
+      setMsg("");
+      updateUI();
+      drawNext();
+      drawBoard();
+    }
+
+    function stopTetris() {
+      running = false;
+      clearInterval(gameLoop);
+    }
+
+    document.getElementById("start-btn").addEventListener("click", () => {
+      showScreen("tetris");
+      startGame();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (!running || menuScreen.classList.contains("hidden") === false || tetrisScreen.classList.contains("hidden")) return;
+
+      switch (e.key) {
+        case "ArrowLeft":
+        case "a":
+        case "A":
+          if (valid(board, piece, -1, 0)) { piece.x--; playMove(); drawBoard(); }
+          e.preventDefault();
+          break;
+        case "ArrowRight":
+        case "d":
+        case "D":
+          if (valid(board, piece, 1, 0)) { piece.x++; playMove(); drawBoard(); }
+          e.preventDefault();
+          break;
+        case "ArrowDown":
+        case "s":
+        case "S":
+          if (valid(board, piece, 0, 1)) { piece.y++; score++; updateUI(); drawBoard(); }
+          e.preventDefault();
+          break;
+        case "ArrowUp":
+        case "w":
+        case "W": {
+          const rotated = rotate(piece.shape);
+          if (valid(board, piece, 0, 0, rotated)) { piece.shape = rotated; playMove(); drawBoard(); }
+          e.preventDefault();
+          break;
+        }
+        case " ":
+          while (valid(board, piece, 0, 1)) { piece.y++; score += 2; }
+          tick();
+          updateUI();
+          e.preventDefault();
+          break;
+      }
+    });
+
+    const tankCanvas = document.getElementById("tank-board");
+    const tankCtx = tankCanvas.getContext("2d");
+    const tankKeys = new Set();
+    const difficultyButtons = Array.from(document.querySelectorAll(".difficulty-btn"));
+    const TANK_PATH_GRID = 48;
+
+    let tankState = null;
+    let tankAnimationId = null;
+    let tankDifficulty = "easy";
+
+    const tankDifficultyPresets = {
+      easy: {
+        lives: 5,
+        playerSpeed: 275,
+        fireRate: 0.22,
+        maxEnemies: 2,
+        spawnBase: 2.2,
+        enemySpeed: 34,
+        enemyBullet: 122,
+        enemyCooldown: 2.15,
+        wallCount: 4
+      },
+      normal: {
+        lives: 4,
+        playerSpeed: 260,
+        fireRate: 0.18,
+        maxEnemies: 3,
+        spawnBase: 1.75,
+        enemySpeed: 44,
+        enemyBullet: 145,
+        enemyCooldown: 1.75,
+        wallCount: 5
+      },
+      hard: {
+        lives: 3,
+        playerSpeed: 238,
+        fireRate: 0.135,
+        maxEnemies: 5,
+        spawnBase: 1.08,
+        enemySpeed: 68,
+        enemyBullet: 184,
+        enemyCooldown: 1.08,
+        wallCount: 7
+      },
+      hardcore: {
+        lives: 2,
+        playerSpeed: 228,
+        fireRate: 0.125,
+        maxEnemies: 6,
+        spawnBase: 0.82,
+        enemySpeed: 84,
+        enemyBullet: 210,
+        enemyCooldown: 0.82,
+        wallCount: 8
+      }
+    };
+
+    function updateDifficultyButtons() {
+      difficultyButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.difficulty === tankDifficulty);
+      });
+    }
+
+    difficultyButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        tankDifficulty = button.dataset.difficulty;
+        updateDifficultyButtons();
+        if (!tankScreen.classList.contains("hidden")) {
+          drawTankStartScreen();
+        }
+      });
+    });
+
+    function rectsOverlap(a, b) {
+      return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+    }
+
+    function circleRectHit(circle, rect, radius) {
+      const nearestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.w));
+      const nearestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.h));
+      const dx = circle.x - nearestX;
+      const dy = circle.y - nearestY;
+      return dx * dx + dy * dy < radius * radius;
+    }
+
+    function collidesWithWalls(circle, radius) {
+      return tankState.walls.some((wall) => circleRectHit(circle, wall, radius));
+    }
+
+    function moveCircleWithWalls(entity, moveX, moveY, radius) {
+      let blockedX = false;
+      let blockedY = false;
+
+      entity.x += moveX;
+      if (collidesWithWalls(entity, radius)) {
+        entity.x -= moveX;
+        blockedX = true;
+      }
+
+      entity.y += moveY;
+      if (collidesWithWalls(entity, radius)) {
+        entity.y -= moveY;
+        blockedY = true;
+      }
+
+      return { blockedX, blockedY };
+    }
+
+    function tryMoveDirection(entity, dirX, dirY, speed, dt, radius) {
+      const len = Math.hypot(dirX, dirY) || 1;
+      return moveCircleWithWalls(entity, (dirX / len) * speed * dt, (dirY / len) * speed * dt, radius);
+    }
+
+    function generateWalls(count) {
+      const walls = [];
+      const reserved = [
+        { x: tankCanvas.width / 2 - 92, y: tankCanvas.height - 138, w: 184, h: 104 },
+        { x: tankCanvas.width / 2 - 92, y: 24, w: 184, h: 104 }
+      ];
+
+      let tries = 0;
+      while (walls.length < count && tries < 120) {
+        tries++;
+        const wall = {
+          x: 52 + Math.random() * (tankCanvas.width - 196),
+          y: 44 + Math.random() * (tankCanvas.height - 148),
+          w: 48 + Math.random() * 54,
+          h: 24 + Math.random() * 28
+        };
+
+        const hitsReserved = reserved.some((area) => rectsOverlap(wall, area));
+        const hitsWall = walls.some((placed) => rectsOverlap(
+          { x: wall.x - 42, y: wall.y - 42, w: wall.w + 84, h: wall.h + 84 },
+          placed
+        ));
+
+        if (!hitsReserved && !hitsWall) walls.push(wall);
+      }
+      return walls;
+    }
+
+    function lineIntersectsRect(x1, y1, x2, y2, rect) {
+      const steps = 32;
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const px = x1 + (x2 - x1) * t;
+        const py = y1 + (y2 - y1) * t;
+        if (px >= rect.x && px <= rect.x + rect.w && py >= rect.y && py <= rect.y + rect.h) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function hasLineOfSight(fromX, fromY, toX, toY) {
+      return !tankState.walls.some((wall) => lineIntersectsRect(fromX, fromY, toX, toY, wall));
+    }
+
+    function isGridCellBlocked(col, row, radius) {
+      const x = col * TANK_PATH_GRID + TANK_PATH_GRID / 2;
+      const y = row * TANK_PATH_GRID + TANK_PATH_GRID / 2;
+      if (x < 24 || x > tankCanvas.width - 24 || y < 24 || y > tankCanvas.height - 24) return true;
+      return tankState.walls.some((wall) => circleRectHit({ x, y }, wall, radius));
+    }
+
+    function toGridPoint(x, y) {
+      return {
+        col: Math.max(0, Math.min(Math.floor(x / TANK_PATH_GRID), Math.floor(tankCanvas.width / TANK_PATH_GRID) - 1)),
+        row: Math.max(0, Math.min(Math.floor(y / TANK_PATH_GRID), Math.floor(tankCanvas.height / TANK_PATH_GRID) - 1))
+      };
+    }
+
+    function gridKey(col, row) {
+      return col + "," + row;
+    }
+
+    function findPathPoints(startX, startY, endX, endY, radius) {
+      const cols = Math.floor(tankCanvas.width / TANK_PATH_GRID);
+      const rows = Math.floor(tankCanvas.height / TANK_PATH_GRID);
+      const start = toGridPoint(startX, startY);
+      const goal = toGridPoint(endX, endY);
+      const startKey = gridKey(start.col, start.row);
+      const goalKey = gridKey(goal.col, goal.row);
+      const queue = [start];
+      const visited = new Set([startKey]);
+      const parents = new Map();
+      const steps = [
+        { dc: 1, dr: 0 }, { dc: -1, dr: 0 }, { dc: 0, dr: 1 }, { dc: 0, dr: -1 },
+        { dc: 1, dr: 1 }, { dc: -1, dr: 1 }, { dc: 1, dr: -1 }, { dc: -1, dr: -1 }
+      ];
+
+      while (queue.length > 0) {
+        const current = queue.shift();
+        const currentKey = gridKey(current.col, current.row);
+        if (currentKey === goalKey) break;
+
+        for (const step of steps) {
+          const nextCol = current.col + step.dc;
+          const nextRow = current.row + step.dr;
+          if (nextCol < 0 || nextRow < 0 || nextCol >= cols || nextRow >= rows) continue;
+          if (step.dc !== 0 && step.dr !== 0) {
+            if (
+              isGridCellBlocked(current.col + step.dc, current.row, radius + 4) ||
+              isGridCellBlocked(current.col, current.row + step.dr, radius + 4)
+            ) {
+              continue;
+            }
+          }
+          const nextKey = gridKey(nextCol, nextRow);
+          if (visited.has(nextKey) || isGridCellBlocked(nextCol, nextRow, radius + 4)) continue;
+          visited.add(nextKey);
+          parents.set(nextKey, currentKey);
+          queue.push({ col: nextCol, row: nextRow });
+        }
+      }
+
+      if (!visited.has(goalKey)) return [];
+
+      const path = [];
+      let currentKey = goalKey;
+      while (currentKey !== startKey) {
+        const [col, row] = currentKey.split(",").map(Number);
+        path.push({
+          x: col * TANK_PATH_GRID + TANK_PATH_GRID / 2,
+          y: row * TANK_PATH_GRID + TANK_PATH_GRID / 2
+        });
+        currentKey = parents.get(currentKey);
+        if (!currentKey) break;
+      }
+
+      path.reverse();
+      return path;
+    }
+
+    function makeTankState() {
+      const preset = tankDifficultyPresets[tankDifficulty];
+      return {
+        running: true,
+        score: 0,
+        lives: preset.lives,
+        wave: 1,
+        lastTime: 0,
+        spawnTimer: 0.9,
+        fireCooldown: 0,
+        maxEnemies: preset.maxEnemies,
+        mouseX: tankCanvas.width / 2,
+        mouseY: 60,
+        shooting: false,
+        preset,
+        player: {
+          x: tankCanvas.width / 2,
+          y: tankCanvas.height - 50,
+          size: 16,
+          speed: preset.playerSpeed,
+          dirX: 0,
+          dirY: -1
+        },
+        bullets: [],
+        enemies: [],
+        particles: [],
+        walls: generateWalls(preset.wallCount)
+      };
+    }
+
+    function updateTankHUD() {
+      document.getElementById("tank-score").textContent = tankState ? tankState.score : 0;
+      document.getElementById("tank-lives").textContent = tankState ? tankState.lives : 3;
+      document.getElementById("tank-wave").textContent = tankState ? tankState.wave : 1;
+    }
+
+    function setTankMsg(text) {
+      document.getElementById("tank-msg").textContent = text;
+    }
+
+    function spawnEnemy() {
+      if (tankState.enemies.length >= tankState.maxEnemies) return;
+      const edge = Math.floor(Math.random() * 4);
+      let x = 0;
+      let y = 0;
+      if (edge === 0) { x = Math.random() * tankCanvas.width; y = -20; }
+      if (edge === 1) { x = tankCanvas.width + 20; y = Math.random() * tankCanvas.height; }
+      if (edge === 2) { x = Math.random() * tankCanvas.width; y = tankCanvas.height + 20; }
+      if (edge === 3) { x = -20; y = Math.random() * tankCanvas.height; }
+
+      const enemy = {
+        x,
+        y,
+        size: 15,
+        speed: tankState.preset.enemySpeed + tankState.wave * 4 + Math.random() * 8,
+        cooldown: tankState.preset.enemyCooldown + Math.random() * 0.9,
+        path: [],
+        pathIndex: 0,
+        pathTimer: 0
+      };
+
+      const badSpawn = tankState.walls.some((wall) => circleRectHit(enemy, wall, enemy.size + 12));
+      if (!badSpawn) tankState.enemies.push(enemy);
+    }
+
+    function fireBullet(owner, x, y, dx, dy, speed) {
+      const length = Math.hypot(dx, dy) || 1;
+      tankState.bullets.push({
+        owner,
+        x,
+        y,
+        dx: dx / length,
+        dy: dy / length,
+        speed,
+        radius: owner === "player" ? 4 : 5
+      });
+    }
+
+    function explode(x, y, color) {
+      for (let i = 0; i < 12; i++) {
+        const angle = (Math.PI * 2 * i) / 12;
+        tankState.particles.push({
+          x,
+          y,
+          dx: Math.cos(angle) * (40 + Math.random() * 80),
+          dy: Math.sin(angle) * (40 + Math.random() * 80),
+          life: 0.45 + Math.random() * 0.2,
+          color
+        });
+      }
+    }
+
+    function circleHit(a, ar, b, br) {
+      return Math.hypot(a.x - b.x, a.y - b.y) < ar + br;
+    }
+
+    function endTankGame(message) {
+      tankState.running = false;
+      setTankMsg(message);
+      document.getElementById("tank-start-btn").textContent = "Restart Battle";
+    }
+
+    function updateTank(dt) {
+      if (!tankState.running) return;
+
+      const player = tankState.player;
+      let moveX = 0;
+      let moveY = 0;
+
+      if (tankKeys.has("ArrowLeft") || tankKeys.has("a") || tankKeys.has("A")) moveX -= 1;
+      if (tankKeys.has("ArrowRight") || tankKeys.has("d") || tankKeys.has("D")) moveX += 1;
+      if (tankKeys.has("ArrowUp") || tankKeys.has("w") || tankKeys.has("W")) moveY -= 1;
+      if (tankKeys.has("ArrowDown") || tankKeys.has("s") || tankKeys.has("S")) moveY += 1;
+
+      if (moveX || moveY) {
+        const len = Math.hypot(moveX, moveY);
+        moveX /= len;
+        moveY /= len;
+      }
+
+      moveCircleWithWalls(player, moveX * player.speed * dt, moveY * player.speed * dt, player.size);
+      player.x = Math.max(20, Math.min(tankCanvas.width - 20, player.x));
+      player.y = Math.max(20, Math.min(tankCanvas.height - 20, player.y));
+
+      tankState.fireCooldown -= dt;
+      const aimX = tankState.mouseX - player.x;
+      const aimY = tankState.mouseY - player.y;
+      const aimLen = Math.hypot(aimX, aimY) || 1;
+      player.dirX = aimX / aimLen;
+      player.dirY = aimY / aimLen;
+
+      if (tankState.shooting && tankState.fireCooldown <= 0) {
+        fireBullet("player", player.x + player.dirX * 18, player.y + player.dirY * 18, player.dirX, player.dirY, 420);
+        tankState.fireCooldown = tankState.preset.fireRate;
+      }
+
+      tankState.spawnTimer -= dt;
+      if (tankState.spawnTimer <= 0) {
+        spawnEnemy();
+        const spawnExtra = tankDifficulty === "hardcore" ? 2 : tankDifficulty === "hard" ? 1 : 0;
+        tankState.maxEnemies = Math.min(
+          tankState.preset.maxEnemies + spawnExtra,
+          tankState.preset.maxEnemies + Math.floor(tankState.wave / 2) + spawnExtra
+        );
+        const minSpawn = tankDifficulty === "hardcore" ? 0.42 : tankDifficulty === "hard" ? 0.62 : 0.85;
+        tankState.spawnTimer = Math.max(minSpawn, tankState.preset.spawnBase - tankState.wave * 0.06 + Math.random() * 0.35);
+      }
+
+      tankState.bullets.forEach((bullet) => {
+        bullet.x += bullet.dx * bullet.speed * dt;
+        bullet.y += bullet.dy * bullet.speed * dt;
+      });
+
+      tankState.bullets = tankState.bullets.filter((bullet) => {
+        const insideField = bullet.x > -20 && bullet.x < tankCanvas.width + 20 && bullet.y > -20 && bullet.y < tankCanvas.height + 20;
+        const hitsWall = tankState.walls.some((wall) => circleRectHit(bullet, wall, bullet.radius));
+        if (hitsWall) explode(bullet.x, bullet.y, bullet.owner === "player" ? "#79f0c8" : "#ff7366");
+        return insideField && !hitsWall;
+      });
+
+      const destroyedBullets = new Set();
+      for (let i = 0; i < tankState.bullets.length; i++) {
+        const a = tankState.bullets[i];
+        if (destroyedBullets.has(i)) continue;
+        for (let j = i + 1; j < tankState.bullets.length; j++) {
+          const b = tankState.bullets[j];
+          if (destroyedBullets.has(j) || a.owner === b.owner) continue;
+          if (circleHit(a, a.radius + 1, b, b.radius + 1)) {
+            destroyedBullets.add(i);
+            destroyedBullets.add(j);
+            explode((a.x + b.x) / 2, (a.y + b.y) / 2, "#d9f0ff");
+            break;
+          }
+        }
+      }
+
+      if (destroyedBullets.size > 0) {
+        tankState.bullets = tankState.bullets.filter((_, index) => !destroyedBullets.has(index));
+      }
+
+      tankState.enemies.forEach((enemy) => {
+        enemy.pathTimer -= dt;
+
+        const seesPlayer = hasLineOfSight(enemy.x, enemy.y, player.x, player.y);
+        if (seesPlayer) {
+          enemy.path = [];
+          enemy.pathIndex = 0;
+        } else if (enemy.pathTimer <= 0 || enemy.path.length === 0 || enemy.pathIndex >= enemy.path.length) {
+          enemy.path = findPathPoints(enemy.x, enemy.y, player.x, player.y, enemy.size);
+          enemy.pathIndex = 0;
+          enemy.pathTimer = 0.45 + Math.random() * 0.2;
+        }
+
+        let targetX = player.x;
+        let targetY = player.y;
+        if (!seesPlayer && enemy.path.length > 0 && enemy.pathIndex < enemy.path.length) {
+          const node = enemy.path[enemy.pathIndex];
+          targetX = node.x;
+          targetY = node.y;
+          if (Math.hypot(node.x - enemy.x, node.y - enemy.y) < 18) {
+            enemy.pathIndex++;
+            if (enemy.pathIndex < enemy.path.length) {
+              targetX = enemy.path[enemy.pathIndex].x;
+              targetY = enemy.path[enemy.pathIndex].y;
+            }
+          }
+        }
+
+        const dx = targetX - enemy.x;
+        const dy = targetY - enemy.y;
+        const len = Math.hypot(dx, dy) || 1;
+        const dirX = dx / len;
+        const dirY = dy / len;
+        const moveResult = tryMoveDirection(enemy, dirX, dirY, enemy.speed, dt, enemy.size);
+
+        if (moveResult.blockedX && moveResult.blockedY && !seesPlayer) {
+          enemy.pathTimer = 0;
+        }
+
+        enemy.cooldown -= dt;
+        if (enemy.cooldown <= 0) {
+          const shootDx = player.x - enemy.x;
+          const shootDy = player.y - enemy.y;
+          fireBullet("enemy", enemy.x, enemy.y, shootDx, shootDy, tankState.preset.enemyBullet + tankState.wave * 7);
+          enemy.cooldown = Math.max(0.55, tankState.preset.enemyCooldown - tankState.wave * 0.05) + Math.random() * 0.45;
+        }
+      });
+
+      const nextBullets = [];
+      for (const bullet of tankState.bullets) {
+        let consumed = false;
+
+        if (bullet.owner === "player") {
+          for (let i = tankState.enemies.length - 1; i >= 0; i--) {
+            const enemy = tankState.enemies[i];
+            if (circleHit(bullet, bullet.radius, enemy, enemy.size)) {
+              tankState.enemies.splice(i, 1);
+              tankState.score += 100;
+              if (tankState.score % 500 === 0) tankState.wave++;
+              explode(enemy.x, enemy.y, "#ff8b6b");
+              consumed = true;
+              break;
+            }
+          }
+        } else if (circleHit(bullet, bullet.radius, player, player.size)) {
+          tankState.lives--;
+          explode(player.x, player.y, "#7bc7ff");
+          consumed = true;
+          if (tankState.lives <= 0) {
+            endTankGame("Game over. Score: " + tankState.score);
+          }
+        }
+
+        if (!consumed) nextBullets.push(bullet);
+      }
+      tankState.bullets = nextBullets;
+
+      for (let i = tankState.enemies.length - 1; i >= 0; i--) {
+        const enemy = tankState.enemies[i];
+        if (circleHit(enemy, enemy.size, player, player.size + 4)) {
+          tankState.enemies.splice(i, 1);
+          tankState.lives--;
+          explode(enemy.x, enemy.y, "#ffd36d");
+          if (tankState.lives <= 0) {
+            endTankGame("Game over. Score: " + tankState.score);
+          }
+        }
+      }
+
+      tankState.particles.forEach((particle) => {
+        particle.x += particle.dx * dt;
+        particle.y += particle.dy * dt;
+        particle.life -= dt;
+      });
+      tankState.particles = tankState.particles.filter((particle) => particle.life > 0);
+
+      updateTankHUD();
+      if (tankState.running) {
+        setTankMsg("Aim with the mouse and hold click to shoot.");
+      }
+    }
+
+    function drawTankGrid() {
+      tankCtx.strokeStyle = "rgba(255,255,255,0.05)";
+      tankCtx.lineWidth = 1;
+      for (let x = 0; x < tankCanvas.width; x += 32) {
+        tankCtx.beginPath();
+        tankCtx.moveTo(x, 0);
+        tankCtx.lineTo(x, tankCanvas.height);
+        tankCtx.stroke();
+      }
+      for (let y = 0; y < tankCanvas.height; y += 32) {
+        tankCtx.beginPath();
+        tankCtx.moveTo(0, y);
+        tankCtx.lineTo(tankCanvas.width, y);
+        tankCtx.stroke();
+      }
+    }
+
+    function drawTankEffects() {
+      tankCtx.save();
+      tankCtx.globalAlpha = 0.35;
+      for (let i = 0; i < 4; i++) {
+        tankCtx.strokeStyle = i % 2 === 0 ? "rgba(123,199,255,0.12)" : "rgba(121,240,200,0.08)";
+        tankCtx.lineWidth = 1;
+        tankCtx.beginPath();
+        tankCtx.moveTo(0, 70 + i * 90);
+        tankCtx.lineTo(tankCanvas.width, 30 + i * 90);
+        tankCtx.stroke();
+      }
+      tankCtx.restore();
+    }
+
+    function drawWalls() {
+      tankState.walls.forEach((wall) => {
+        tankCtx.fillStyle = "rgba(25, 40, 56, 0.92)";
+        tankCtx.strokeStyle = "rgba(123, 199, 255, 0.2)";
+        tankCtx.lineWidth = 1.5;
+        tankCtx.fillRect(wall.x, wall.y, wall.w, wall.h);
+        tankCtx.strokeRect(wall.x, wall.y, wall.w, wall.h);
+        tankCtx.fillStyle = "rgba(121, 240, 200, 0.08)";
+        tankCtx.fillRect(wall.x + 6, wall.y + 6, wall.w - 12, 4);
+      });
+    }
+
+    function drawTank() {
+      tankCtx.clearRect(0, 0, tankCanvas.width, tankCanvas.height);
+      tankCtx.fillStyle = "#0a141d";
+      tankCtx.fillRect(0, 0, tankCanvas.width, tankCanvas.height);
+      drawTankGrid();
+      drawTankEffects();
+
+      if (!tankState) return;
+
+      drawWalls();
+
+      tankState.particles.forEach((particle) => {
+        tankCtx.globalAlpha = Math.max(0, particle.life * 1.8);
+        tankCtx.fillStyle = particle.color;
+        tankCtx.fillRect(particle.x - 2, particle.y - 2, 4, 4);
+        tankCtx.globalAlpha = 1;
+      });
+
+      tankState.bullets.forEach((bullet) => {
+        tankCtx.fillStyle = bullet.owner === "player" ? "#79f0c8" : "#ff7366";
+        tankCtx.beginPath();
+        tankCtx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
+        tankCtx.fill();
+      });
+
+      tankState.enemies.forEach((enemy) => {
+        tankCtx.save();
+        tankCtx.translate(enemy.x, enemy.y);
+        tankCtx.fillStyle = "#ff8b6b";
+        tankCtx.fillRect(-12, -10, 24, 20);
+        tankCtx.fillStyle = "#ffd36d";
+        tankCtx.fillRect(-6, -4, 12, 8);
+        tankCtx.restore();
+      });
+
+      const player = tankState.player;
+      tankCtx.save();
+      tankCtx.strokeStyle = "rgba(123, 199, 255, 0.18)";
+      tankCtx.lineWidth = 1;
+      tankCtx.beginPath();
+      tankCtx.moveTo(player.x, player.y);
+      tankCtx.lineTo(player.x + player.dirX * 38, player.y + player.dirY * 38);
+      tankCtx.stroke();
+      tankCtx.restore();
+
+      tankCtx.save();
+      tankCtx.translate(player.x, player.y);
+      const angle = Math.atan2(player.dirY, player.dirX);
+      tankCtx.rotate(angle);
+      tankCtx.fillStyle = "#7bc7ff";
+      tankCtx.fillRect(-14, -10, 28, 20);
+      tankCtx.fillStyle = "#d9f0ff";
+      tankCtx.fillRect(-5, -5, 18, 10);
+      tankCtx.fillRect(4, -2, 16, 4);
+      tankCtx.restore();
+    }
+
+    function tankLoop(timestamp) {
+      if (!tankState) return;
+      if (!tankState.lastTime) tankState.lastTime = timestamp;
+      const dt = Math.min(0.033, (timestamp - tankState.lastTime) / 1000);
+      tankState.lastTime = timestamp;
+      updateTank(dt);
+      drawTank();
+      tankAnimationId = requestAnimationFrame(tankLoop);
+    }
+
+    function startTank() {
+      tankState = makeTankState();
+      updateTankHUD();
+      setTankMsg("Aim with the mouse and hold click to shoot.");
+      document.getElementById("tank-start-btn").textContent = "Restart Battle";
+      cancelAnimationFrame(tankAnimationId);
+      tankAnimationId = requestAnimationFrame(tankLoop);
+    }
+
+    function stopTank() {
+      cancelAnimationFrame(tankAnimationId);
+      tankAnimationId = null;
+      if (tankState) tankState.shooting = false;
+      tankState = null;
+      tankKeys.clear();
+      drawTankStartScreen();
+    }
+
+    function drawTankStartScreen() {
+      tankCtx.clearRect(0, 0, tankCanvas.width, tankCanvas.height);
+      tankCtx.fillStyle = "#0a141d";
+      tankCtx.fillRect(0, 0, tankCanvas.width, tankCanvas.height);
+      drawTankGrid();
+      tankCtx.fillStyle = "#eef5f7";
+      tankCtx.font = "28px Courier New";
+      tankCtx.textAlign = "center";
+      tankCtx.fillText("MINI TANK", tankCanvas.width / 2, 170);
+      tankCtx.fillStyle = "#8ea5b6";
+      tankCtx.font = "16px Courier New";
+      tankCtx.fillText("Move with WASD or Arrow Keys", tankCanvas.width / 2, 215);
+      tankCtx.fillText("Aim with mouse and hold click to shoot", tankCanvas.width / 2, 242);
+      tankCtx.fillText("Press Start Battle", tankCanvas.width / 2, 286);
+    }
+
+    document.getElementById("tank-start-btn").addEventListener("click", () => {
+      showScreen("tank");
+      startTank();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (tankScreen.classList.contains("hidden")) return;
+      const key = e.key === "Spacebar" ? " " : e.key;
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "a", "A", "d", "D", "w", "W", "s", "S"].includes(key)) {
+        tankKeys.add(key);
+        e.preventDefault();
+      }
+    });
+
+    document.addEventListener("keyup", (e) => {
+      const key = e.key === "Spacebar" ? " " : e.key;
+      tankKeys.delete(key);
+      if (key === "Space") tankKeys.delete(" ");
+      if (key === " ") tankKeys.delete("Space");
+    });
+
+    tankCanvas.addEventListener("mousemove", (e) => {
+      if (!tankState) return;
+      const rect = tankCanvas.getBoundingClientRect();
+      tankState.mouseX = (e.clientX - rect.left) * (tankCanvas.width / rect.width);
+      tankState.mouseY = (e.clientY - rect.top) * (tankCanvas.height / rect.height);
+    });
+
+    tankCanvas.addEventListener("mousedown", (e) => {
+      if (!tankState || e.button !== 0) return;
+      tankState.shooting = true;
+    });
+
+    window.addEventListener("mouseup", () => {
+      if (tankState) tankState.shooting = false;
+    });
+
+    board = newBoard();
+    piece = null;
+    next = null;
+    score = 0;
+    lines = 0;
+    volume = 0;
+    updateDifficultyButtons();
+    updateUI();
+    drawBoard();
+    drawNext();
+    drawTankStartScreen();
+  </script>
+</body>
+</html>

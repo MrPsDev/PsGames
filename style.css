@@ -1,0 +1,158 @@
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #0e0e12;
+  color: #e8e8e0;
+  font-family: 'Courier New', monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 40px;
+  min-height: 100vh;
+}
+
+/* ── Title ── */
+.title {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: #5DCAA5;
+  margin-bottom: 4px;
+}
+.subtitle {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: #666;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+/* ── Layout ── */
+#app {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+#game-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+#board {
+  border: 1px solid #2a2a35;
+  border-radius: 4px;
+  display: block;
+  background: #080810;
+}
+
+#msg {
+  font-size: 12px;
+  color: #5DCAA5;
+  letter-spacing: 0.08em;
+  min-height: 16px;
+  text-align: center;
+}
+
+/* ── Side panel ── */
+#side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 130px;
+}
+
+.panel {
+  background: #14141c;
+  border: 1px solid #2a2a35;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.panel-label {
+  font-size: 10px;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 6px;
+}
+
+.panel-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #e8e8e0;
+}
+
+/* ── Volume bar ── */
+#vol-display { display: flex; flex-direction: column; gap: 4px; }
+
+.vol-bar-wrap {
+  height: 100px;
+  width: 24px;
+  background: #0a0a10;
+  border: 1px solid #2a2a35;
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.vol-bar {
+  width: 100%;
+  background: #1D9E75;
+  transition: height 0.3s ease, background 0.3s ease;
+  border-radius: 2px 2px 0 0;
+}
+
+.vol-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.vol-num {
+  font-size: 28px;
+  font-weight: 700;
+  color: #e8e8e0;
+  line-height: 1;
+}
+
+/* ── Next piece canvas ── */
+#next-canvas { display: block; }
+
+/* ── Start button ── */
+#start-btn {
+  width: 100%;
+  padding: 10px;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 1px solid #5DCAA5;
+  background: transparent;
+  color: #5DCAA5;
+  transition: background 0.15s, color 0.15s;
+}
+#start-btn:hover { background: #5DCAA5; color: #080810; }
+#start-btn:active { transform: scale(0.97); }
+
+/* ── Controls ── */
+#controls {
+  font-size: 11px;
+  color: #666;
+  line-height: 2;
+}
+#controls strong {
+  display: block;
+  font-size: 10px;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 4px;
+}
