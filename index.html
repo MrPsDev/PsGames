@@ -1053,10 +1053,6 @@
             <div class="hud-label">Score</div>
             <div class="hud-value" id="score-val">0</div>
           </div>
-          <div class="hud-box">
-            <div class="hud-label">Volume</div>
-            <div class="hud-value" id="vol-num">0</div>
-          </div>
         </div>
 
         <div id="tetris-layout">
@@ -1332,7 +1328,7 @@
       [[0, 1, 1], [1, 1, 0]]
     ];
 
-    let board, piece, next, score, lines, volume, gameLoop, running;
+    let board, piece, next, score, lines, gameLoop, running;
     let audioCtx = null;
 
     function initAudio() {
@@ -1494,7 +1490,6 @@
     function updateUI() {
       document.getElementById("lines-val").textContent = lines ?? 0;
       document.getElementById("score-val").textContent = score ?? 0;
-      document.getElementById("vol-num").textContent = volume ?? 0;
       syncTetrisLayout();
     }
 
@@ -1519,16 +1514,10 @@
 
         if (cleared > 0) {
           lines += cleared;
-          volume += cleared;
           score += cleared * 100 * cleared;
-          playLineClear(volume);
+          playLineClear(lines);
           updateUI();
-
-          if (volume >= 20) {
-            setMsg("MAX VOLUME! " + volume);
-          } else {
-            setMsg("+" + cleared + " line" + (cleared > 1 ? "s" : "") + "! Volume -> " + volume, 1200);
-          }
+          setMsg("+" + cleared + " line" + (cleared > 1 ? "s" : "") + "!", 1200);
         }
 
         piece = next;
@@ -1538,7 +1527,7 @@
         if (!valid(board, piece, 0, 0)) {
           running = false;
           clearInterval(gameLoop);
-          setMsg("Game over! Final volume: " + volume);
+          setMsg("Game over! Score: " + score);
           document.getElementById("start-btn").textContent = "Restart";
           return;
         }
@@ -1552,7 +1541,6 @@
       board = newBoard();
       score = 0;
       lines = 0;
-      volume = 0;
       piece = randomPiece();
       next = randomPiece();
       running = true;
@@ -2524,7 +2512,6 @@
     next = null;
     score = 0;
     lines = 0;
-    volume = 0;
     refreshFullscreenLabels();
     syncLayouts();
     updateDifficultyButtons();
