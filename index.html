@@ -38,6 +38,7 @@
       --tetris-board-width: clamp(180px, calc(100vh - 420px), 240px);
       --tetris-side-width: clamp(190px, 18vw, 260px);
       --tetris-live-board-width: var(--tetris-board-width);
+      --tank-live-board-width: min(920px, 100%);
     }
 
     body {
@@ -524,7 +525,7 @@
         radial-gradient(circle at center, rgba(123, 199, 255, 0.08), transparent 55%),
         linear-gradient(180deg, #061019, #08131d);
       cursor: crosshair;
-      width: 100%;
+      width: var(--tank-live-board-width);
       max-width: 920px;
       aspect-ratio: 920 / 560;
     }
@@ -742,9 +743,9 @@
 
     #tank-screen:fullscreen #tank-board,
     #tank-screen:-webkit-full-screen #tank-board {
-      width: min(96vw, calc((100vh - 270px) * 1.642857));
+      width: var(--tank-live-board-width);
       max-width: 1400px;
-      max-height: calc(100vh - 270px);
+      max-height: calc(100vh - 360px);
       margin: 0 auto;
     }
 
@@ -769,9 +770,9 @@
     #tetris-screen:fullscreen #board,
     #tetris-screen:-webkit-full-screen #board {
       width: var(--tetris-live-board-width);
-      min-width: 280px;
+      min-width: 160px;
       max-width: 440px;
-      max-height: calc(100vh - 170px);
+      max-height: calc(100vh - 300px);
     }
 
     #tetris-screen:fullscreen #tetris-side,
@@ -1200,6 +1201,7 @@
       if (name !== "tetris") stopTetris();
       if (name !== "tank") stopTank();
       if (name === "tetris") syncTetrisLayout();
+      if (name === "tank") requestAnimationFrame(syncTankLayout);
     }
 
     function isTouchDevice() {
@@ -1227,6 +1229,11 @@
       tankFullscreenButton.textContent = isFullscreenActiveFor(tankScreen) ? "Exit Fullscreen" : "Fullscreen";
     }
 
+    function syncLayouts() {
+      syncTetrisLayout();
+      syncTankLayout();
+    }
+
     function syncTetrisLayout() {
       const viewportHeight = Math.max(window.innerHeight, window.visualViewport ? Math.round(window.visualViewport.height) : 0);
       const viewportWidth = Math.max(window.innerWidth, window.visualViewport ? Math.round(window.visualViewport.width) : 0);
@@ -1235,22 +1242,20 @@
       const sideWidth = fullscreenTetris ? 280 : Math.min(260, Math.max(190, Math.round(viewportWidth * 0.2)));
       const layoutGap = fullscreenTetris ? 20 : 18;
 
-      let reservedHeight;
+      let availableBoardHeight;
       if (fullscreenTetris) {
-        reservedHeight = 64;
-        reservedHeight += tetrisScreen.querySelector(".screen-head").offsetHeight;
-        reservedHeight += tetrisHud.offsetHeight;
-        reservedHeight += 30;
+        const layoutTop = tetrisLayout.getBoundingClientRect().top;
+        availableBoardHeight = Math.max(260, viewportHeight - layoutTop - 28);
       } else {
-        reservedHeight = 120;
+        let reservedHeight = 120;
         reservedHeight += pageTitle ? pageTitle.offsetHeight : 0;
         reservedHeight += pageSubtitle ? pageSubtitle.offsetHeight : 0;
         reservedHeight += tetrisScreen.querySelector(".screen-head").offsetHeight;
         reservedHeight += tetrisHud.offsetHeight;
         reservedHeight += 34;
+        availableBoardHeight = Math.max(320, viewportHeight - reservedHeight);
       }
 
-      const availableBoardHeight = Math.max(320, viewportHeight - reservedHeight);
       const layoutWidth = fullscreenTetris
         ? Math.max(420, viewportWidth - 90)
         : Math.max(360, tetrisLayout.clientWidth || shell.clientWidth || viewportWidth - 60);
@@ -1273,6 +1278,7 @@
     document.getElementById("open-tank").addEventListener("click", () => {
       showScreen("tank");
       drawTankStartScreen();
+      requestAnimationFrame(syncTankLayout);
     });
 
     document.getElementById("back-from-tetris").addEventListener("click", () => showScreen("menu"));
@@ -1281,10 +1287,10 @@
     tankFullscreenButton.addEventListener("click", () => toggleFullscreen(tankScreen));
     document.addEventListener("fullscreenchange", () => {
       refreshFullscreenLabels();
-      syncTetrisLayout();
+      requestAnimationFrame(syncLayouts);
     });
-    window.addEventListener("resize", syncTetrisLayout);
-    if (window.visualViewport) window.visualViewport.addEventListener("resize", syncTetrisLayout);
+    window.addEventListener("resize", syncLayouts);
+    if (window.visualViewport) window.visualViewport.addEventListener("resize", syncLayouts);
 
     const canvas = document.getElementById("board");
     const ctx = canvas.getContext("2d");
@@ -1657,6 +1663,19 @@
     let tankAnimationId = null;
     let tankDifficulty = "easy";
     let tankAimTouchId = null;
+
+    function syncTankLayout() {
+      if (!tankCanvas) return;
+      const viewportHeight = Math.max(window.innerHeight, window.visualViewport ? Math.round(window.visualViewport.height) : 0);
+      const viewportWidth = Math.max(window.innerWidth, window.visualViewport ? Math.round(window.visualViewport.width) : 0);
+      const fullscreenTank = isFullscreenActiveFor(tankScreen);
+      const rect = tankCanvas.getBoundingClientRect();
+      const remainingHeight = Math.max(260, viewportHeight - rect.top - (fullscreenTank ? 34 : 60));
+      const maxWidthFromHeight = Math.floor(remainingHeight * (920 / 560));
+      const maxWidthFromScreen = fullscreenTank ? viewportWidth - 70 : Math.min(920, viewportWidth - 48);
+      const width = Math.max(360, Math.min(maxWidthFromHeight, maxWidthFromScreen, fullscreenTank ? 1180 : 920));
+      document.documentElement.style.setProperty("--tank-live-board-width", width + "px");
+    }
 
     const tankDifficultyPresets = {
       easy: {
@@ -2319,6 +2338,7 @@
     }
 
     function startTank() {
+      syncTankLayout();
       tankState = makeTankState();
       updateTankHUD();
       setTankMsg(tankHelpText());
@@ -2495,7 +2515,7 @@
     lines = 0;
     volume = 0;
     refreshFullscreenLabels();
-    syncTetrisLayout();
+    syncLayouts();
     updateDifficultyButtons();
     updateUI();
     drawBoard();
