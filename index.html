@@ -405,6 +405,13 @@
       gap: 10px;
     }
 
+    .next-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
     #next-canvas {
       display: block;
       margin: 6px auto 0;
@@ -415,6 +422,54 @@
       border: 1px solid var(--line);
       border-radius: 10px;
       padding: 12px;
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .control-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .control-action {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .key-badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .key-chip {
+      min-width: 34px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(151, 194, 220, 0.18);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+      color: #eef5f7;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 
     .tank-wrap {
@@ -577,10 +632,10 @@
       padding: clamp(18px, 2vw, 30px);
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 14px;
       align-items: stretch;
       justify-content: flex-start;
-      overflow: auto;
+      overflow: hidden;
       box-sizing: border-box;
     }
 
@@ -609,12 +664,17 @@
       max-width: 900px;
     }
 
+    #tetris-screen:fullscreen .hint,
+    #tetris-screen:-webkit-full-screen .hint {
+      max-width: 620px;
+    }
+
     #tetris-screen:fullscreen .top-row button,
     #tank-screen:fullscreen .top-row button,
     #tetris-screen:-webkit-full-screen .top-row button,
     #tank-screen:-webkit-full-screen .top-row button {
-      font-size: 16px;
-      padding: 14px 18px;
+      font-size: 15px;
+      padding: 12px 16px;
     }
 
     #tetris-screen:fullscreen .hud,
@@ -622,7 +682,7 @@
     #tetris-screen:-webkit-full-screen .hud,
     #tank-screen:-webkit-full-screen .hud {
       grid-template-columns: repeat(3, minmax(180px, 1fr));
-      gap: 14px;
+      gap: 12px;
     }
 
     #tetris-screen:fullscreen .hud-box,
@@ -684,50 +744,65 @@
       flex: 1;
       align-items: center;
       justify-content: center;
-      grid-template-columns: minmax(420px, 620px) minmax(240px, 320px);
-      gap: 28px;
+      grid-template-columns: minmax(340px, 1fr) minmax(240px, 300px);
+      gap: 22px;
       margin-top: 0;
+      min-height: 0;
     }
 
     #tetris-screen:fullscreen #tetris-left,
     #tetris-screen:-webkit-full-screen #tetris-left {
       width: 100%;
       justify-content: center;
+      min-height: 0;
     }
 
     #tetris-screen:fullscreen #board,
     #tetris-screen:-webkit-full-screen #board {
-      width: min(calc((100vh - 220px) / 2), 32vw, 620px);
-      min-width: 320px;
-      max-width: 620px;
-      max-height: calc(100vh - 220px);
+      width: min(calc((100vh - 170px) / 2), 30vw, 440px);
+      min-width: 280px;
+      max-width: 440px;
+      max-height: calc(100vh - 170px);
     }
 
     #tetris-screen:fullscreen #tetris-side,
     #tetris-screen:-webkit-full-screen #tetris-side {
       width: 100%;
-      max-width: 320px;
+      max-width: 300px;
+      align-self: center;
     }
 
     #tetris-screen:fullscreen #next-canvas,
     #tetris-screen:-webkit-full-screen #next-canvas {
-      width: 128px;
-      height: 128px;
+      width: 140px;
+      height: 140px;
     }
 
     #tetris-screen:fullscreen .mini-panel,
     #tank-screen:fullscreen .mini-panel,
     #tetris-screen:-webkit-full-screen .mini-panel,
     #tank-screen:-webkit-full-screen .mini-panel {
-      padding: 16px;
+      padding: 14px;
     }
 
     #tetris-screen:fullscreen #msg,
     #tank-screen:fullscreen #tank-msg,
     #tetris-screen:-webkit-full-screen #msg,
     #tank-screen:-webkit-full-screen #tank-msg {
-      font-size: 15px;
-      min-height: 24px;
+      font-size: 13px;
+      min-height: 18px;
+    }
+
+    #tetris-screen:fullscreen .control-action,
+    #tetris-screen:-webkit-full-screen .control-action {
+      font-size: 13px;
+    }
+
+    #tetris-screen:fullscreen .key-chip,
+    #tetris-screen:-webkit-full-screen .key-chip {
+      min-width: 36px;
+      font-size: 11px;
+      padding: 7px 9px;
     }
 
     @media (max-width: 840px), (pointer: coarse) {
@@ -873,16 +948,43 @@
           </div>
 
           <aside id="tetris-side">
-            <div class="mini-panel">
+            <div class="mini-panel next-panel">
               <div class="hud-label">Next</div>
               <canvas id="next-canvas" width="80" height="80"></canvas>
             </div>
-            <div class="mini-panel">
+            <div class="mini-panel controls-panel">
               <div class="hud-label">Controls</div>
-              <p>Move: Left / Right or A / D</p>
-              <p>Rotate: Up or W</p>
-              <p>Soft drop: Down or S</p>
-              <p>Hard drop: Space</p>
+              <div class="control-list">
+                <div class="control-row">
+                  <span class="control-action">Move</span>
+                  <span class="key-badges">
+                    <span class="key-chip">Left</span>
+                    <span class="key-chip">Right</span>
+                    <span class="key-chip">A</span>
+                    <span class="key-chip">D</span>
+                  </span>
+                </div>
+                <div class="control-row">
+                  <span class="control-action">Rotate</span>
+                  <span class="key-badges">
+                    <span class="key-chip">Up</span>
+                    <span class="key-chip">W</span>
+                  </span>
+                </div>
+                <div class="control-row">
+                  <span class="control-action">Soft Drop</span>
+                  <span class="key-badges">
+                    <span class="key-chip">Down</span>
+                    <span class="key-chip">S</span>
+                  </span>
+                </div>
+                <div class="control-row">
+                  <span class="control-action">Hard Drop</span>
+                  <span class="key-badges">
+                    <span class="key-chip">Space</span>
+                  </span>
+                </div>
+              </div>
             </div>
           </aside>
         </div>
