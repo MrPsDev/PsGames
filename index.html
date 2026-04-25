@@ -1231,6 +1231,24 @@
       }
     }
 
+    async function exitFullscreenIfNeeded() {
+      if (!document.fullscreenElement) return;
+      try {
+        await document.exitFullscreen();
+      } catch (err) {
+        console.error("Exit fullscreen failed", err);
+      }
+    }
+
+    async function returnToMenu() {
+      await exitFullscreenIfNeeded();
+      showScreen("menu");
+      requestAnimationFrame(() => {
+        refreshFullscreenLabels();
+        syncLayouts();
+      });
+    }
+
     function refreshFullscreenLabels() {
       tetrisFullscreenButton.textContent = isFullscreenActiveFor(tetrisScreen) ? "Exit Fullscreen" : "Fullscreen";
       tankFullscreenButton.textContent = isFullscreenActiveFor(tankScreen) ? "Exit Fullscreen" : "Fullscreen";
@@ -1288,14 +1306,18 @@
       requestAnimationFrame(syncTankLayout);
     });
 
-    document.getElementById("back-from-tetris").addEventListener("click", () => showScreen("menu"));
-    document.getElementById("back-from-tank").addEventListener("click", () => showScreen("menu"));
+    document.getElementById("back-from-tetris").addEventListener("click", returnToMenu);
+    document.getElementById("back-from-tank").addEventListener("click", returnToMenu);
     tetrisFullscreenButton.addEventListener("click", () => toggleFullscreen(tetrisScreen));
     tankFullscreenButton.addEventListener("click", () => toggleFullscreen(tankScreen));
     document.addEventListener("fullscreenchange", () => {
       refreshFullscreenLabels();
       requestAnimationFrame(syncLayouts);
       setTimeout(syncLayouts, 80);
+      if (!document.fullscreenElement && !menuScreen.classList.contains("hidden")) {
+        tetrisScreen.classList.add("hidden");
+        tankScreen.classList.add("hidden");
+      }
     });
     window.addEventListener("resize", syncLayouts);
     if (window.visualViewport) window.visualViewport.addEventListener("resize", syncLayouts);
