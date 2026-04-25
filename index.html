@@ -678,10 +678,6 @@
       max-width: 620px;
     }
 
-    #tetris-screen.tetris-tight .hint {
-      font-size: 11px;
-    }
-
     #tetris-screen:fullscreen .top-row button,
     #tank-screen:fullscreen .top-row button,
     #tetris-screen:-webkit-full-screen .top-row button,
@@ -761,23 +757,6 @@
       gap: 22px;
       margin-top: 0;
       min-height: 0;
-    }
-
-    #tetris-screen.tetris-stack #tetris-layout {
-      grid-template-columns: 1fr;
-      justify-items: center;
-    }
-
-    #tetris-screen.tetris-stack #tetris-side {
-      max-width: min(100%, 680px);
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    #tetris-screen.tetris-stack .controls-panel,
-    #tetris-screen.tetris-stack .next-panel {
-      height: 100%;
     }
 
     #tetris-screen:fullscreen #tetris-left,
@@ -950,7 +929,7 @@
       }
 
       #board {
-        width: var(--tetris-live-board-width);
+        width: min(var(--tetris-live-board-width), 220px);
       }
 
       #tetris-side {
@@ -1253,23 +1232,15 @@
       const viewportWidth = Math.max(window.innerWidth, window.visualViewport ? Math.round(window.visualViewport.width) : 0);
       const fullscreenTetris = isFullscreenActiveFor(tetrisScreen);
 
-      tetrisScreen.classList.remove("tetris-tight", "tetris-stack");
-
-      if (fullscreenTetris && viewportHeight < 860) {
-        tetrisScreen.classList.add("tetris-tight");
-      }
-
-      const sideWidth = fullscreenTetris
-        ? (viewportHeight < 760 || viewportWidth < 980 ? 0 : 280)
-        : Math.min(260, Math.max(190, Math.round(viewportWidth * 0.2)));
-      const layoutGap = fullscreenTetris ? (viewportHeight < 760 ? 14 : 22) : 18;
+      const sideWidth = fullscreenTetris ? 280 : Math.min(260, Math.max(190, Math.round(viewportWidth * 0.2)));
+      const layoutGap = fullscreenTetris ? 20 : 18;
 
       let reservedHeight;
       if (fullscreenTetris) {
-        reservedHeight = 54;
+        reservedHeight = 64;
         reservedHeight += tetrisScreen.querySelector(".screen-head").offsetHeight;
         reservedHeight += tetrisHud.offsetHeight;
-        reservedHeight += 22;
+        reservedHeight += 30;
       } else {
         reservedHeight = 120;
         reservedHeight += pageTitle ? pageTitle.offsetHeight : 0;
@@ -1280,20 +1251,14 @@
       }
 
       const availableBoardHeight = Math.max(320, viewportHeight - reservedHeight);
-      const availableBoardWidth = Math.max(180, Math.min(
-        fullscreenTetris ? viewportWidth - sideWidth - layoutGap - 90 : tetrisLayout.clientWidth - sideWidth - layoutGap,
-        Math.floor(availableBoardHeight / 2)
-      ));
-
-      const compactBoardWidth = Math.max(180, Math.min(availableBoardWidth, fullscreenTetris ? 420 : 240));
-
-      if (fullscreenTetris && (availableBoardHeight < 520 || viewportWidth < 980)) {
-        tetrisScreen.classList.add("tetris-stack");
-      }
-
-      const finalWidth = tetrisScreen.classList.contains("tetris-stack")
-        ? Math.max(180, Math.min(Math.floor((viewportHeight - reservedHeight - 150) / 2), fullscreenTetris ? 360 : 220))
-        : compactBoardWidth;
+      const layoutWidth = fullscreenTetris
+        ? Math.max(420, viewportWidth - 90)
+        : Math.max(360, tetrisLayout.clientWidth || shell.clientWidth || viewportWidth - 60);
+      const maxBoardFromWidth = Math.max(180, layoutWidth - sideWidth - layoutGap);
+      const maxBoardFromHeight = Math.max(180, Math.floor(availableBoardHeight / 2));
+      const finalWidth = fullscreenTetris
+        ? Math.max(180, Math.min(maxBoardFromWidth, maxBoardFromHeight, 360))
+        : Math.max(180, Math.min(maxBoardFromWidth, maxBoardFromHeight, 240));
 
       document.documentElement.style.setProperty("--tetris-live-board-width", finalWidth + "px");
     }
