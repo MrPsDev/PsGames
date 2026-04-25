@@ -306,6 +306,10 @@
       border-color: rgba(151, 194, 220, 0.12);
     }
 
+    .fullscreen-btn {
+      min-width: 132px;
+    }
+
     .screen-head {
       width: 100%;
       display: flex;
@@ -656,6 +660,7 @@
           </div>
           <div class="top-row">
             <button class="secondary" id="back-from-tetris">Menu</button>
+            <button class="secondary fullscreen-btn" id="tetris-fullscreen-btn">Fullscreen</button>
             <button class="primary" id="start-btn">Start</button>
           </div>
         </div>
@@ -720,6 +725,7 @@
           </div>
           <div class="top-row">
             <button class="secondary" id="back-from-tank">Menu</button>
+            <button class="secondary fullscreen-btn" id="tank-fullscreen-btn">Fullscreen</button>
             <button class="primary" id="tank-start-btn">Start Battle</button>
           </div>
         </div>
@@ -784,6 +790,8 @@
     const tankMoveButtons = Array.from(document.querySelectorAll("[data-tank-move]"));
     const tankAimPad = document.getElementById("tank-aim-pad");
     const tankAimDot = document.getElementById("tank-aim-dot");
+    const tetrisFullscreenButton = document.getElementById("tetris-fullscreen-btn");
+    const tankFullscreenButton = document.getElementById("tank-fullscreen-btn");
 
     function showScreen(name) {
       menuScreen.classList.toggle("hidden", name !== "menu");
@@ -795,6 +803,27 @@
 
     function isTouchDevice() {
       return window.matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
+    }
+
+    function isFullscreenActiveFor(element) {
+      return document.fullscreenElement === element;
+    }
+
+    async function toggleFullscreen(element) {
+      try {
+        if (isFullscreenActiveFor(element)) {
+          await document.exitFullscreen();
+        } else {
+          await element.requestFullscreen();
+        }
+      } catch (err) {
+        console.error("Fullscreen failed", err);
+      }
+    }
+
+    function refreshFullscreenLabels() {
+      tetrisFullscreenButton.textContent = isFullscreenActiveFor(tetrisScreen) ? "Exit Fullscreen" : "Fullscreen";
+      tankFullscreenButton.textContent = isFullscreenActiveFor(tankScreen) ? "Exit Fullscreen" : "Fullscreen";
     }
 
     document.getElementById("open-tetris").addEventListener("click", () => {
@@ -811,6 +840,9 @@
 
     document.getElementById("back-from-tetris").addEventListener("click", () => showScreen("menu"));
     document.getElementById("back-from-tank").addEventListener("click", () => showScreen("menu"));
+    tetrisFullscreenButton.addEventListener("click", () => toggleFullscreen(tetrisScreen));
+    tankFullscreenButton.addEventListener("click", () => toggleFullscreen(tankScreen));
+    document.addEventListener("fullscreenchange", refreshFullscreenLabels);
 
     const canvas = document.getElementById("board");
     const ctx = canvas.getContext("2d");
@@ -2018,6 +2050,7 @@
     score = 0;
     lines = 0;
     volume = 0;
+    refreshFullscreenLabels();
     updateDifficultyButtons();
     updateUI();
     drawBoard();
