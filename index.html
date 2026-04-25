@@ -497,7 +497,8 @@
       flex-wrap: wrap;
       gap: 10px;
       align-items: center;
-      margin-top: 8px;
+      margin-top: 10px;
+      margin-bottom: 14px;
     }
 
     .difficulty-label {
@@ -720,6 +721,7 @@
     #tank-screen:-webkit-full-screen .difficulty-row {
       gap: 12px;
       margin-top: 0;
+      margin-bottom: 8px;
     }
 
     #tank-screen:fullscreen .difficulty-label,
@@ -745,7 +747,7 @@
     #tank-screen:-webkit-full-screen #tank-board {
       width: var(--tank-live-board-width);
       max-width: 1400px;
-      max-height: calc(100vh - 360px);
+      max-height: calc(100vh - 300px);
       margin: 0 auto;
     }
 
@@ -772,7 +774,7 @@
       width: var(--tetris-live-board-width);
       min-width: 160px;
       max-width: 440px;
-      max-height: calc(100vh - 300px);
+      max-height: calc(100vh - 250px);
     }
 
     #tetris-screen:fullscreen #tetris-side,
@@ -1239,13 +1241,13 @@
       const viewportWidth = Math.max(window.innerWidth, window.visualViewport ? Math.round(window.visualViewport.width) : 0);
       const fullscreenTetris = isFullscreenActiveFor(tetrisScreen);
 
-      const sideWidth = fullscreenTetris ? 280 : Math.min(260, Math.max(190, Math.round(viewportWidth * 0.2)));
+      const sideWidth = fullscreenTetris ? 300 : Math.min(260, Math.max(190, Math.round(viewportWidth * 0.2)));
       const layoutGap = fullscreenTetris ? 20 : 18;
 
       let availableBoardHeight;
       if (fullscreenTetris) {
         const layoutTop = tetrisLayout.getBoundingClientRect().top;
-        availableBoardHeight = Math.max(260, viewportHeight - layoutTop - 28);
+        availableBoardHeight = Math.max(300, viewportHeight - layoutTop - 18);
       } else {
         let reservedHeight = 120;
         reservedHeight += pageTitle ? pageTitle.offsetHeight : 0;
@@ -1262,7 +1264,7 @@
       const maxBoardFromWidth = Math.max(180, layoutWidth - sideWidth - layoutGap);
       const maxBoardFromHeight = Math.max(180, Math.floor(availableBoardHeight / 2));
       const finalWidth = fullscreenTetris
-        ? Math.max(180, Math.min(maxBoardFromWidth, maxBoardFromHeight, 360))
+        ? Math.max(220, Math.min(maxBoardFromWidth, maxBoardFromHeight, 440))
         : Math.max(180, Math.min(maxBoardFromWidth, maxBoardFromHeight, 240));
 
       document.documentElement.style.setProperty("--tetris-live-board-width", finalWidth + "px");
@@ -1670,10 +1672,10 @@
       const viewportWidth = Math.max(window.innerWidth, window.visualViewport ? Math.round(window.visualViewport.width) : 0);
       const fullscreenTank = isFullscreenActiveFor(tankScreen);
       const rect = tankCanvas.getBoundingClientRect();
-      const remainingHeight = Math.max(260, viewportHeight - rect.top - (fullscreenTank ? 34 : 60));
+      const remainingHeight = Math.max(300, viewportHeight - rect.top - (fullscreenTank ? 18 : 54));
       const maxWidthFromHeight = Math.floor(remainingHeight * (920 / 560));
-      const maxWidthFromScreen = fullscreenTank ? viewportWidth - 70 : Math.min(920, viewportWidth - 48);
-      const width = Math.max(360, Math.min(maxWidthFromHeight, maxWidthFromScreen, fullscreenTank ? 1180 : 920));
+      const maxWidthFromScreen = fullscreenTank ? viewportWidth - 52 : Math.min(920, viewportWidth - 48);
+      const width = Math.max(420, Math.min(maxWidthFromHeight, maxWidthFromScreen, fullscreenTank ? 1280 : 920));
       document.documentElement.style.setProperty("--tank-live-board-width", width + "px");
     }
 
