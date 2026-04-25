@@ -597,6 +597,70 @@
       pointer-events: none;
     }
 
+    .gunshop {
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      width: min(360px, calc(100% - 32px));
+      padding: 14px;
+      border: 1px solid rgba(151, 194, 220, 0.22);
+      border-radius: 12px;
+      background: rgba(5, 10, 15, 0.88);
+      box-shadow: 0 20px 42px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(12px);
+      z-index: 2;
+    }
+
+    .gunshop-title {
+      color: var(--sand);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .gun-options {
+      display: grid;
+      gap: 8px;
+    }
+
+    .gun-option {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px 12px;
+      align-items: center;
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 10px;
+    }
+
+    .gun-option.active {
+      border-color: rgba(121, 240, 200, 0.48);
+      background: rgba(121, 240, 200, 0.12);
+    }
+
+    .gun-name {
+      color: var(--text);
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .gun-stats {
+      grid-column: 1 / -1;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .gun-key {
+      color: var(--mint);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
     .mobile-controls {
       display: none;
       width: 100%;
@@ -1323,6 +1387,26 @@
           <canvas id="fps-board"></canvas>
           <div class="crosshair"></div>
           <div class="fps-help" id="fps-msg">Press Start Run, then click the arena.</div>
+          <div class="gunshop hidden" id="gunshop">
+            <div class="gunshop-title">Gun Shop</div>
+            <div class="gun-options">
+              <button class="gun-option active" data-weapon="ak47">
+                <span class="gun-name">AK-47</span>
+                <span class="gun-key">1</span>
+                <span class="gun-stats">Fast automatic rifle. Damage 34, high fire rate.</span>
+              </button>
+              <button class="gun-option" data-weapon="awp">
+                <span class="gun-name">AWP</span>
+                <span class="gun-key">2</span>
+                <span class="gun-stats">Heavy sniper. Damage 120, slow but one-shot on drones.</span>
+              </button>
+              <button class="gun-option" data-weapon="deagle">
+                <span class="gun-name">Desert Eagle</span>
+                <span class="gun-key">3</span>
+                <span class="gun-stats">Strong pistol. Damage 70, accurate semi-auto.</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -2690,6 +2774,8 @@
 
     const fpsCanvas = document.getElementById("fps-board");
     const fpsStage = document.getElementById("fps-stage");
+    const gunshop = document.getElementById("gunshop");
+    const gunButtons = Array.from(document.querySelectorAll("[data-weapon]"));
     const fpsKeys = new Set();
     const fpsRaycaster = window.THREE ? new THREE.Raycaster() : null;
     const fpsCenter = window.THREE ? new THREE.Vector2(0, 0) : null;
@@ -2712,9 +2798,18 @@
     let fpsVelocityZ = 0;
     let fpsOnGround = true;
     let fpsJumpQueued = false;
+    let fpsJumpHeld = false;
+    let fpsCurrentWeapon = "ak47";
+    let fpsShotCooldown = 0;
+    let fpsShopOpen = false;
     const FPS_EYE_HEIGHT = 1.7;
     const FPS_PLAYER_RADIUS = 0.55;
     const FPS_GROUND_Y = FPS_EYE_HEIGHT;
+    const FPS_WEAPONS = {
+      ak47: { label: "AK-47", damage: 34, cooldown: 0.11, spread: 0.012 },
+      awp: { label: "AWP", damage: 120, cooldown: 0.92, spread: 0.002 },
+      deagle: { label: "Desert Eagle", damage: 70, cooldown: 0.34, spread: 0.004 }
+    };
 
     function setFpsMsg(text) {
       document.getElementById("fps-msg").textContent = text;
@@ -2819,6 +2914,7 @@
       const radius = 12 + Math.random() * 12;
       enemy.position.set(Math.cos(angle) * radius, 0.9, Math.sin(angle) * radius);
       enemy.userData.speed = 1.15 + fpsWave * 0.18 + Math.random() * 0.3;
+      enemy.userData.health = 100;
       fpsScene.add(enemy);
       fpsEnemies.push(enemy);
     }
@@ -2837,11 +2933,14 @@
       fpsVelocityZ = 0;
       fpsOnGround = true;
       fpsJumpQueued = false;
+      fpsJumpHeld = false;
+      fpsShotCooldown = 0;
+      closeGunshop();
       fpsCamera.position.set(0, FPS_EYE_HEIGHT, 12);
       fpsCamera.rotation.set(0, 0, 0);
       for (let i = 0; i < 5; i++) spawnFpsEnemy();
       updateFpsHud();
-      setFpsMsg("Click arena. WASD move. Space jump. Time jumps to bunnyhop.");
+      setFpsMsg("Click arena. WASD move. Hold Space to bunnyhop. Press B for guns.");
       return true;
     }
 
@@ -2878,7 +2977,7 @@
         }
       }
 
-      if (fpsOnGround && fpsJumpQueued) {
+      if (fpsOnGround && (fpsJumpQueued || fpsJumpHeld)) {
         fpsVelocityY = 7.6;
         fpsOnGround = false;
       }
@@ -2939,6 +3038,7 @@
     }
 
     function updateFpsEnemies(dt) {
+      fpsShotCooldown = Math.max(0, fpsShotCooldown - dt);
       fpsEnemies.forEach((enemy) => {
         const dx = fpsCamera.position.x - enemy.position.x;
         const dz = fpsCamera.position.z - enemy.position.z;
@@ -2966,18 +3066,62 @@
 
     function shootFps() {
       if (!fpsRunning || !fpsRaycaster || !fpsCamera) return;
+      if (fpsShopOpen || fpsShotCooldown > 0) return;
+      const weapon = FPS_WEAPONS[fpsCurrentWeapon];
+      fpsShotCooldown = weapon.cooldown;
+      fpsCenter.set(
+        (Math.random() - 0.5) * weapon.spread,
+        (Math.random() - 0.5) * weapon.spread
+      );
       fpsRaycaster.setFromCamera(fpsCenter, fpsCamera);
+      fpsCenter.set(0, 0);
       const hits = fpsRaycaster.intersectObjects(fpsEnemies, false);
       if (!hits.length) {
-        setFpsMsg("Miss.");
+        setFpsMsg(FPS_WEAPONS[fpsCurrentWeapon].label + " miss.");
         return;
       }
       const enemy = hits[0].object;
-      fpsScene.remove(enemy);
-      fpsEnemies = fpsEnemies.filter((item) => item !== enemy);
-      fpsScore += 100;
-      setFpsMsg("Hit! Score +" + 100);
+      enemy.userData.health -= weapon.damage;
+      enemy.material.emissive.setHex(0x5a1b12);
+      setTimeout(() => {
+        if (enemy.material) enemy.material.emissive.setHex(0x3a0906);
+      }, 70);
+      if (enemy.userData.health <= 0) {
+        fpsScene.remove(enemy);
+        fpsEnemies = fpsEnemies.filter((item) => item !== enemy);
+        fpsScore += 100;
+        setFpsMsg(weapon.label + " downed a drone. Score +100");
+      } else {
+        setFpsMsg(weapon.label + " hit. Drone HP " + Math.max(0, Math.ceil(enemy.userData.health)));
+      }
       updateFpsHud();
+    }
+
+    function selectWeapon(name) {
+      if (!FPS_WEAPONS[name]) return;
+      fpsCurrentWeapon = name;
+      gunButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.weapon === fpsCurrentWeapon);
+      });
+      setFpsMsg("Equipped " + FPS_WEAPONS[fpsCurrentWeapon].label + ".");
+    }
+
+    function openGunshop() {
+      fpsShopOpen = true;
+      gunshop.classList.remove("hidden");
+      if (document.pointerLockElement === fpsCanvas) document.exitPointerLock();
+      setFpsMsg("Choose a weapon, then click arena again.");
+    }
+
+    function closeGunshop() {
+      fpsShopOpen = false;
+      gunshop.classList.add("hidden");
+    }
+
+    function toggleGunshop() {
+      if (!fpsRunning) return;
+      if (fpsShopOpen) closeGunshop();
+      else openGunshop();
     }
 
     function fpsLoop() {
@@ -3004,6 +3148,9 @@
     function stopFps() {
       fpsRunning = false;
       fpsKeys.clear();
+      fpsJumpHeld = false;
+      fpsJumpQueued = false;
+      closeGunshop();
       if (fpsAnimationId) cancelAnimationFrame(fpsAnimationId);
       fpsAnimationId = null;
       if (document.pointerLockElement === fpsCanvas) document.exitPointerLock();
@@ -3018,8 +3165,16 @@
 
     document.getElementById("fps-start-btn").addEventListener("click", startFps);
 
+    gunButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        selectWeapon(button.dataset.weapon);
+        closeGunshop();
+      });
+    });
+
     fpsCanvas.addEventListener("click", () => {
       if (!fpsRunning) return;
+      if (fpsShopOpen) return;
       fpsCanvas.requestPointerLock();
     });
 
@@ -3041,6 +3196,30 @@
       const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
       if (key === " ") {
         fpsJumpQueued = true;
+        fpsJumpHeld = true;
+        event.preventDefault();
+        return;
+      }
+      if (key === "b") {
+        toggleGunshop();
+        event.preventDefault();
+        return;
+      }
+      if (key === "1") {
+        selectWeapon("ak47");
+        closeGunshop();
+        event.preventDefault();
+        return;
+      }
+      if (key === "2") {
+        selectWeapon("awp");
+        closeGunshop();
+        event.preventDefault();
+        return;
+      }
+      if (key === "3") {
+        selectWeapon("deagle");
+        closeGunshop();
         event.preventDefault();
         return;
       }
@@ -3052,6 +3231,7 @@
 
     document.addEventListener("keyup", (event) => {
       const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      if (key === " ") fpsJumpHeld = false;
       fpsKeys.delete(key);
     });
 
