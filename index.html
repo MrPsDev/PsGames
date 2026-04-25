@@ -4,17 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ArmaPS Games | Retro Arcade</title>
-  <meta name="description" content="Play Tetris and Mini Tank in ArmaPS Games, a fast retro arcade you can open on desktop or phone." />
+  <meta name="description" content="Play Tetris, Mini Tank, and a 3D arena shooter in ArmaPS Games, a fast retro arcade you can open on desktop or phone." />
   <meta name="theme-color" content="#07111a" />
   <meta name="robots" content="index,follow" />
   <meta property="og:title" content="ArmaPS Games | Retro Arcade" />
-  <meta property="og:description" content="Play Tetris and Mini Tank right in your browser on desktop or phone." />
+  <meta property="og:description" content="Play Tetris, Mini Tank, and a 3D arena shooter right in your browser." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://armapsgames.online/" />
   <meta property="og:image" content="https://armapsgames.online/favicon.svg" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="ArmaPS Games | Retro Arcade" />
-  <meta name="twitter:description" content="Play Tetris and Mini Tank right in your browser on desktop or phone." />
+  <meta name="twitter:description" content="Play Tetris, Mini Tank, and a 3D arena shooter right in your browser." />
   <link rel="canonical" href="https://armapsgames.online/" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <style>
@@ -144,7 +144,8 @@
 
     #menu-screen,
     #tetris-screen,
-    #tank-screen {
+    #tank-screen,
+    #fps-screen {
       width: 100%;
       position: relative;
       z-index: 1;
@@ -531,6 +532,71 @@
       aspect-ratio: 920 / 560;
     }
 
+    .fps-wrap {
+      position: relative;
+      width: 100%;
+      margin-top: 18px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      background: #05090d;
+      aspect-ratio: 16 / 9;
+      min-height: 420px;
+    }
+
+    #fps-board {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+    }
+
+    .crosshair {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 22px;
+      height: 22px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .crosshair::before,
+    .crosshair::after {
+      content: "";
+      position: absolute;
+      background: rgba(238, 245, 247, 0.9);
+      box-shadow: 0 0 12px rgba(121, 240, 200, 0.35);
+    }
+
+    .crosshair::before {
+      left: 10px;
+      top: 2px;
+      width: 2px;
+      height: 18px;
+    }
+
+    .crosshair::after {
+      left: 2px;
+      top: 10px;
+      width: 18px;
+      height: 2px;
+    }
+
+    .fps-help {
+      position: absolute;
+      left: 16px;
+      bottom: 14px;
+      padding: 8px 10px;
+      border: 1px solid rgba(151, 194, 220, 0.18);
+      border-radius: 10px;
+      background: rgba(5, 10, 15, 0.72);
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      pointer-events: none;
+    }
+
     .mobile-controls {
       display: none;
       width: 100%;
@@ -632,8 +698,10 @@
 
     #tetris-screen:fullscreen,
     #tank-screen:fullscreen,
+    #fps-screen:fullscreen,
     #tetris-screen:-webkit-full-screen,
-    #tank-screen:-webkit-full-screen {
+    #tank-screen:-webkit-full-screen,
+    #fps-screen:-webkit-full-screen {
       background:
         radial-gradient(circle at top, rgba(123, 199, 255, 0.16), transparent 28%),
         radial-gradient(circle at 20% 20%, rgba(121, 240, 200, 0.08), transparent 24%),
@@ -652,8 +720,10 @@
 
     #tetris-screen:fullscreen .screen-head,
     #tank-screen:fullscreen .screen-head,
+    #fps-screen:fullscreen .screen-head,
     #tetris-screen:-webkit-full-screen .screen-head,
-    #tank-screen:-webkit-full-screen .screen-head {
+    #tank-screen:-webkit-full-screen .screen-head,
+    #fps-screen:-webkit-full-screen .screen-head {
       gap: 14px;
       margin-bottom: 0;
       align-items: center;
@@ -662,23 +732,29 @@
 
     #tetris-screen:fullscreen .screen-title,
     #tank-screen:fullscreen .screen-title,
+    #fps-screen:fullscreen .screen-title,
     #tetris-screen:-webkit-full-screen .screen-title,
-    #tank-screen:-webkit-full-screen .screen-title {
+    #tank-screen:-webkit-full-screen .screen-title,
+    #fps-screen:-webkit-full-screen .screen-title {
       font-size: 28px;
       line-height: 1;
     }
 
     #tetris-screen:fullscreen .hint,
     #tank-screen:fullscreen .hint,
+    #fps-screen:fullscreen .hint,
     #tetris-screen:-webkit-full-screen .hint,
-    #tank-screen:-webkit-full-screen .hint {
+    #tank-screen:-webkit-full-screen .hint,
+    #fps-screen:-webkit-full-screen .hint {
       display: none;
     }
 
     #tetris-screen:fullscreen .top-row,
     #tank-screen:fullscreen .top-row,
+    #fps-screen:fullscreen .top-row,
     #tetris-screen:-webkit-full-screen .top-row,
-    #tank-screen:-webkit-full-screen .top-row {
+    #tank-screen:-webkit-full-screen .top-row,
+    #fps-screen:-webkit-full-screen .top-row {
       width: auto;
       flex-wrap: nowrap;
       justify-content: flex-end;
@@ -686,8 +762,10 @@
 
     #tetris-screen:fullscreen .top-row button,
     #tank-screen:fullscreen .top-row button,
+    #fps-screen:fullscreen .top-row button,
     #tetris-screen:-webkit-full-screen .top-row button,
-    #tank-screen:-webkit-full-screen .top-row button {
+    #tank-screen:-webkit-full-screen .top-row button,
+    #fps-screen:-webkit-full-screen .top-row button {
       font-size: 13px;
       padding: 9px 13px;
       border-radius: 11px;
@@ -695,32 +773,40 @@
 
     #tetris-screen:fullscreen .hud,
     #tank-screen:fullscreen .hud,
+    #fps-screen:fullscreen .hud,
     #tetris-screen:-webkit-full-screen .hud,
-    #tank-screen:-webkit-full-screen .hud {
+    #tank-screen:-webkit-full-screen .hud,
+    #fps-screen:-webkit-full-screen .hud {
       grid-template-columns: repeat(3, minmax(180px, 1fr));
       gap: 10px;
     }
 
     #tetris-screen:fullscreen .hud-box,
     #tank-screen:fullscreen .hud-box,
+    #fps-screen:fullscreen .hud-box,
     #tetris-screen:-webkit-full-screen .hud-box,
-    #tank-screen:-webkit-full-screen .hud-box {
+    #tank-screen:-webkit-full-screen .hud-box,
+    #fps-screen:-webkit-full-screen .hud-box {
       min-height: 52px;
       padding: 7px 12px;
     }
 
     #tetris-screen:fullscreen .hud-label,
     #tank-screen:fullscreen .hud-label,
+    #fps-screen:fullscreen .hud-label,
     #tetris-screen:-webkit-full-screen .hud-label,
-    #tank-screen:-webkit-full-screen .hud-label {
+    #tank-screen:-webkit-full-screen .hud-label,
+    #fps-screen:-webkit-full-screen .hud-label {
       font-size: 10px;
       margin-bottom: 0;
     }
 
     #tetris-screen:fullscreen .hud-value,
     #tank-screen:fullscreen .hud-value,
+    #fps-screen:fullscreen .hud-value,
     #tetris-screen:-webkit-full-screen .hud-value,
-    #tank-screen:-webkit-full-screen .hud-value {
+    #tank-screen:-webkit-full-screen .hud-value,
+    #fps-screen:-webkit-full-screen .hud-value {
       font-size: 24px;
       line-height: 1.05;
     }
@@ -808,10 +894,19 @@
 
     #tetris-screen:fullscreen #msg,
     #tank-screen:fullscreen #tank-msg,
+    #fps-screen:fullscreen #fps-msg,
     #tetris-screen:-webkit-full-screen #msg,
-    #tank-screen:-webkit-full-screen #tank-msg {
+    #tank-screen:-webkit-full-screen #tank-msg,
+    #fps-screen:-webkit-full-screen #fps-msg {
       font-size: 13px;
       min-height: 18px;
+    }
+
+    #fps-screen:fullscreen .fps-wrap,
+    #fps-screen:-webkit-full-screen .fps-wrap {
+      flex: 1;
+      min-height: 0;
+      margin-top: 0;
     }
 
     #tetris-screen:fullscreen .control-action,
@@ -1028,6 +1123,20 @@
               <button class="primary" id="open-tank">Play Mini Tank</button>
             </div>
           </article>
+
+          <article class="game-card">
+            <div class="shine"></div>
+            <div class="card-top">
+              <span class="badge">3D</span>
+            </div>
+            <div class="card-bottom">
+              <h2>Arena Shooter</h2>
+              <p>Move through a neon arena, aim with the mouse, and tag enemy drones before they reach you.</p>
+            </div>
+            <div class="cta-row card-bottom">
+              <button class="primary" id="open-fps">Play Arena Shooter</button>
+            </div>
+          </article>
         </div>
       </div>
 
@@ -1181,13 +1290,50 @@
           </div>
         </div>
       </div>
+
+      <div id="fps-screen" class="hidden">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">Arena Shooter</div>
+            <div class="hint">WASD to move. Click the arena to lock the mouse. Left click to shoot.</div>
+          </div>
+          <div class="top-row">
+            <button class="secondary" id="back-from-fps">Menu</button>
+            <button class="secondary fullscreen-btn" id="fps-fullscreen-btn">Fullscreen</button>
+            <button class="primary" id="fps-start-btn">Start Run</button>
+          </div>
+        </div>
+
+        <div class="hud">
+          <div class="hud-box">
+            <div class="hud-label">Score</div>
+            <div class="hud-value" id="fps-score">0</div>
+          </div>
+          <div class="hud-box">
+            <div class="hud-label">Health</div>
+            <div class="hud-value" id="fps-health">100</div>
+          </div>
+          <div class="hud-box">
+            <div class="hud-label">Wave</div>
+            <div class="hud-value" id="fps-wave">1</div>
+          </div>
+        </div>
+
+        <div class="fps-wrap" id="fps-stage">
+          <canvas id="fps-board"></canvas>
+          <div class="crosshair"></div>
+          <div class="fps-help" id="fps-msg">Press Start Run, then click the arena.</div>
+        </div>
+      </div>
     </section>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
   <script>
     const menuScreen = document.getElementById("menu-screen");
     const tetrisScreen = document.getElementById("tetris-screen");
     const tankScreen = document.getElementById("tank-screen");
+    const fpsScreen = document.getElementById("fps-screen");
     const shell = document.getElementById("shell");
     const tetrisActionButtons = Array.from(document.querySelectorAll("[data-tetris-action]"));
     const tankMoveButtons = Array.from(document.querySelectorAll("[data-tank-move]"));
@@ -1195,6 +1341,7 @@
     const tankAimDot = document.getElementById("tank-aim-dot");
     const tetrisFullscreenButton = document.getElementById("tetris-fullscreen-btn");
     const tankFullscreenButton = document.getElementById("tank-fullscreen-btn");
+    const fpsFullscreenButton = document.getElementById("fps-fullscreen-btn");
     const tetrisHud = tetrisScreen.querySelector(".hud");
     const tetrisLayout = document.getElementById("tetris-layout");
     const tetrisSide = document.getElementById("tetris-side");
@@ -1205,8 +1352,10 @@
       menuScreen.classList.toggle("hidden", name !== "menu");
       tetrisScreen.classList.toggle("hidden", name !== "tetris");
       tankScreen.classList.toggle("hidden", name !== "tank");
+      fpsScreen.classList.toggle("hidden", name !== "fps");
       if (name !== "tetris") stopTetris();
       if (name !== "tank") stopTank();
+      if (name !== "fps") stopFps();
       if (name === "tetris") syncTetrisLayout();
       if (name === "tank") requestAnimationFrame(syncTankLayout);
     }
@@ -1252,6 +1401,7 @@
     function refreshFullscreenLabels() {
       tetrisFullscreenButton.textContent = isFullscreenActiveFor(tetrisScreen) ? "Exit Fullscreen" : "Fullscreen";
       tankFullscreenButton.textContent = isFullscreenActiveFor(tankScreen) ? "Exit Fullscreen" : "Fullscreen";
+      fpsFullscreenButton.textContent = isFullscreenActiveFor(fpsScreen) ? "Exit Fullscreen" : "Fullscreen";
     }
 
     function syncLayouts() {
@@ -1306,10 +1456,17 @@
       requestAnimationFrame(syncTankLayout);
     });
 
+    document.getElementById("open-fps").addEventListener("click", () => {
+      showScreen("fps");
+      drawFpsStartScreen();
+    });
+
     document.getElementById("back-from-tetris").addEventListener("click", returnToMenu);
     document.getElementById("back-from-tank").addEventListener("click", returnToMenu);
+    document.getElementById("back-from-fps").addEventListener("click", returnToMenu);
     tetrisFullscreenButton.addEventListener("click", () => toggleFullscreen(tetrisScreen));
     tankFullscreenButton.addEventListener("click", () => toggleFullscreen(tankScreen));
+    fpsFullscreenButton.addEventListener("click", () => toggleFullscreen(fpsScreen));
     document.addEventListener("fullscreenchange", () => {
       refreshFullscreenLabels();
       requestAnimationFrame(syncLayouts);
@@ -1317,6 +1474,7 @@
       if (!document.fullscreenElement && !menuScreen.classList.contains("hidden")) {
         tetrisScreen.classList.add("hidden");
         tankScreen.classList.add("hidden");
+        fpsScreen.classList.add("hidden");
       }
     });
     window.addEventListener("resize", syncLayouts);
@@ -2529,6 +2687,272 @@
     tankAimPad.addEventListener("touchcancel", releaseAimTouch, { passive: false });
     tankAimPad.addEventListener("mouseup", releaseAimTouch);
     tankAimPad.addEventListener("mouseleave", releaseAimTouch);
+
+    const fpsCanvas = document.getElementById("fps-board");
+    const fpsStage = document.getElementById("fps-stage");
+    const fpsKeys = new Set();
+    const fpsRaycaster = window.THREE ? new THREE.Raycaster() : null;
+    const fpsCenter = window.THREE ? new THREE.Vector2(0, 0) : null;
+
+    let fpsRenderer = null;
+    let fpsScene = null;
+    let fpsCamera = null;
+    let fpsClock = null;
+    let fpsAnimationId = null;
+    let fpsRunning = false;
+    let fpsScore = 0;
+    let fpsHealth = 100;
+    let fpsWave = 1;
+    let fpsYaw = 0;
+    let fpsPitch = 0;
+    let fpsEnemies = [];
+
+    function setFpsMsg(text) {
+      document.getElementById("fps-msg").textContent = text;
+    }
+
+    function updateFpsHud() {
+      document.getElementById("fps-score").textContent = fpsScore;
+      document.getElementById("fps-health").textContent = Math.max(0, Math.ceil(fpsHealth));
+      document.getElementById("fps-wave").textContent = fpsWave;
+    }
+
+    function ensureFpsWorld() {
+      if (!window.THREE) {
+        setFpsMsg("3D engine did not load. Refresh the page and try again.");
+        return false;
+      }
+      if (fpsRenderer) return true;
+
+      fpsRenderer = new THREE.WebGLRenderer({ canvas: fpsCanvas, antialias: true });
+      fpsRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+      fpsScene = new THREE.Scene();
+      fpsScene.background = new THREE.Color(0x05090d);
+      fpsScene.fog = new THREE.Fog(0x05090d, 16, 58);
+
+      fpsCamera = new THREE.PerspectiveCamera(75, 16 / 9, 0.1, 120);
+      fpsCamera.rotation.order = "YXZ";
+      fpsCamera.position.set(0, 1.7, 12);
+      fpsClock = new THREE.Clock();
+
+      const ambient = new THREE.HemisphereLight(0xbfefff, 0x10202b, 1.4);
+      fpsScene.add(ambient);
+      const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+      keyLight.position.set(8, 12, 6);
+      fpsScene.add(keyLight);
+
+      const floor = new THREE.Mesh(
+        new THREE.PlaneGeometry(56, 56),
+        new THREE.MeshStandardMaterial({ color: 0x0b1620, roughness: 0.85, metalness: 0.08 })
+      );
+      floor.rotation.x = -Math.PI / 2;
+      fpsScene.add(floor);
+
+      const grid = new THREE.GridHelper(56, 28, 0x244152, 0x132633);
+      grid.position.y = 0.01;
+      fpsScene.add(grid);
+
+      const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x172d3b, roughness: 0.7 });
+      [
+        { x: 0, z: -28, w: 56, d: 1 },
+        { x: 0, z: 28, w: 56, d: 1 },
+        { x: -28, z: 0, w: 1, d: 56 },
+        { x: 28, z: 0, w: 1, d: 56 }
+      ].forEach((wall) => {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(wall.w, 4, wall.d), wallMaterial);
+        mesh.position.set(wall.x, 2, wall.z);
+        fpsScene.add(mesh);
+      });
+
+      for (let i = 0; i < 10; i++) {
+        const box = new THREE.Mesh(
+          new THREE.BoxGeometry(2.4 + Math.random() * 2.5, 1.2 + Math.random() * 1.5, 2.4 + Math.random() * 2.5),
+          wallMaterial
+        );
+        box.position.set(-18 + Math.random() * 36, box.geometry.parameters.height / 2, -18 + Math.random() * 36);
+        fpsScene.add(box);
+      }
+
+      resizeFpsRenderer();
+      return true;
+    }
+
+    function resizeFpsRenderer() {
+      if (!fpsRenderer || !fpsCamera) return;
+      const width = Math.max(320, fpsStage.clientWidth);
+      const height = Math.max(260, fpsStage.clientHeight);
+      const needsResize = fpsCanvas.width !== Math.floor(width * fpsRenderer.getPixelRatio()) ||
+        fpsCanvas.height !== Math.floor(height * fpsRenderer.getPixelRatio());
+      if (needsResize) fpsRenderer.setSize(width, height, false);
+      fpsCamera.aspect = width / height;
+      fpsCamera.updateProjectionMatrix();
+    }
+
+    function spawnFpsEnemy() {
+      if (!fpsScene || !window.THREE) return;
+      const material = new THREE.MeshStandardMaterial({
+        color: 0xff7366,
+        emissive: 0x3a0906,
+        roughness: 0.55
+      });
+      const enemy = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.8, 1.1), material);
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 12 + Math.random() * 12;
+      enemy.position.set(Math.cos(angle) * radius, 0.9, Math.sin(angle) * radius);
+      enemy.userData.speed = 1.15 + fpsWave * 0.18 + Math.random() * 0.3;
+      fpsScene.add(enemy);
+      fpsEnemies.push(enemy);
+    }
+
+    function resetFpsGame() {
+      if (!ensureFpsWorld()) return false;
+      fpsEnemies.forEach((enemy) => fpsScene.remove(enemy));
+      fpsEnemies = [];
+      fpsScore = 0;
+      fpsHealth = 100;
+      fpsWave = 1;
+      fpsYaw = 0;
+      fpsPitch = 0;
+      fpsCamera.position.set(0, 1.7, 12);
+      fpsCamera.rotation.set(0, 0, 0);
+      for (let i = 0; i < 5; i++) spawnFpsEnemy();
+      updateFpsHud();
+      setFpsMsg("Click the arena to lock mouse. WASD move. Left click shoots.");
+      return true;
+    }
+
+    function updateFpsMovement(dt) {
+      const speed = 8.5;
+      let moveX = 0;
+      let moveZ = 0;
+      if (fpsKeys.has("w") || fpsKeys.has("ArrowUp")) moveZ -= 1;
+      if (fpsKeys.has("s") || fpsKeys.has("ArrowDown")) moveZ += 1;
+      if (fpsKeys.has("a") || fpsKeys.has("ArrowLeft")) moveX -= 1;
+      if (fpsKeys.has("d") || fpsKeys.has("ArrowRight")) moveX += 1;
+      if (!moveX && !moveZ) return;
+
+      const len = Math.hypot(moveX, moveZ);
+      moveX /= len;
+      moveZ /= len;
+      const sin = Math.sin(fpsYaw);
+      const cos = Math.cos(fpsYaw);
+      fpsCamera.position.x += (moveX * cos - moveZ * sin) * speed * dt;
+      fpsCamera.position.z += (moveX * sin + moveZ * cos) * speed * dt;
+      fpsCamera.position.x = Math.max(-25, Math.min(25, fpsCamera.position.x));
+      fpsCamera.position.z = Math.max(-25, Math.min(25, fpsCamera.position.z));
+    }
+
+    function updateFpsEnemies(dt) {
+      fpsEnemies.forEach((enemy) => {
+        const dx = fpsCamera.position.x - enemy.position.x;
+        const dz = fpsCamera.position.z - enemy.position.z;
+        const distance = Math.hypot(dx, dz) || 1;
+        enemy.position.x += (dx / distance) * enemy.userData.speed * dt;
+        enemy.position.z += (dz / distance) * enemy.userData.speed * dt;
+        enemy.lookAt(fpsCamera.position.x, enemy.position.y, fpsCamera.position.z);
+        if (distance < 1.45) fpsHealth -= 20 * dt;
+      });
+
+      if (fpsEnemies.length === 0) {
+        fpsWave++;
+        for (let i = 0; i < 4 + fpsWave; i++) spawnFpsEnemy();
+        setFpsMsg("Wave " + fpsWave + " incoming.");
+      }
+
+      if (fpsHealth <= 0) {
+        fpsRunning = false;
+        setFpsMsg("Run over. Score: " + fpsScore);
+        document.getElementById("fps-start-btn").textContent = "Restart Run";
+        if (document.pointerLockElement === fpsCanvas) document.exitPointerLock();
+      }
+      updateFpsHud();
+    }
+
+    function shootFps() {
+      if (!fpsRunning || !fpsRaycaster || !fpsCamera) return;
+      fpsRaycaster.setFromCamera(fpsCenter, fpsCamera);
+      const hits = fpsRaycaster.intersectObjects(fpsEnemies, false);
+      if (!hits.length) {
+        setFpsMsg("Miss.");
+        return;
+      }
+      const enemy = hits[0].object;
+      fpsScene.remove(enemy);
+      fpsEnemies = fpsEnemies.filter((item) => item !== enemy);
+      fpsScore += 100;
+      setFpsMsg("Hit! Score +" + 100);
+      updateFpsHud();
+    }
+
+    function fpsLoop() {
+      if (!fpsRenderer || !fpsScene || !fpsCamera) return;
+      const dt = Math.min(0.033, fpsClock.getDelta());
+      if (fpsRunning) {
+        updateFpsMovement(dt);
+        updateFpsEnemies(dt);
+      }
+      resizeFpsRenderer();
+      fpsRenderer.render(fpsScene, fpsCamera);
+      fpsAnimationId = requestAnimationFrame(fpsLoop);
+    }
+
+    function startFps() {
+      if (!resetFpsGame()) return;
+      fpsRunning = true;
+      document.getElementById("fps-start-btn").textContent = "Restart Run";
+      if (fpsAnimationId) cancelAnimationFrame(fpsAnimationId);
+      fpsClock.getDelta();
+      fpsAnimationId = requestAnimationFrame(fpsLoop);
+    }
+
+    function stopFps() {
+      fpsRunning = false;
+      fpsKeys.clear();
+      if (fpsAnimationId) cancelAnimationFrame(fpsAnimationId);
+      fpsAnimationId = null;
+      if (document.pointerLockElement === fpsCanvas) document.exitPointerLock();
+    }
+
+    function drawFpsStartScreen() {
+      if (!ensureFpsWorld()) return;
+      fpsRenderer.render(fpsScene, fpsCamera);
+      setFpsMsg("Press Start Run, then click the arena.");
+      updateFpsHud();
+    }
+
+    document.getElementById("fps-start-btn").addEventListener("click", startFps);
+
+    fpsCanvas.addEventListener("click", () => {
+      if (!fpsRunning) return;
+      fpsCanvas.requestPointerLock();
+    });
+
+    fpsCanvas.addEventListener("mousedown", (event) => {
+      if (event.button !== 0) return;
+      if (document.pointerLockElement === fpsCanvas) shootFps();
+    });
+
+    document.addEventListener("mousemove", (event) => {
+      if (!fpsRunning || document.pointerLockElement !== fpsCanvas) return;
+      fpsYaw -= event.movementX * 0.0023;
+      fpsPitch -= event.movementY * 0.0023;
+      fpsPitch = Math.max(-1.25, Math.min(1.25, fpsPitch));
+      fpsCamera.rotation.set(fpsPitch, fpsYaw, 0);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (fpsScreen.classList.contains("hidden")) return;
+      const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      if (["w", "a", "s", "d", "ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"].includes(key)) {
+        fpsKeys.add(key);
+        event.preventDefault();
+      }
+    });
+
+    document.addEventListener("keyup", (event) => {
+      const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      fpsKeys.delete(key);
+    });
 
     board = newBoard();
     piece = null;
