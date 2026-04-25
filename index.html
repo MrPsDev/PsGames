@@ -107,6 +107,22 @@
       z-index: 1;
     }
 
+    .model-credit-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .model-credit-note a {
+      color: var(--sky);
+      text-decoration: none;
+    }
+
+    .model-credit-note a:hover {
+      text-decoration: underline;
+    }
+
     #shell {
       width: min(1120px, 100%);
       position: relative;
@@ -1413,6 +1429,10 @@
             </div>
           </div>
         </div>
+        <p class="model-credit-note">
+          3D models by Sketchfab creators under CC-BY. Credits:
+          <a href="https://github.com/MrPsDev/PsGames/blob/main/MODEL_CREDITS.md" target="_blank" rel="noopener">MODEL_CREDITS.md</a>
+        </p>
       </div>
     </section>
   </div>
@@ -2811,8 +2831,14 @@
     let fpsSpray = 0;
     let fpsViewModel = null;
     let fpsWeaponModel = null;
+    let fpsGripHands = null;
     let fpsRecoil = 0;
+    let fpsMeleeSwing = 0;
     let fpsEffects = [];
+    let fpsModelLoaderPromise = null;
+    let fpsModelLoadNoticeShown = false;
+    const fpsModelPromises = {};
+    const fpsWeaponModelTokens = {};
     const FPS_EYE_HEIGHT = 1.7;
     const FPS_PLAYER_RADIUS = 0.55;
     const FPS_GROUND_Y = FPS_EYE_HEIGHT;
@@ -2821,6 +2847,40 @@
       awp: { label: "AWP", damage: 120, cooldown: 0.92, spread: 0.002 },
       deagle: { label: "Desert Eagle", damage: 70, cooldown: 0.34, spread: 0.004 },
       bayonet: { label: "Bayonet Knife", damage: 90, cooldown: 0.42, spread: 0, melee: true, range: 2.4 }
+    };
+    const FPS_MODEL_PATHS = {
+      hands: "assets/models/hand_cs_go/scene.gltf",
+      ak47: "assets/models/ak47_counter_strike_2/scene.gltf",
+      awp: "assets/models/awp_counter_strike_2/scene.gltf",
+      deagle: "assets/models/deagle_counter_strike_2/scene.gltf",
+      bayonet: "assets/models/m9_bayonet_knife/scene.gltf"
+    };
+    const FPS_MODEL_CONFIGS = {
+      hands: {
+        targetSize: 0.92,
+        position: [0.03, -0.18, -0.34],
+        rotation: [0.03, Math.PI, -0.02]
+      },
+      ak47: {
+        targetSize: 0.92,
+        position: [0.18, -0.08, -0.56],
+        rotation: [0.03, Math.PI, 0]
+      },
+      awp: {
+        targetSize: 1.18,
+        position: [0.18, -0.08, -0.6],
+        rotation: [0.03, Math.PI, 0]
+      },
+      deagle: {
+        targetSize: 0.58,
+        position: [0.19, -0.1, -0.5],
+        rotation: [0.02, Math.PI, 0]
+      },
+      bayonet: {
+        targetSize: 0.68,
+        position: [0.27, -0.08, -0.48],
+        rotation: [0.32, Math.PI * 0.86, -0.12]
+      }
     };
 
     function setFpsMsg(text) {
@@ -2915,32 +2975,35 @@
       viewLight.position.set(0.25, 0.35, 0.25);
       fpsViewModel.add(viewLight);
 
-      addFpsHands();
+      fpsGripHands = new THREE.Group();
+      fpsViewModel.add(fpsGripHands);
+      addFpsHands(fpsGripHands);
 
       fpsViewModel.add(fpsWeaponModel);
       fpsCamera.add(fpsViewModel);
       updateFpsWeaponModel();
+      loadFpsHandsModel();
     }
 
-    function addFpsHands() {
+    function addFpsHands(parent) {
       const skin = 0xc98f62;
       const glove = 0x161116;
       const strap = 0x2d1c1f;
 
-      addModelCylinder(fpsViewModel, 0.095, 0.12, 0.62, -0.42, -0.08, -0.02, 0.18, 0.55, -0.34, skin, 22);
-      addModelCylinder(fpsViewModel, 0.095, 0.12, 0.66, 0.38, -0.06, -0.04, 0.16, -0.44, 0.32, skin, 22);
-      addModelCylinder(fpsViewModel, 0.11, 0.095, 0.16, -0.28, -0.105, -0.33, 0.35, 0.08, -0.28, glove, 22);
-      addModelCylinder(fpsViewModel, 0.11, 0.095, 0.16, 0.23, -0.1, -0.35, 0.34, -0.08, 0.24, glove, 22);
-      addModelSphere(fpsViewModel, 0.115, -0.3, -0.1, -0.4, glove, 18, 12);
-      addModelSphere(fpsViewModel, 0.115, 0.24, -0.095, -0.42, glove, 18, 12);
-      addModelCylinder(fpsViewModel, 0.022, 0.018, 0.16, -0.37, -0.065, -0.47, 0.5, 0.08, -0.35, skin, 12);
-      addModelCylinder(fpsViewModel, 0.022, 0.018, 0.16, -0.31, -0.045, -0.48, 0.5, 0.03, -0.18, skin, 12);
-      addModelCylinder(fpsViewModel, 0.022, 0.018, 0.16, -0.25, -0.05, -0.48, 0.5, -0.03, 0.02, skin, 12);
-      addModelCylinder(fpsViewModel, 0.022, 0.018, 0.17, 0.17, -0.04, -0.5, 0.52, 0.05, -0.1, skin, 12);
-      addModelCylinder(fpsViewModel, 0.022, 0.018, 0.17, 0.24, -0.045, -0.5, 0.52, 0.02, 0.08, skin, 12);
-      addModelCylinder(fpsViewModel, 0.022, 0.018, 0.17, 0.31, -0.06, -0.49, 0.5, -0.05, 0.25, skin, 12);
-      addModelCylinder(fpsViewModel, 0.115, 0.12, 0.045, -0.42, -0.07, 0.18, 0.18, 0.55, -0.34, strap, 18);
-      addModelCylinder(fpsViewModel, 0.115, 0.12, 0.045, 0.38, -0.05, 0.18, 0.16, -0.44, 0.32, strap, 18);
+      addModelCylinder(parent, 0.095, 0.12, 0.62, -0.42, -0.08, -0.02, 0.18, 0.55, -0.34, skin, 22);
+      addModelCylinder(parent, 0.095, 0.12, 0.66, 0.38, -0.06, -0.04, 0.16, -0.44, 0.32, skin, 22);
+      addModelCylinder(parent, 0.11, 0.095, 0.16, -0.28, -0.105, -0.33, 0.35, 0.08, -0.28, glove, 22);
+      addModelCylinder(parent, 0.11, 0.095, 0.16, 0.23, -0.1, -0.35, 0.34, -0.08, 0.24, glove, 22);
+      addModelSphere(parent, 0.115, -0.3, -0.1, -0.4, glove, 18, 12);
+      addModelSphere(parent, 0.115, 0.24, -0.095, -0.42, glove, 18, 12);
+      addModelCylinder(parent, 0.022, 0.018, 0.16, -0.37, -0.065, -0.47, 0.5, 0.08, -0.35, skin, 12);
+      addModelCylinder(parent, 0.022, 0.018, 0.16, -0.31, -0.045, -0.48, 0.5, 0.03, -0.18, skin, 12);
+      addModelCylinder(parent, 0.022, 0.018, 0.16, -0.25, -0.05, -0.48, 0.5, -0.03, 0.02, skin, 12);
+      addModelCylinder(parent, 0.022, 0.018, 0.17, 0.17, -0.04, -0.5, 0.52, 0.05, -0.1, skin, 12);
+      addModelCylinder(parent, 0.022, 0.018, 0.17, 0.24, -0.045, -0.5, 0.52, 0.02, 0.08, skin, 12);
+      addModelCylinder(parent, 0.022, 0.018, 0.17, 0.31, -0.06, -0.49, 0.5, -0.05, 0.25, skin, 12);
+      addModelCylinder(parent, 0.115, 0.12, 0.045, -0.42, -0.07, 0.18, 0.18, 0.55, -0.34, strap, 18);
+      addModelCylinder(parent, 0.115, 0.12, 0.045, 0.38, -0.05, 0.18, 0.16, -0.44, 0.32, strap, 18);
     }
 
     function makeViewMaterial(color, roughness = 0.55, metalness = 0.2) {
@@ -2983,9 +3046,99 @@
       return addModelCylinder(fpsWeaponModel, radiusTop, radiusBottom, length, x, y, z, rotX, rotY, rotZ, color, radialSegments);
     }
 
+    function getFpsModelLoader() {
+      if (!fpsModelLoaderPromise) {
+        fpsModelLoaderPromise = import("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js")
+          .then((module) => new module.GLTFLoader())
+          .catch((error) => {
+            console.warn("GLTF model loader failed", error);
+            return null;
+          });
+      }
+      return fpsModelLoaderPromise;
+    }
+
+    function loadFpsModelAsset(name) {
+      if (!fpsModelPromises[name]) {
+        fpsModelPromises[name] = getFpsModelLoader().then((loader) => new Promise((resolve, reject) => {
+          if (!loader) {
+            reject(new Error("GLTF loader unavailable"));
+            return;
+          }
+          loader.load(FPS_MODEL_PATHS[name], (gltf) => resolve(gltf.scene), undefined, reject);
+        }));
+      }
+      return fpsModelPromises[name];
+    }
+
+    function prepareFpsImportedModel(source, config) {
+      const wrapper = new THREE.Group();
+      const model = source.clone(true);
+      model.traverse((child) => {
+        child.frustumCulled = false;
+        if (!child.material) return;
+        if (Array.isArray(child.material)) {
+          child.material = child.material.map((material) => material.clone());
+        } else {
+          child.material = child.material.clone();
+        }
+      });
+
+      wrapper.add(model);
+      const firstBox = new THREE.Box3().setFromObject(model);
+      const size = new THREE.Vector3();
+      firstBox.getSize(size);
+      const biggestSide = Math.max(size.x, size.y, size.z) || 1;
+      model.scale.multiplyScalar(config.targetSize / biggestSide);
+
+      const centeredBox = new THREE.Box3().setFromObject(model);
+      const center = new THREE.Vector3();
+      centeredBox.getCenter(center);
+      model.position.sub(center);
+
+      wrapper.position.fromArray(config.position);
+      wrapper.rotation.set(config.rotation[0], config.rotation[1], config.rotation[2]);
+      return wrapper;
+    }
+
+    function clearFpsWeaponModel() {
+      while (fpsWeaponModel.children.length) fpsWeaponModel.remove(fpsWeaponModel.children[0]);
+    }
+
+    function loadFpsHandsModel() {
+      if (!fpsViewModel) return;
+      loadFpsModelAsset("hands").then((source) => {
+        if (!fpsViewModel) return;
+        const importedHands = prepareFpsImportedModel(source, FPS_MODEL_CONFIGS.hands);
+        importedHands.name = "CS-style imported hands";
+        if (fpsGripHands) fpsGripHands.visible = false;
+        fpsViewModel.add(importedHands);
+      }).catch((error) => {
+        console.warn("Hands model failed to load", error);
+      });
+    }
+
+    function loadFpsWeaponModel(name, token) {
+      loadFpsModelAsset(name).then((source) => {
+        if (!fpsWeaponModel || fpsWeaponModelTokens[name] !== token || fpsCurrentWeapon !== name) return;
+        clearFpsWeaponModel();
+        const importedWeapon = prepareFpsImportedModel(source, FPS_MODEL_CONFIGS[name]);
+        importedWeapon.name = name + " imported model";
+        fpsWeaponModel.add(importedWeapon);
+        if (!fpsModelLoadNoticeShown) {
+          fpsModelLoadNoticeShown = true;
+          setFpsMsg("Real 3D models loaded.");
+        }
+      }).catch((error) => {
+        console.warn(name + " model failed to load", error);
+      });
+    }
+
     function updateFpsWeaponModel() {
       if (!fpsWeaponModel) return;
-      while (fpsWeaponModel.children.length) fpsWeaponModel.remove(fpsWeaponModel.children[0]);
+      clearFpsWeaponModel();
+      const modelToken = (fpsWeaponModelTokens[fpsCurrentWeapon] || 0) + 1;
+      fpsWeaponModelTokens[fpsCurrentWeapon] = modelToken;
       const spec = FPS_WEAPONS[fpsCurrentWeapon];
       const dark = 0x14191f;
       const black = 0x090c10;
@@ -3029,6 +3182,7 @@
         addGunCylinder(0.018, 0.018, 0.12, 0.02, 0.16, -0.55, Math.PI / 2, 0, 0, 0xc7e7ff, 14);
       }
       setFpsMsg("Equipped " + spec.label + ".");
+      loadFpsWeaponModel(fpsCurrentWeapon, modelToken);
     }
 
     function resizeFpsRenderer() {
@@ -3275,6 +3429,7 @@
       fpsShotCooldown = weapon.cooldown;
       fpsRecoil = Math.min(1, fpsRecoil + (weapon.auto ? 0.16 : 0.36));
       if (weapon.melee) {
+        fpsMeleeSwing = 1;
         fpsRaycaster.setFromCamera(fpsCenter, fpsCamera);
         const hits = fpsRaycaster.intersectObjects(fpsEnemies, false);
         if (!hits.length || hits[0].distance > weapon.range) {
@@ -3369,8 +3524,24 @@
       updateFpsEffects(dt);
       if (fpsViewModel) {
         fpsRecoil = Math.max(0, fpsRecoil - dt * 6);
-        fpsViewModel.position.set(0.33, -0.33 - fpsRecoil * 0.035, -0.72 + fpsRecoil * 0.12);
-        fpsViewModel.rotation.set(-0.08 - fpsRecoil * 0.12, -0.08, 0.02 + Math.sin(performance.now() * 0.01) * fpsSpray * 0.015);
+        fpsMeleeSwing = Math.max(0, fpsMeleeSwing - dt * 4.5);
+        const time = performance.now() * 0.001;
+        const walkBob = fpsRunning ? Math.sin(time * 7.5) * 0.008 : 0;
+        const slash = Math.sin(fpsMeleeSwing * Math.PI);
+        fpsViewModel.position.set(
+          0.33 + slash * 0.06,
+          -0.33 - fpsRecoil * 0.035 + walkBob - slash * 0.04,
+          -0.72 + fpsRecoil * 0.12 + slash * 0.08
+        );
+        fpsViewModel.rotation.set(
+          -0.08 - fpsRecoil * 0.12 - slash * 0.35,
+          -0.08 + slash * 0.22,
+          0.02 + Math.sin(time * 10) * fpsSpray * 0.015 - slash * 0.42
+        );
+        if (fpsWeaponModel) {
+          fpsWeaponModel.position.set(0, slash * 0.02, slash * 0.06);
+          fpsWeaponModel.rotation.set(-slash * 0.25, slash * 0.08, -slash * 0.55);
+        }
       }
       resizeFpsRenderer();
       fpsRenderer.render(fpsScene, fpsCamera);
