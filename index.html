@@ -2802,11 +2802,13 @@
     let fpsCurrentWeapon = "ak47";
     let fpsShotCooldown = 0;
     let fpsShopOpen = false;
+    let fpsTriggerHeld = false;
+    let fpsSpray = 0;
     const FPS_EYE_HEIGHT = 1.7;
     const FPS_PLAYER_RADIUS = 0.55;
     const FPS_GROUND_Y = FPS_EYE_HEIGHT;
     const FPS_WEAPONS = {
-      ak47: { label: "AK-47", damage: 34, cooldown: 0.11, spread: 0.012 },
+      ak47: { label: "AK-47", damage: 28, cooldown: 0.085, spread: 0.012, auto: true, spray: 0.042 },
       awp: { label: "AWP", damage: 120, cooldown: 0.92, spread: 0.002 },
       deagle: { label: "Desert Eagle", damage: 70, cooldown: 0.34, spread: 0.004 }
     };
@@ -2935,6 +2937,8 @@
       fpsJumpQueued = false;
       fpsJumpHeld = false;
       fpsShotCooldown = 0;
+      fpsTriggerHeld = false;
+      fpsSpray = 0;
       closeGunshop();
       fpsCamera.position.set(0, FPS_EYE_HEIGHT, 12);
       fpsCamera.rotation.set(0, 0, 0);
@@ -3039,6 +3043,11 @@
 
     function updateFpsEnemies(dt) {
       fpsShotCooldown = Math.max(0, fpsShotCooldown - dt);
+      if (fpsTriggerHeld && fpsCurrentWeapon === "ak47" && document.pointerLockElement === fpsCanvas) {
+        shootFps();
+      } else {
+        fpsSpray = Math.max(0, fpsSpray - dt * 3.5);
+      }
       fpsEnemies.forEach((enemy) => {
         const dx = fpsCamera.position.x - enemy.position.x;
         const dz = fpsCamera.position.z - enemy.position.z;
@@ -3069,9 +3078,12 @@
       if (fpsShopOpen || fpsShotCooldown > 0) return;
       const weapon = FPS_WEAPONS[fpsCurrentWeapon];
       fpsShotCooldown = weapon.cooldown;
+      if (weapon.auto) fpsSpray = Math.min(1, fpsSpray + 0.11);
+      else fpsSpray = Math.max(0, fpsSpray - 0.18);
+      const activeSpread = weapon.spread + (weapon.spray || 0) * fpsSpray;
       fpsCenter.set(
-        (Math.random() - 0.5) * weapon.spread,
-        (Math.random() - 0.5) * weapon.spread
+        (Math.random() - 0.5) * activeSpread,
+        (Math.random() - 0.5) * activeSpread
       );
       fpsRaycaster.setFromCamera(fpsCenter, fpsCamera);
       fpsCenter.set(0, 0);
@@ -3150,6 +3162,8 @@
       fpsKeys.clear();
       fpsJumpHeld = false;
       fpsJumpQueued = false;
+      fpsTriggerHeld = false;
+      fpsSpray = 0;
       closeGunshop();
       if (fpsAnimationId) cancelAnimationFrame(fpsAnimationId);
       fpsAnimationId = null;
@@ -3180,7 +3194,15 @@
 
     fpsCanvas.addEventListener("mousedown", (event) => {
       if (event.button !== 0) return;
-      if (document.pointerLockElement === fpsCanvas) shootFps();
+      fpsTriggerHeld = true;
+      if (document.pointerLockElement !== fpsCanvas) return;
+      shootFps();
+    });
+
+    window.addEventListener("mouseup", (event) => {
+      if (event.button !== 0) return;
+      fpsTriggerHeld = false;
+      fpsSpray = Math.max(0, fpsSpray - 0.25);
     });
 
     document.addEventListener("mousemove", (event) => {
