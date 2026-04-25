@@ -1405,6 +1405,11 @@
                 <span class="gun-key">3</span>
                 <span class="gun-stats">Strong pistol. Damage 70, accurate semi-auto.</span>
               </button>
+              <button class="gun-option" data-weapon="bayonet">
+                <span class="gun-name">Bayonet Knife</span>
+                <span class="gun-key">4</span>
+                <span class="gun-stats">Close range melee. Fast slash, high damage up close.</span>
+              </button>
             </div>
           </div>
         </div>
@@ -2814,7 +2819,8 @@
     const FPS_WEAPONS = {
       ak47: { label: "AK-47", damage: 28, cooldown: 0.085, spread: 0.012, auto: true, spray: 0.042 },
       awp: { label: "AWP", damage: 120, cooldown: 0.92, spread: 0.002 },
-      deagle: { label: "Desert Eagle", damage: 70, cooldown: 0.34, spread: 0.004 }
+      deagle: { label: "Desert Eagle", damage: 70, cooldown: 0.34, spread: 0.004 },
+      bayonet: { label: "Bayonet Knife", damage: 90, cooldown: 0.42, spread: 0, melee: true, range: 2.4 }
     };
 
     function setFpsMsg(text) {
@@ -2902,29 +2908,39 @@
     function createFpsViewModel() {
       fpsViewModel = new THREE.Group();
       fpsWeaponModel = new THREE.Group();
-      fpsViewModel.position.set(0.33, -0.33, -0.72);
-      fpsViewModel.rotation.set(-0.08, -0.08, 0.02);
+      fpsViewModel.position.set(0.16, -0.38, -0.78);
+      fpsViewModel.rotation.set(-0.05, -0.03, 0.01);
 
       const viewLight = new THREE.PointLight(0xffffff, 0.95, 3);
       viewLight.position.set(0.25, 0.35, 0.25);
       fpsViewModel.add(viewLight);
 
-      const skin = 0xc98f62;
-      const sleeve = 0x1c3443;
-      const glove = 0x111820;
-
-      addModelCylinder(fpsViewModel, 0.07, 0.085, 0.48, -0.24, -0.08, 0.02, 0.12, 0.28, -0.16, sleeve);
-      addModelCylinder(fpsViewModel, 0.07, 0.085, 0.56, 0.25, -0.07, 0.01, 0.08, -0.18, 0.14, sleeve);
-      addModelSphere(fpsViewModel, 0.105, -0.17, -0.095, -0.25, skin, 18, 12);
-      addModelSphere(fpsViewModel, 0.105, 0.19, -0.095, -0.25, skin, 18, 12);
-      addModelCylinder(fpsViewModel, 0.035, 0.03, 0.18, -0.1, -0.105, -0.34, 0.5, 0.05, -0.15, skin);
-      addModelCylinder(fpsViewModel, 0.035, 0.03, 0.18, 0.11, -0.105, -0.35, 0.48, -0.05, 0.15, skin);
-      addModelCylinder(fpsViewModel, 0.08, 0.07, 0.1, -0.18, -0.08, -0.17, 0.2, 0.05, 0, glove);
-      addModelCylinder(fpsViewModel, 0.08, 0.07, 0.1, 0.19, -0.08, -0.17, 0.2, -0.05, 0, glove);
+      addFpsHands();
 
       fpsViewModel.add(fpsWeaponModel);
       fpsCamera.add(fpsViewModel);
       updateFpsWeaponModel();
+    }
+
+    function addFpsHands() {
+      const skin = 0xc98f62;
+      const glove = 0x161116;
+      const strap = 0x2d1c1f;
+
+      addModelCylinder(fpsViewModel, 0.095, 0.12, 0.62, -0.42, -0.08, -0.02, 0.18, 0.55, -0.34, skin, 22);
+      addModelCylinder(fpsViewModel, 0.095, 0.12, 0.66, 0.38, -0.06, -0.04, 0.16, -0.44, 0.32, skin, 22);
+      addModelCylinder(fpsViewModel, 0.11, 0.095, 0.16, -0.28, -0.105, -0.33, 0.35, 0.08, -0.28, glove, 22);
+      addModelCylinder(fpsViewModel, 0.11, 0.095, 0.16, 0.23, -0.1, -0.35, 0.34, -0.08, 0.24, glove, 22);
+      addModelSphere(fpsViewModel, 0.115, -0.3, -0.1, -0.4, glove, 18, 12);
+      addModelSphere(fpsViewModel, 0.115, 0.24, -0.095, -0.42, glove, 18, 12);
+      addModelCylinder(fpsViewModel, 0.022, 0.018, 0.16, -0.37, -0.065, -0.47, 0.5, 0.08, -0.35, skin, 12);
+      addModelCylinder(fpsViewModel, 0.022, 0.018, 0.16, -0.31, -0.045, -0.48, 0.5, 0.03, -0.18, skin, 12);
+      addModelCylinder(fpsViewModel, 0.022, 0.018, 0.16, -0.25, -0.05, -0.48, 0.5, -0.03, 0.02, skin, 12);
+      addModelCylinder(fpsViewModel, 0.022, 0.018, 0.17, 0.17, -0.04, -0.5, 0.52, 0.05, -0.1, skin, 12);
+      addModelCylinder(fpsViewModel, 0.022, 0.018, 0.17, 0.24, -0.045, -0.5, 0.52, 0.02, 0.08, skin, 12);
+      addModelCylinder(fpsViewModel, 0.022, 0.018, 0.17, 0.31, -0.06, -0.49, 0.5, -0.05, 0.25, skin, 12);
+      addModelCylinder(fpsViewModel, 0.115, 0.12, 0.045, -0.42, -0.07, 0.18, 0.18, 0.55, -0.34, strap, 18);
+      addModelCylinder(fpsViewModel, 0.115, 0.12, 0.045, 0.38, -0.05, 0.18, 0.16, -0.44, 0.32, strap, 18);
     }
 
     function makeViewMaterial(color, roughness = 0.55, metalness = 0.2) {
@@ -2975,7 +2991,7 @@
       const black = 0x090c10;
       const metal = 0x303943;
       const wood = 0x7a4a2b;
-      const accent = fpsCurrentWeapon === "awp" ? 0x4f6f9e : fpsCurrentWeapon === "deagle" ? 0xb9a05f : 0x5d7f67;
+      const accent = fpsCurrentWeapon === "awp" ? 0x4f6f9e : fpsCurrentWeapon === "deagle" ? 0xb9a05f : fpsCurrentWeapon === "bayonet" ? 0xd24a7b : 0x5d7f67;
 
       if (fpsCurrentWeapon === "ak47") {
         addGunBox(0.22, 0.16, 0.52, 0.02, -0.02, -0.34, dark);
@@ -2994,16 +3010,24 @@
         addGunBox(0.18, 0.3, 0.18, 0.02, -0.22, -0.38, black, -0.12, 0, 0);
         addGunBox(0.22, 0.1, 0.36, -0.17, -0.03, -0.05, accent, 0.04, 0.3, 0.02, 0.12);
         addGunCylinder(0.052, 0.042, 0.16, 0.02, 0.01, -1.78, 0, 0, 0, metal, 24);
-      } else {
+      } else if (fpsCurrentWeapon === "deagle") {
         addGunBox(0.22, 0.14, 0.48, 0.03, -0.02, -0.26, accent, 0, 0, 0, 0.35);
         addGunBox(0.2, 0.11, 0.4, 0.03, 0.07, -0.3, metal, 0, 0, 0, 0.45);
         addGunCylinder(0.04, 0.04, 0.44, 0.03, 0.04, -0.68, 0, 0, 0, black, 28);
         addGunBox(0.12, 0.3, 0.16, 0.03, -0.25, -0.27, black, -0.24, 0, 0);
         addGunBox(0.2, 0.055, 0.18, 0.03, -0.11, -0.04, black);
         addGunCylinder(0.052, 0.045, 0.1, 0.03, 0.04, -0.94, 0, 0, 0, metal, 24);
+      } else {
+        addGunCylinder(0.045, 0.055, 0.48, 0.24, -0.1, -0.34, 0.1, -0.18, 0.08, black, 20);
+        addGunBox(0.12, 0.08, 0.36, 0.24, -0.02, -0.66, accent, 0.18, -0.08, 0.02, 0.55);
+        addGunBox(0.08, 0.035, 0.44, 0.24, 0.035, -0.74, 0x23262b, 0.18, -0.08, 0.02, 0.75);
+        addGunBox(0.035, 0.09, 0.16, 0.24, -0.03, -0.48, 0xb7bbc2, 0.1, -0.08, 0.02, 0.65);
+        addModelSphere(fpsWeaponModel, 0.04, 0.24, -0.11, -0.16, 0x111111, 14, 10);
       }
 
-      addGunCylinder(0.018, 0.018, 0.12, 0.02, 0.16, -0.55, Math.PI / 2, 0, 0, 0xc7e7ff, 14);
+      if (fpsCurrentWeapon !== "bayonet") {
+        addGunCylinder(0.018, 0.018, 0.12, 0.02, 0.16, -0.55, Math.PI / 2, 0, 0, 0xc7e7ff, 14);
+      }
       setFpsMsg("Equipped " + spec.label + ".");
     }
 
@@ -3250,6 +3274,28 @@
       const weapon = FPS_WEAPONS[fpsCurrentWeapon];
       fpsShotCooldown = weapon.cooldown;
       fpsRecoil = Math.min(1, fpsRecoil + (weapon.auto ? 0.16 : 0.36));
+      if (weapon.melee) {
+        fpsRaycaster.setFromCamera(fpsCenter, fpsCamera);
+        const hits = fpsRaycaster.intersectObjects(fpsEnemies, false);
+        if (!hits.length || hits[0].distance > weapon.range) {
+          setFpsMsg(weapon.label + " slash missed.");
+          return;
+        }
+        const enemy = hits[0].object;
+        addFpsHitParticles(hits[0].point);
+        enemy.userData.health -= weapon.damage;
+        enemy.material.emissive.setHex(0x5a1b12);
+        if (enemy.userData.health <= 0) {
+          fpsScene.remove(enemy);
+          fpsEnemies = fpsEnemies.filter((item) => item !== enemy);
+          fpsScore += 100;
+          setFpsMsg(weapon.label + " eliminated a drone. Score +100");
+        } else {
+          setFpsMsg(weapon.label + " hit. Drone HP " + Math.max(0, Math.ceil(enemy.userData.health)));
+        }
+        updateFpsHud();
+        return;
+      }
       if (weapon.auto) fpsSpray = Math.min(1, fpsSpray + 0.11);
       else fpsSpray = Math.max(0, fpsSpray - 0.18);
       const activeSpread = weapon.spread + (weapon.spray || 0) * fpsSpray;
@@ -3424,6 +3470,12 @@
       }
       if (key === "3") {
         selectWeapon("deagle");
+        closeGunshop();
+        event.preventDefault();
+        return;
+      }
+      if (key === "4") {
+        selectWeapon("bayonet");
         closeGunshop();
         event.preventDefault();
         return;
