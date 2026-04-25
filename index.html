@@ -37,6 +37,7 @@
       --shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
       --tetris-board-width: clamp(180px, calc(100vh - 420px), 240px);
       --tetris-side-width: clamp(190px, 18vw, 260px);
+      --tetris-live-board-width: var(--tetris-board-width);
     }
 
     body {
@@ -393,7 +394,7 @@
     }
 
     #board {
-      width: var(--tetris-board-width);
+      width: var(--tetris-live-board-width);
     }
 
     #msg,
@@ -677,6 +678,10 @@
       max-width: 620px;
     }
 
+    #tetris-screen.tetris-tight .hint {
+      font-size: 11px;
+    }
+
     #tetris-screen:fullscreen .top-row button,
     #tank-screen:fullscreen .top-row button,
     #tetris-screen:-webkit-full-screen .top-row button,
@@ -758,6 +763,23 @@
       min-height: 0;
     }
 
+    #tetris-screen.tetris-stack #tetris-layout {
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+
+    #tetris-screen.tetris-stack #tetris-side {
+      max-width: min(100%, 680px);
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    #tetris-screen.tetris-stack .controls-panel,
+    #tetris-screen.tetris-stack .next-panel {
+      height: 100%;
+    }
+
     #tetris-screen:fullscreen #tetris-left,
     #tetris-screen:-webkit-full-screen #tetris-left {
       width: 100%;
@@ -767,7 +789,7 @@
 
     #tetris-screen:fullscreen #board,
     #tetris-screen:-webkit-full-screen #board {
-      width: min(calc((100vh - 170px) / 2), 30vw, 440px);
+      width: var(--tetris-live-board-width);
       min-width: 280px;
       max-width: 440px;
       max-height: calc(100vh - 170px);
@@ -928,7 +950,7 @@
       }
 
       #board {
-        width: clamp(170px, calc(100vh - 430px), 220px);
+        width: var(--tetris-live-board-width);
       }
 
       #tetris-side {
@@ -1179,12 +1201,18 @@
     const menuScreen = document.getElementById("menu-screen");
     const tetrisScreen = document.getElementById("tetris-screen");
     const tankScreen = document.getElementById("tank-screen");
+    const shell = document.getElementById("shell");
     const tetrisActionButtons = Array.from(document.querySelectorAll("[data-tetris-action]"));
     const tankMoveButtons = Array.from(document.querySelectorAll("[data-tank-move]"));
     const tankAimPad = document.getElementById("tank-aim-pad");
     const tankAimDot = document.getElementById("tank-aim-dot");
     const tetrisFullscreenButton = document.getElementById("tetris-fullscreen-btn");
     const tankFullscreenButton = document.getElementById("tank-fullscreen-btn");
+    const tetrisHud = tetrisScreen.querySelector(".hud");
+    const tetrisLayout = document.getElementById("tetris-layout");
+    const tetrisSide = document.getElementById("tetris-side");
+    const pageTitle = document.querySelector(".title");
+    const pageSubtitle = document.querySelector(".subtitle");
 
     function showScreen(name) {
       menuScreen.classList.toggle("hidden", name !== "menu");
@@ -1192,6 +1220,7 @@
       tankScreen.classList.toggle("hidden", name !== "tank");
       if (name !== "tetris") stopTetris();
       if (name !== "tank") stopTank();
+      if (name === "tetris") syncTetrisLayout();
     }
 
     function isTouchDevice() {
@@ -1219,6 +1248,56 @@
       tankFullscreenButton.textContent = isFullscreenActiveFor(tankScreen) ? "Exit Fullscreen" : "Fullscreen";
     }
 
+    function syncTetrisLayout() {
+      const viewportHeight = Math.max(window.innerHeight, window.visualViewport ? Math.round(window.visualViewport.height) : 0);
+      const viewportWidth = Math.max(window.innerWidth, window.visualViewport ? Math.round(window.visualViewport.width) : 0);
+      const fullscreenTetris = isFullscreenActiveFor(tetrisScreen);
+
+      tetrisScreen.classList.remove("tetris-tight", "tetris-stack");
+
+      if (fullscreenTetris && viewportHeight < 860) {
+        tetrisScreen.classList.add("tetris-tight");
+      }
+
+      const sideWidth = fullscreenTetris
+        ? (viewportHeight < 760 || viewportWidth < 980 ? 0 : 280)
+        : Math.min(260, Math.max(190, Math.round(viewportWidth * 0.2)));
+      const layoutGap = fullscreenTetris ? (viewportHeight < 760 ? 14 : 22) : 18;
+
+      let reservedHeight;
+      if (fullscreenTetris) {
+        reservedHeight = 54;
+        reservedHeight += tetrisScreen.querySelector(".screen-head").offsetHeight;
+        reservedHeight += tetrisHud.offsetHeight;
+        reservedHeight += 22;
+      } else {
+        reservedHeight = 120;
+        reservedHeight += pageTitle ? pageTitle.offsetHeight : 0;
+        reservedHeight += pageSubtitle ? pageSubtitle.offsetHeight : 0;
+        reservedHeight += tetrisScreen.querySelector(".screen-head").offsetHeight;
+        reservedHeight += tetrisHud.offsetHeight;
+        reservedHeight += 34;
+      }
+
+      const availableBoardHeight = Math.max(320, viewportHeight - reservedHeight);
+      const availableBoardWidth = Math.max(180, Math.min(
+        fullscreenTetris ? viewportWidth - sideWidth - layoutGap - 90 : tetrisLayout.clientWidth - sideWidth - layoutGap,
+        Math.floor(availableBoardHeight / 2)
+      ));
+
+      const compactBoardWidth = Math.max(180, Math.min(availableBoardWidth, fullscreenTetris ? 420 : 240));
+
+      if (fullscreenTetris && (availableBoardHeight < 520 || viewportWidth < 980)) {
+        tetrisScreen.classList.add("tetris-stack");
+      }
+
+      const finalWidth = tetrisScreen.classList.contains("tetris-stack")
+        ? Math.max(180, Math.min(Math.floor((viewportHeight - reservedHeight - 150) / 2), fullscreenTetris ? 360 : 220))
+        : compactBoardWidth;
+
+      document.documentElement.style.setProperty("--tetris-live-board-width", finalWidth + "px");
+    }
+
     document.getElementById("open-tetris").addEventListener("click", () => {
       showScreen("tetris");
       drawBoard();
@@ -1235,7 +1314,12 @@
     document.getElementById("back-from-tank").addEventListener("click", () => showScreen("menu"));
     tetrisFullscreenButton.addEventListener("click", () => toggleFullscreen(tetrisScreen));
     tankFullscreenButton.addEventListener("click", () => toggleFullscreen(tankScreen));
-    document.addEventListener("fullscreenchange", refreshFullscreenLabels);
+    document.addEventListener("fullscreenchange", () => {
+      refreshFullscreenLabels();
+      syncTetrisLayout();
+    });
+    window.addEventListener("resize", syncTetrisLayout);
+    if (window.visualViewport) window.visualViewport.addEventListener("resize", syncTetrisLayout);
 
     const canvas = document.getElementById("board");
     const ctx = canvas.getContext("2d");
@@ -1429,6 +1513,7 @@
       document.getElementById("lines-val").textContent = lines ?? 0;
       document.getElementById("score-val").textContent = score ?? 0;
       document.getElementById("vol-num").textContent = volume ?? 0;
+      syncTetrisLayout();
     }
 
     function setMsg(text, clearAfter = 0) {
@@ -1496,6 +1581,7 @@
       updateUI();
       drawNext();
       drawBoard();
+      syncTetrisLayout();
     }
 
     function stopTetris() {
@@ -2444,6 +2530,7 @@
     lines = 0;
     volume = 0;
     refreshFullscreenLabels();
+    syncTetrisLayout();
     updateDifficultyButtons();
     updateUI();
     drawBoard();
