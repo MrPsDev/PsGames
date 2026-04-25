@@ -1295,7 +1295,7 @@
         <div class="screen-head">
           <div>
             <div class="screen-title">Arena Shooter</div>
-            <div class="hint">WASD to move. Click the arena to lock the mouse. Left click to shoot.</div>
+            <div class="hint">WASD to move. Space to jump. Click the arena to lock the mouse. Left click to shoot.</div>
           </div>
           <div class="top-row">
             <button class="secondary" id="back-from-fps">Menu</button>
@@ -2706,6 +2706,15 @@
     let fpsYaw = 0;
     let fpsPitch = 0;
     let fpsEnemies = [];
+    let fpsObstacles = [];
+    let fpsVelocityX = 0;
+    let fpsVelocityY = 0;
+    let fpsVelocityZ = 0;
+    let fpsOnGround = true;
+    let fpsJumpQueued = false;
+    const FPS_EYE_HEIGHT = 1.7;
+    const FPS_PLAYER_RADIUS = 0.55;
+    const FPS_GROUND_Y = FPS_EYE_HEIGHT;
 
     function setFpsMsg(text) {
       document.getElementById("fps-msg").textContent = text;
@@ -2753,6 +2762,7 @@
       fpsScene.add(grid);
 
       const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x172d3b, roughness: 0.7 });
+      fpsObstacles = [];
       [
         { x: 0, z: -28, w: 56, d: 1 },
         { x: 0, z: 28, w: 56, d: 1 },
@@ -2765,12 +2775,21 @@
       });
 
       for (let i = 0; i < 10; i++) {
+        const width = 2.4 + Math.random() * 2.5;
+        const height = 1.2 + Math.random() * 1.5;
+        const depth = 2.4 + Math.random() * 2.5;
         const box = new THREE.Mesh(
-          new THREE.BoxGeometry(2.4 + Math.random() * 2.5, 1.2 + Math.random() * 1.5, 2.4 + Math.random() * 2.5),
+          new THREE.BoxGeometry(width, height, depth),
           wallMaterial
         );
-        box.position.set(-18 + Math.random() * 36, box.geometry.parameters.height / 2, -18 + Math.random() * 36);
+        box.position.set(-18 + Math.random() * 36, height / 2, -18 + Math.random() * 36);
         fpsScene.add(box);
+        fpsObstacles.push({
+          x: box.position.x,
+          z: box.position.z,
+          halfX: width / 2,
+          halfZ: depth / 2
+        });
       }
 
       resizeFpsRenderer();
@@ -2813,37 +2832,110 @@
       fpsWave = 1;
       fpsYaw = 0;
       fpsPitch = 0;
-      fpsCamera.position.set(0, 1.7, 12);
+      fpsVelocityX = 0;
+      fpsVelocityY = 0;
+      fpsVelocityZ = 0;
+      fpsOnGround = true;
+      fpsJumpQueued = false;
+      fpsCamera.position.set(0, FPS_EYE_HEIGHT, 12);
       fpsCamera.rotation.set(0, 0, 0);
       for (let i = 0; i < 5; i++) spawnFpsEnemy();
       updateFpsHud();
-      setFpsMsg("Click the arena to lock mouse. WASD move. Left click shoots.");
+      setFpsMsg("Click arena. WASD move. Space jump. Time jumps to bunnyhop.");
       return true;
     }
 
     function updateFpsMovement(dt) {
-      const speed = 8.5;
       let moveX = 0;
       let moveZ = 0;
       if (fpsKeys.has("w") || fpsKeys.has("ArrowUp")) moveZ -= 1;
       if (fpsKeys.has("s") || fpsKeys.has("ArrowDown")) moveZ += 1;
       if (fpsKeys.has("a") || fpsKeys.has("ArrowLeft")) moveX -= 1;
       if (fpsKeys.has("d") || fpsKeys.has("ArrowRight")) moveX += 1;
-      if (!moveX && !moveZ) return;
 
-      const len = Math.hypot(moveX, moveZ);
-      moveX /= len;
-      moveZ /= len;
       const sin = Math.sin(fpsYaw);
       const cos = Math.cos(fpsYaw);
       const forwardX = -sin;
       const forwardZ = -cos;
       const rightX = cos;
       const rightZ = -sin;
-      fpsCamera.position.x += (rightX * moveX + forwardX * -moveZ) * speed * dt;
-      fpsCamera.position.z += (rightZ * moveX + forwardZ * -moveZ) * speed * dt;
+
+      if (moveX || moveZ) {
+        const len = Math.hypot(moveX, moveZ);
+        moveX /= len;
+        moveZ /= len;
+        const wishX = rightX * moveX + forwardX * -moveZ;
+        const wishZ = rightZ * moveX + forwardZ * -moveZ;
+        const accel = fpsOnGround ? 48 : 18;
+        const maxSpeed = fpsOnGround ? 8.8 : 10.5;
+        fpsVelocityX += wishX * accel * dt;
+        fpsVelocityZ += wishZ * accel * dt;
+        const horizontalSpeed = Math.hypot(fpsVelocityX, fpsVelocityZ);
+        if (horizontalSpeed > maxSpeed) {
+          const scale = maxSpeed / horizontalSpeed;
+          fpsVelocityX *= scale;
+          fpsVelocityZ *= scale;
+        }
+      }
+
+      if (fpsOnGround && fpsJumpQueued) {
+        fpsVelocityY = 7.6;
+        fpsOnGround = false;
+      }
+      fpsJumpQueued = false;
+
+      if (fpsOnGround && !moveX && !moveZ) {
+        const friction = Math.max(0, 1 - 12 * dt);
+        fpsVelocityX *= friction;
+        fpsVelocityZ *= friction;
+      }
+
+      fpsVelocityY -= 22 * dt;
+      fpsCamera.position.x += fpsVelocityX * dt;
+      fpsCamera.position.y += fpsVelocityY * dt;
+      fpsCamera.position.z += fpsVelocityZ * dt;
+
+      if (fpsCamera.position.y <= FPS_GROUND_Y) {
+        fpsCamera.position.y = FPS_GROUND_Y;
+        fpsVelocityY = 0;
+        fpsOnGround = true;
+      }
+
+      resolveFpsPlayerCollision();
       fpsCamera.position.x = Math.max(-25, Math.min(25, fpsCamera.position.x));
       fpsCamera.position.z = Math.max(-25, Math.min(25, fpsCamera.position.z));
+    }
+
+    function resolveFpsPlayerCollision() {
+      fpsObstacles.forEach((box) => {
+        const minX = box.x - box.halfX - FPS_PLAYER_RADIUS;
+        const maxX = box.x + box.halfX + FPS_PLAYER_RADIUS;
+        const minZ = box.z - box.halfZ - FPS_PLAYER_RADIUS;
+        const maxZ = box.z + box.halfZ + FPS_PLAYER_RADIUS;
+        const px = fpsCamera.position.x;
+        const pz = fpsCamera.position.z;
+        if (px < minX || px > maxX || pz < minZ || pz > maxZ) return;
+
+        const pushLeft = Math.abs(px - minX);
+        const pushRight = Math.abs(maxX - px);
+        const pushBack = Math.abs(pz - minZ);
+        const pushFront = Math.abs(maxZ - pz);
+        const minPush = Math.min(pushLeft, pushRight, pushBack, pushFront);
+
+        if (minPush === pushLeft) {
+          fpsCamera.position.x = minX;
+          if (fpsVelocityX > 0) fpsVelocityX = 0;
+        } else if (minPush === pushRight) {
+          fpsCamera.position.x = maxX;
+          if (fpsVelocityX < 0) fpsVelocityX = 0;
+        } else if (minPush === pushBack) {
+          fpsCamera.position.z = minZ;
+          if (fpsVelocityZ > 0) fpsVelocityZ = 0;
+        } else {
+          fpsCamera.position.z = maxZ;
+          if (fpsVelocityZ < 0) fpsVelocityZ = 0;
+        }
+      });
     }
 
     function updateFpsEnemies(dt) {
@@ -2947,6 +3039,11 @@
     document.addEventListener("keydown", (event) => {
       if (fpsScreen.classList.contains("hidden")) return;
       const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      if (key === " ") {
+        fpsJumpQueued = true;
+        event.preventDefault();
+        return;
+      }
       if (["w", "a", "s", "d", "ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"].includes(key)) {
         fpsKeys.add(key);
         event.preventDefault();
