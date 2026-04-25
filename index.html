@@ -2804,6 +2804,10 @@
     let fpsShopOpen = false;
     let fpsTriggerHeld = false;
     let fpsSpray = 0;
+    let fpsViewModel = null;
+    let fpsWeaponModel = null;
+    let fpsRecoil = 0;
+    let fpsEffects = [];
     const FPS_EYE_HEIGHT = 1.7;
     const FPS_PLAYER_RADIUS = 0.55;
     const FPS_GROUND_Y = FPS_EYE_HEIGHT;
@@ -2839,6 +2843,7 @@
       fpsCamera = new THREE.PerspectiveCamera(75, 16 / 9, 0.1, 120);
       fpsCamera.rotation.order = "YXZ";
       fpsCamera.position.set(0, 1.7, 12);
+      fpsScene.add(fpsCamera);
       fpsClock = new THREE.Clock();
 
       const ambient = new THREE.HemisphereLight(0xbfefff, 0x10202b, 1.4);
@@ -2890,7 +2895,77 @@
       }
 
       resizeFpsRenderer();
+      createFpsViewModel();
       return true;
+    }
+
+    function createFpsViewModel() {
+      fpsViewModel = new THREE.Group();
+      fpsWeaponModel = new THREE.Group();
+      fpsViewModel.position.set(0.33, -0.33, -0.72);
+      fpsViewModel.rotation.set(-0.08, -0.08, 0.02);
+
+      const handMaterial = new THREE.MeshBasicMaterial({ color: 0xd6a079 });
+      const sleeveMaterial = new THREE.MeshBasicMaterial({ color: 0x172d3b });
+
+      const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.18, 0.5), sleeveMaterial);
+      leftArm.position.set(-0.22, -0.08, 0.08);
+      leftArm.rotation.set(0.15, 0.25, -0.18);
+      fpsViewModel.add(leftArm);
+
+      const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.18, 0.58), sleeveMaterial);
+      rightArm.position.set(0.22, -0.07, 0.08);
+      rightArm.rotation.set(0.12, -0.16, 0.14);
+      fpsViewModel.add(rightArm);
+
+      const leftHand = new THREE.Mesh(new THREE.SphereGeometry(0.105, 14, 10), handMaterial);
+      leftHand.position.set(-0.16, -0.08, -0.23);
+      fpsViewModel.add(leftHand);
+
+      const rightHand = new THREE.Mesh(new THREE.SphereGeometry(0.105, 14, 10), handMaterial);
+      rightHand.position.set(0.18, -0.08, -0.24);
+      fpsViewModel.add(rightHand);
+
+      fpsViewModel.add(fpsWeaponModel);
+      fpsCamera.add(fpsViewModel);
+      updateFpsWeaponModel();
+    }
+
+    function addGunBox(width, height, depth, x, y, z, color) {
+      const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(width, height, depth),
+        new THREE.MeshBasicMaterial({ color })
+      );
+      mesh.position.set(x, y, z);
+      fpsWeaponModel.add(mesh);
+      return mesh;
+    }
+
+    function updateFpsWeaponModel() {
+      if (!fpsWeaponModel) return;
+      while (fpsWeaponModel.children.length) fpsWeaponModel.remove(fpsWeaponModel.children[0]);
+      const spec = FPS_WEAPONS[fpsCurrentWeapon];
+      const dark = 0x151b22;
+      const accent = fpsCurrentWeapon === "awp" ? 0x8db6ff : fpsCurrentWeapon === "deagle" ? 0xd7c173 : 0x79f0c8;
+
+      if (fpsCurrentWeapon === "ak47") {
+        addGunBox(0.18, 0.18, 0.72, 0.02, -0.02, -0.28, dark);
+        addGunBox(0.12, 0.12, 0.5, 0.02, 0.01, -0.85, dark);
+        addGunBox(0.13, 0.22, 0.18, 0.02, -0.18, -0.42, 0x6f4730);
+        addGunBox(0.2, 0.08, 0.2, -0.13, -0.01, -0.06, 0x6f4730);
+      } else if (fpsCurrentWeapon === "awp") {
+        addGunBox(0.16, 0.16, 0.94, 0.02, -0.03, -0.36, dark);
+        addGunBox(0.08, 0.08, 0.78, 0.02, 0.01, -1.18, dark);
+        addGunBox(0.22, 0.16, 0.28, 0.02, 0.12, -0.32, accent);
+        addGunBox(0.16, 0.24, 0.16, 0.02, -0.2, -0.4, dark);
+      } else {
+        addGunBox(0.18, 0.2, 0.48, 0.03, -0.04, -0.24, dark);
+        addGunBox(0.12, 0.1, 0.42, 0.03, 0.04, -0.62, dark);
+        addGunBox(0.12, 0.24, 0.15, 0.03, -0.22, -0.3, accent);
+      }
+
+      addGunBox(0.04, 0.04, 0.12, 0.02, 0.12, -0.72, accent);
+      setFpsMsg("Equipped " + spec.label + ".");
     }
 
     function resizeFpsRenderer() {
@@ -2921,10 +2996,67 @@
       fpsEnemies.push(enemy);
     }
 
+    function addFpsTracer(endPoint) {
+      if (!window.THREE || !fpsScene || !fpsCamera) return;
+      const start = new THREE.Vector3();
+      const direction = new THREE.Vector3();
+      fpsCamera.getWorldPosition(start);
+      fpsCamera.getWorldDirection(direction);
+      start.add(direction.multiplyScalar(0.8));
+
+      const geometry = new THREE.BufferGeometry().setFromPoints([start, endPoint.clone()]);
+      const material = new THREE.LineBasicMaterial({
+        color: 0x9fffe0,
+        transparent: true,
+        opacity: 0.92
+      });
+      const line = new THREE.Line(geometry, material);
+      fpsScene.add(line);
+      fpsEffects.push({ mesh: line, life: 0.075, maxLife: 0.075, velocity: null });
+    }
+
+    function addFpsHitParticles(point) {
+      if (!window.THREE || !fpsScene) return;
+      for (let i = 0; i < 12; i++) {
+        const particle = new THREE.Mesh(
+          new THREE.SphereGeometry(0.035 + Math.random() * 0.025, 8, 6),
+          new THREE.MeshBasicMaterial({ color: i % 3 === 0 ? 0xff3f3f : 0xb91525 })
+        );
+        particle.position.copy(point);
+        const velocity = new THREE.Vector3(
+          (Math.random() - 0.5) * 4.2,
+          1.2 + Math.random() * 2.6,
+          (Math.random() - 0.5) * 4.2
+        );
+        fpsScene.add(particle);
+        fpsEffects.push({ mesh: particle, life: 0.45, maxLife: 0.45, velocity });
+      }
+    }
+
+    function updateFpsEffects(dt) {
+      fpsEffects = fpsEffects.filter((effect) => {
+        effect.life -= dt;
+        if (effect.velocity) {
+          effect.velocity.y -= 8 * dt;
+          effect.mesh.position.addScaledVector(effect.velocity, dt);
+        }
+        if (effect.mesh.material && "opacity" in effect.mesh.material) {
+          effect.mesh.material.opacity = Math.max(0, effect.life / effect.maxLife);
+        }
+        if (effect.life > 0) return true;
+        fpsScene.remove(effect.mesh);
+        if (effect.mesh.geometry) effect.mesh.geometry.dispose();
+        if (effect.mesh.material) effect.mesh.material.dispose();
+        return false;
+      });
+    }
+
     function resetFpsGame() {
       if (!ensureFpsWorld()) return false;
       fpsEnemies.forEach((enemy) => fpsScene.remove(enemy));
       fpsEnemies = [];
+      fpsEffects.forEach((effect) => fpsScene.remove(effect.mesh));
+      fpsEffects = [];
       fpsScore = 0;
       fpsHealth = 100;
       fpsWave = 1;
@@ -3078,6 +3210,7 @@
       if (fpsShopOpen || fpsShotCooldown > 0) return;
       const weapon = FPS_WEAPONS[fpsCurrentWeapon];
       fpsShotCooldown = weapon.cooldown;
+      fpsRecoil = Math.min(1, fpsRecoil + (weapon.auto ? 0.16 : 0.36));
       if (weapon.auto) fpsSpray = Math.min(1, fpsSpray + 0.11);
       else fpsSpray = Math.max(0, fpsSpray - 0.18);
       const activeSpread = weapon.spread + (weapon.spray || 0) * fpsSpray;
@@ -3089,10 +3222,14 @@
       fpsCenter.set(0, 0);
       const hits = fpsRaycaster.intersectObjects(fpsEnemies, false);
       if (!hits.length) {
+        const missEnd = fpsRaycaster.ray.origin.clone().add(fpsRaycaster.ray.direction.clone().multiplyScalar(55));
+        addFpsTracer(missEnd);
         setFpsMsg(FPS_WEAPONS[fpsCurrentWeapon].label + " miss.");
         return;
       }
       const enemy = hits[0].object;
+      addFpsTracer(hits[0].point);
+      addFpsHitParticles(hits[0].point);
       enemy.userData.health -= weapon.damage;
       enemy.material.emissive.setHex(0x5a1b12);
       setTimeout(() => {
@@ -3115,6 +3252,7 @@
       gunButtons.forEach((button) => {
         button.classList.toggle("active", button.dataset.weapon === fpsCurrentWeapon);
       });
+      updateFpsWeaponModel();
       setFpsMsg("Equipped " + FPS_WEAPONS[fpsCurrentWeapon].label + ".");
     }
 
@@ -3142,6 +3280,12 @@
       if (fpsRunning) {
         updateFpsMovement(dt);
         updateFpsEnemies(dt);
+      }
+      updateFpsEffects(dt);
+      if (fpsViewModel) {
+        fpsRecoil = Math.max(0, fpsRecoil - dt * 6);
+        fpsViewModel.position.set(0.33, -0.33 - fpsRecoil * 0.035, -0.72 + fpsRecoil * 0.12);
+        fpsViewModel.rotation.set(-0.08 - fpsRecoil * 0.12, -0.08, 0.02 + Math.sin(performance.now() * 0.01) * fpsSpray * 0.015);
       }
       resizeFpsRenderer();
       fpsRenderer.render(fpsScene, fpsCamera);
