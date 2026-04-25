@@ -3,7 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Retro Arcade</title>
+  <title>ArmaPS Games | Retro Arcade</title>
+  <meta name="description" content="Play Tetris and Mini Tank in ArmaPS Games, a fast retro arcade you can open on desktop or phone." />
+  <meta name="theme-color" content="#07111a" />
+  <meta name="robots" content="index,follow" />
+  <meta property="og:title" content="ArmaPS Games | Retro Arcade" />
+  <meta property="og:description" content="Play Tetris and Mini Tank right in your browser on desktop or phone." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://armapsgames.online/" />
+  <meta property="og:image" content="https://armapsgames.online/favicon.svg" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="ArmaPS Games | Retro Arcade" />
+  <meta name="twitter:description" content="Play Tetris and Mini Tank right in your browser on desktop or phone." />
+  <link rel="canonical" href="https://armapsgames.online/" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -368,6 +381,9 @@
       border: 1px solid var(--line);
       background: #060c13;
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+      max-width: 100%;
+      height: auto;
+      touch-action: none;
     }
 
     #msg,
@@ -440,9 +456,111 @@
         radial-gradient(circle at center, rgba(123, 199, 255, 0.08), transparent 55%),
         linear-gradient(180deg, #061019, #08131d);
       cursor: crosshair;
+      width: 100%;
+      max-width: 920px;
+      aspect-ratio: 920 / 560;
     }
 
-    @media (max-width: 840px) {
+    .mobile-controls {
+      display: none;
+      width: 100%;
+      gap: 12px;
+      margin-top: 6px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .mobile-pad,
+    .mobile-actions {
+      flex: 1;
+      min-width: 0;
+      background: rgba(8, 16, 24, 0.56);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px;
+    }
+
+    .mobile-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .mobile-grid {
+      display: grid;
+      gap: 10px;
+      justify-items: center;
+    }
+
+    .mobile-grid.tetris-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .mobile-grid.tank-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .mobile-grid.action-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .touch-spacer {
+      width: 100%;
+      height: 1px;
+    }
+
+    .mobile-btn {
+      width: 100%;
+      min-height: 56px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(151, 194, 220, 0.14);
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 700;
+      touch-action: manipulation;
+    }
+
+    .mobile-btn.wide {
+      grid-column: span 2;
+    }
+
+    .aim-pad {
+      position: relative;
+      min-height: 170px;
+      border-radius: 18px;
+      border: 1px dashed rgba(123, 199, 255, 0.34);
+      background:
+        radial-gradient(circle at center, rgba(123, 199, 255, 0.14), transparent 55%),
+        rgba(255, 255, 255, 0.03);
+      touch-action: none;
+      overflow: hidden;
+    }
+
+    .aim-dot {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--mint);
+      box-shadow: 0 0 0 4px rgba(121, 240, 200, 0.18);
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .mobile-copy {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 840px), (pointer: coarse) {
       #shell,
       #tetris-layout {
         grid-template-columns: 1fr;
@@ -450,6 +568,32 @@
 
       #main-panel {
         min-height: unset;
+      }
+
+      #tetris-layout {
+        gap: 14px;
+      }
+
+      #tetris-side {
+        order: -1;
+      }
+
+      .mobile-controls {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .screen-head {
+        align-items: stretch;
+      }
+
+      .top-row > button,
+      .cta-row > button {
+        flex: 1;
+      }
+
+      .hint {
+        line-height: 1.5;
       }
     }
 
@@ -508,7 +652,7 @@
         <div class="screen-head">
           <div>
             <div class="screen-title">Tetris</div>
-            <div class="hint">Arrow keys or WASD. Space for hard drop.</div>
+            <div class="hint">Arrow keys or WASD. Space for hard drop. On phone use the buttons below.</div>
           </div>
           <div class="top-row">
             <button class="secondary" id="back-from-tetris">Menu</button>
@@ -551,13 +695,28 @@
             </div>
           </aside>
         </div>
+
+        <div class="mobile-controls" id="tetris-mobile-controls">
+          <div class="mobile-pad">
+            <div class="mobile-label">Phone Controls</div>
+            <div class="mobile-grid tetris-grid">
+              <div class="touch-spacer"></div>
+              <button class="mobile-btn" data-tetris-action="rotate">Rotate</button>
+              <div class="touch-spacer"></div>
+              <button class="mobile-btn" data-tetris-action="left">Left</button>
+              <button class="mobile-btn" data-tetris-action="down">Down</button>
+              <button class="mobile-btn" data-tetris-action="right">Right</button>
+              <button class="mobile-btn wide" data-tetris-action="drop">Hard Drop</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div id="tank-screen" class="hidden">
         <div class="screen-head">
           <div>
             <div class="screen-title">Mini Tank</div>
-            <div class="hint">Move with WASD or arrows. Aim with mouse. Hold click to shoot.</div>
+            <div class="hint">Move with WASD or arrows. Aim with mouse. Hold click to shoot. On phone use move and aim pads.</div>
           </div>
           <div class="top-row">
             <button class="secondary" id="back-from-tank">Menu</button>
@@ -592,6 +751,27 @@
           <canvas id="tank-board" width="920" height="560"></canvas>
           <div id="tank-msg">Press Start Battle to play</div>
         </div>
+
+        <div class="mobile-controls" id="tank-mobile-controls">
+          <div class="mobile-pad">
+            <div class="mobile-label">Move</div>
+            <div class="mobile-grid tank-grid">
+              <div class="touch-spacer"></div>
+              <button class="mobile-btn" data-tank-move="up">Up</button>
+              <div class="touch-spacer"></div>
+              <button class="mobile-btn" data-tank-move="left">Left</button>
+              <button class="mobile-btn" data-tank-move="down">Down</button>
+              <button class="mobile-btn" data-tank-move="right">Right</button>
+            </div>
+          </div>
+          <div class="mobile-actions">
+            <div class="mobile-label">Aim And Fire</div>
+            <div class="aim-pad" id="tank-aim-pad">
+              <div class="aim-dot" id="tank-aim-dot"></div>
+            </div>
+            <p class="mobile-copy">Drag inside the pad to aim. Keep touching to keep shooting.</p>
+          </div>
+        </div>
       </div>
     </section>
   </div>
@@ -600,6 +780,10 @@
     const menuScreen = document.getElementById("menu-screen");
     const tetrisScreen = document.getElementById("tetris-screen");
     const tankScreen = document.getElementById("tank-screen");
+    const tetrisActionButtons = Array.from(document.querySelectorAll("[data-tetris-action]"));
+    const tankMoveButtons = Array.from(document.querySelectorAll("[data-tank-move]"));
+    const tankAimPad = document.getElementById("tank-aim-pad");
+    const tankAimDot = document.getElementById("tank-aim-dot");
 
     function showScreen(name) {
       menuScreen.classList.toggle("hidden", name !== "menu");
@@ -607,6 +791,10 @@
       tankScreen.classList.toggle("hidden", name !== "tank");
       if (name !== "tetris") stopTetris();
       if (name !== "tank") stopTank();
+    }
+
+    function isTouchDevice() {
+      return window.matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
     }
 
     document.getElementById("open-tetris").addEventListener("click", () => {
@@ -895,6 +1083,47 @@
       startGame();
     });
 
+    function runTetrisAction(action) {
+      if (!running || !piece || tetrisScreen.classList.contains("hidden")) return;
+
+      if (action === "left" && valid(board, piece, -1, 0)) {
+        piece.x--;
+        playMove();
+        drawBoard();
+      }
+
+      if (action === "right" && valid(board, piece, 1, 0)) {
+        piece.x++;
+        playMove();
+        drawBoard();
+      }
+
+      if (action === "down" && valid(board, piece, 0, 1)) {
+        piece.y++;
+        score++;
+        updateUI();
+        drawBoard();
+      }
+
+      if (action === "rotate") {
+        const rotated = rotate(piece.shape);
+        if (valid(board, piece, 0, 0, rotated)) {
+          piece.shape = rotated;
+          playMove();
+          drawBoard();
+        }
+      }
+
+      if (action === "drop") {
+        while (valid(board, piece, 0, 1)) {
+          piece.y++;
+          score += 2;
+        }
+        tick();
+        updateUI();
+      }
+    }
+
     document.addEventListener("keydown", (e) => {
       if (!running || menuScreen.classList.contains("hidden") === false || tetrisScreen.classList.contains("hidden")) return;
 
@@ -902,36 +1131,44 @@
         case "ArrowLeft":
         case "a":
         case "A":
-          if (valid(board, piece, -1, 0)) { piece.x--; playMove(); drawBoard(); }
+          runTetrisAction("left");
           e.preventDefault();
           break;
         case "ArrowRight":
         case "d":
         case "D":
-          if (valid(board, piece, 1, 0)) { piece.x++; playMove(); drawBoard(); }
+          runTetrisAction("right");
           e.preventDefault();
           break;
         case "ArrowDown":
         case "s":
         case "S":
-          if (valid(board, piece, 0, 1)) { piece.y++; score++; updateUI(); drawBoard(); }
+          runTetrisAction("down");
           e.preventDefault();
           break;
         case "ArrowUp":
         case "w":
         case "W": {
-          const rotated = rotate(piece.shape);
-          if (valid(board, piece, 0, 0, rotated)) { piece.shape = rotated; playMove(); drawBoard(); }
+          runTetrisAction("rotate");
           e.preventDefault();
           break;
         }
         case " ":
-          while (valid(board, piece, 0, 1)) { piece.y++; score += 2; }
-          tick();
-          updateUI();
+          runTetrisAction("drop");
           e.preventDefault();
           break;
       }
+    });
+
+    tetrisActionButtons.forEach((button) => {
+      const action = button.dataset.tetrisAction;
+      const trigger = (e) => {
+        e.preventDefault();
+        runTetrisAction(action);
+      };
+
+      button.addEventListener("click", trigger);
+      button.addEventListener("touchstart", trigger, { passive: false });
     });
 
     const tankCanvas = document.getElementById("tank-board");
@@ -943,6 +1180,7 @@
     let tankState = null;
     let tankAnimationId = null;
     let tankDifficulty = "easy";
+    let tankAimTouchId = null;
 
     const tankDifficultyPresets = {
       easy: {
@@ -995,6 +1233,19 @@
       difficultyButtons.forEach((button) => {
         button.classList.toggle("active", button.dataset.difficulty === tankDifficulty);
       });
+    }
+
+    function setTankMoveKey(direction, active) {
+      const keyMap = {
+        left: "ArrowLeft",
+        right: "ArrowRight",
+        up: "ArrowUp",
+        down: "ArrowDown"
+      };
+      const key = keyMap[direction];
+      if (!key) return;
+      if (active) tankKeys.add(key);
+      else tankKeys.delete(key);
     }
 
     difficultyButtons.forEach((button) => {
@@ -1446,7 +1697,7 @@
 
       updateTankHUD();
       if (tankState.running) {
-        setTankMsg("Aim with the mouse and hold click to shoot.");
+        setTankMsg(tankHelpText());
       }
     }
 
@@ -1560,12 +1811,44 @@
       tankAnimationId = requestAnimationFrame(tankLoop);
     }
 
+    function tankHelpText() {
+      return isTouchDevice()
+        ? "Use the move pad and drag the aim pad to fire."
+        : "Aim with the mouse and hold click to shoot.";
+    }
+
+    function setAimDotPosition(clientX, clientY) {
+      const rect = tankAimPad.getBoundingClientRect();
+      const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+      const y = Math.max(0, Math.min(clientY - rect.top, rect.height));
+      tankAimDot.style.left = (x / rect.width) * 100 + "%";
+      tankAimDot.style.top = (y / rect.height) * 100 + "%";
+    }
+
+    function resetAimDot() {
+      tankAimDot.style.left = "50%";
+      tankAimDot.style.top = "50%";
+    }
+
+    function updateTankAimFromClient(clientX, clientY) {
+      if (!tankState) return;
+      const rect = tankAimPad.getBoundingClientRect();
+      const dx = clientX - (rect.left + rect.width / 2);
+      const dy = clientY - (rect.top + rect.height / 2);
+      const len = Math.hypot(dx, dy) || 1;
+      const reach = Math.min(220, Math.max(90, Math.min(tankCanvas.width, tankCanvas.height) * 0.35));
+      tankState.mouseX = tankState.player.x + (dx / len) * reach;
+      tankState.mouseY = tankState.player.y + (dy / len) * reach;
+      setAimDotPosition(clientX, clientY);
+    }
+
     function startTank() {
       tankState = makeTankState();
       updateTankHUD();
-      setTankMsg("Aim with the mouse and hold click to shoot.");
+      setTankMsg(tankHelpText());
       document.getElementById("tank-start-btn").textContent = "Restart Battle";
       cancelAnimationFrame(tankAnimationId);
+      resetAimDot();
       tankAnimationId = requestAnimationFrame(tankLoop);
     }
 
@@ -1575,6 +1858,8 @@
       if (tankState) tankState.shooting = false;
       tankState = null;
       tankKeys.clear();
+      tankAimTouchId = null;
+      resetAimDot();
       drawTankStartScreen();
     }
 
@@ -1590,7 +1875,7 @@
       tankCtx.fillStyle = "#8ea5b6";
       tankCtx.font = "16px Courier New";
       tankCtx.fillText("Move with WASD or Arrow Keys", tankCanvas.width / 2, 215);
-      tankCtx.fillText("Aim with mouse and hold click to shoot", tankCanvas.width / 2, 242);
+      tankCtx.fillText(isTouchDevice() ? "Phone: move pad + aim pad" : "Aim with mouse and hold click to shoot", tankCanvas.width / 2, 242);
       tankCtx.fillText("Press Start Battle", tankCanvas.width / 2, 286);
     }
 
@@ -1627,9 +1912,105 @@
       tankState.shooting = true;
     });
 
+    tankCanvas.addEventListener("touchstart", (e) => {
+      if (!tankState) return;
+      const touch = e.changedTouches[0];
+      if (!touch) return;
+      const rect = tankCanvas.getBoundingClientRect();
+      tankState.mouseX = (touch.clientX - rect.left) * (tankCanvas.width / rect.width);
+      tankState.mouseY = (touch.clientY - rect.top) * (tankCanvas.height / rect.height);
+      tankState.shooting = true;
+      e.preventDefault();
+    }, { passive: false });
+
+    tankCanvas.addEventListener("touchmove", (e) => {
+      if (!tankState) return;
+      const touch = e.changedTouches[0];
+      if (!touch) return;
+      const rect = tankCanvas.getBoundingClientRect();
+      tankState.mouseX = (touch.clientX - rect.left) * (tankCanvas.width / rect.width);
+      tankState.mouseY = (touch.clientY - rect.top) * (tankCanvas.height / rect.height);
+      e.preventDefault();
+    }, { passive: false });
+
+    tankCanvas.addEventListener("touchend", () => {
+      if (tankState) tankState.shooting = false;
+    });
+
+    tankCanvas.addEventListener("touchcancel", () => {
+      if (tankState) tankState.shooting = false;
+    });
+
     window.addEventListener("mouseup", () => {
       if (tankState) tankState.shooting = false;
     });
+
+    window.addEventListener("touchend", () => {
+      if (tankState && tankAimTouchId === null) tankState.shooting = false;
+    });
+
+    tankMoveButtons.forEach((button) => {
+      const direction = button.dataset.tankMove;
+      const activate = (e) => {
+        e.preventDefault();
+        setTankMoveKey(direction, true);
+      };
+      const deactivate = (e) => {
+        e.preventDefault();
+        setTankMoveKey(direction, false);
+      };
+
+      button.addEventListener("mousedown", activate);
+      button.addEventListener("touchstart", activate, { passive: false });
+      button.addEventListener("mouseup", deactivate);
+      button.addEventListener("mouseleave", deactivate);
+      button.addEventListener("touchend", deactivate, { passive: false });
+      button.addEventListener("touchcancel", deactivate, { passive: false });
+    });
+
+    tankAimPad.addEventListener("mousedown", (e) => {
+      if (!tankState) return;
+      tankState.shooting = true;
+      updateTankAimFromClient(e.clientX, e.clientY);
+    });
+
+    tankAimPad.addEventListener("mousemove", (e) => {
+      if (!tankState || !tankState.shooting || tankAimTouchId !== null) return;
+      updateTankAimFromClient(e.clientX, e.clientY);
+    });
+
+    tankAimPad.addEventListener("touchstart", (e) => {
+      if (!tankState) return;
+      const touch = e.changedTouches[0];
+      if (!touch) return;
+      tankAimTouchId = touch.identifier;
+      tankState.shooting = true;
+      updateTankAimFromClient(touch.clientX, touch.clientY);
+      e.preventDefault();
+    }, { passive: false });
+
+    tankAimPad.addEventListener("touchmove", (e) => {
+      if (!tankState || tankAimTouchId === null) return;
+      const touch = Array.from(e.changedTouches).find((item) => item.identifier === tankAimTouchId);
+      if (!touch) return;
+      updateTankAimFromClient(touch.clientX, touch.clientY);
+      e.preventDefault();
+    }, { passive: false });
+
+    function releaseAimTouch(e) {
+      if (tankAimTouchId === null) return;
+      const touch = Array.from(e.changedTouches || []).find((item) => item.identifier === tankAimTouchId);
+      if (!touch && e.type !== "mouseup" && e.type !== "mouseleave") return;
+      tankAimTouchId = null;
+      if (tankState) tankState.shooting = false;
+      resetAimDot();
+      if (e.cancelable) e.preventDefault();
+    }
+
+    tankAimPad.addEventListener("touchend", releaseAimTouch, { passive: false });
+    tankAimPad.addEventListener("touchcancel", releaseAimTouch, { passive: false });
+    tankAimPad.addEventListener("mouseup", releaseAimTouch);
+    tankAimPad.addEventListener("mouseleave", releaseAimTouch);
 
     board = newBoard();
     piece = null;
