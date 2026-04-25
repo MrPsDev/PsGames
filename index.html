@@ -498,7 +498,7 @@
       gap: 10px;
       align-items: center;
       margin-top: 10px;
-      margin-bottom: 14px;
+      margin-bottom: 22px;
     }
 
     .difficulty-label {
@@ -640,10 +640,10 @@
         linear-gradient(180deg, #091018 0%, #060b11 100%);
       width: 100%;
       height: 100%;
-      padding: clamp(18px, 2vw, 30px);
+      padding: 14px 18px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 10px;
       align-items: stretch;
       justify-content: flex-start;
       overflow: hidden;
@@ -657,35 +657,40 @@
       gap: 14px;
       margin-bottom: 0;
       align-items: center;
+      flex-wrap: nowrap;
     }
 
     #tetris-screen:fullscreen .screen-title,
     #tank-screen:fullscreen .screen-title,
     #tetris-screen:-webkit-full-screen .screen-title,
     #tank-screen:-webkit-full-screen .screen-title {
-      font-size: clamp(34px, 3.6vw, 56px);
+      font-size: 28px;
+      line-height: 1;
     }
 
     #tetris-screen:fullscreen .hint,
     #tank-screen:fullscreen .hint,
     #tetris-screen:-webkit-full-screen .hint,
     #tank-screen:-webkit-full-screen .hint {
-      font-size: clamp(15px, 1.3vw, 20px);
-      line-height: 1.6;
-      max-width: 900px;
+      display: none;
     }
 
-    #tetris-screen:fullscreen .hint,
-    #tetris-screen:-webkit-full-screen .hint {
-      max-width: 620px;
+    #tetris-screen:fullscreen .top-row,
+    #tank-screen:fullscreen .top-row,
+    #tetris-screen:-webkit-full-screen .top-row,
+    #tank-screen:-webkit-full-screen .top-row {
+      width: auto;
+      flex-wrap: nowrap;
+      justify-content: flex-end;
     }
 
     #tetris-screen:fullscreen .top-row button,
     #tank-screen:fullscreen .top-row button,
     #tetris-screen:-webkit-full-screen .top-row button,
     #tank-screen:-webkit-full-screen .top-row button {
-      font-size: 15px;
-      padding: 12px 16px;
+      font-size: 13px;
+      padding: 9px 13px;
+      border-radius: 11px;
     }
 
     #tetris-screen:fullscreen .hud,
@@ -693,35 +698,38 @@
     #tetris-screen:-webkit-full-screen .hud,
     #tank-screen:-webkit-full-screen .hud {
       grid-template-columns: repeat(3, minmax(180px, 1fr));
-      gap: 12px;
+      gap: 10px;
     }
 
     #tetris-screen:fullscreen .hud-box,
     #tank-screen:fullscreen .hud-box,
     #tetris-screen:-webkit-full-screen .hud-box,
     #tank-screen:-webkit-full-screen .hud-box {
-      padding: 14px 16px;
+      min-height: 52px;
+      padding: 7px 12px;
     }
 
     #tetris-screen:fullscreen .hud-label,
     #tank-screen:fullscreen .hud-label,
     #tetris-screen:-webkit-full-screen .hud-label,
     #tank-screen:-webkit-full-screen .hud-label {
-      font-size: 13px;
+      font-size: 10px;
+      margin-bottom: 0;
     }
 
     #tetris-screen:fullscreen .hud-value,
     #tank-screen:fullscreen .hud-value,
     #tetris-screen:-webkit-full-screen .hud-value,
     #tank-screen:-webkit-full-screen .hud-value {
-      font-size: clamp(30px, 2.8vw, 42px);
+      font-size: 24px;
+      line-height: 1.05;
     }
 
     #tank-screen:fullscreen .difficulty-row,
     #tank-screen:-webkit-full-screen .difficulty-row {
       gap: 12px;
       margin-top: 0;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
 
     #tank-screen:fullscreen .difficulty-label,
@@ -731,23 +739,24 @@
 
     #tank-screen:fullscreen .difficulty-btn,
     #tank-screen:-webkit-full-screen .difficulty-btn {
-      padding: 11px 16px;
-      font-size: 16px;
+      padding: 8px 13px;
+      font-size: 13px;
     }
 
     #tank-screen:fullscreen .tank-wrap,
     #tank-screen:-webkit-full-screen .tank-wrap {
       flex: 1;
       justify-content: center;
-      gap: 14px;
+      gap: 8px;
       margin-top: 0;
+      min-height: 0;
     }
 
     #tank-screen:fullscreen #tank-board,
     #tank-screen:-webkit-full-screen #tank-board {
       width: var(--tank-live-board-width);
       max-width: 1400px;
-      max-height: calc(100vh - 300px);
+      max-height: calc(100vh - 170px);
       margin: 0 auto;
     }
 
@@ -757,7 +766,7 @@
       align-items: center;
       justify-content: center;
       grid-template-columns: minmax(340px, 1fr) minmax(240px, 300px);
-      gap: 22px;
+      gap: 18px;
       margin-top: 0;
       min-height: 0;
     }
@@ -774,7 +783,7 @@
       width: var(--tetris-live-board-width);
       min-width: 160px;
       max-width: 440px;
-      max-height: calc(100vh - 250px);
+      max-height: calc(100vh - 150px);
     }
 
     #tetris-screen:fullscreen #tetris-side,
@@ -1242,12 +1251,12 @@
       const fullscreenTetris = isFullscreenActiveFor(tetrisScreen);
 
       const sideWidth = fullscreenTetris ? 300 : Math.min(260, Math.max(190, Math.round(viewportWidth * 0.2)));
-      const layoutGap = fullscreenTetris ? 20 : 18;
+      const layoutGap = fullscreenTetris ? 18 : 18;
 
       let availableBoardHeight;
       if (fullscreenTetris) {
         const layoutTop = tetrisLayout.getBoundingClientRect().top;
-        availableBoardHeight = Math.max(300, viewportHeight - layoutTop - 18);
+        availableBoardHeight = Math.max(340, viewportHeight - layoutTop - 8);
       } else {
         let reservedHeight = 120;
         reservedHeight += pageTitle ? pageTitle.offsetHeight : 0;
@@ -1672,10 +1681,10 @@
       const viewportWidth = Math.max(window.innerWidth, window.visualViewport ? Math.round(window.visualViewport.width) : 0);
       const fullscreenTank = isFullscreenActiveFor(tankScreen);
       const rect = tankCanvas.getBoundingClientRect();
-      const remainingHeight = Math.max(300, viewportHeight - rect.top - (fullscreenTank ? 18 : 54));
+      const remainingHeight = Math.max(340, viewportHeight - rect.top - (fullscreenTank ? 8 : 54));
       const maxWidthFromHeight = Math.floor(remainingHeight * (920 / 560));
-      const maxWidthFromScreen = fullscreenTank ? viewportWidth - 52 : Math.min(920, viewportWidth - 48);
-      const width = Math.max(420, Math.min(maxWidthFromHeight, maxWidthFromScreen, fullscreenTank ? 1280 : 920));
+      const maxWidthFromScreen = fullscreenTank ? viewportWidth - 36 : Math.min(920, viewportWidth - 48);
+      const width = Math.max(420, Math.min(maxWidthFromHeight, maxWidthFromScreen, fullscreenTank ? 1320 : 920));
       document.documentElement.style.setProperty("--tank-live-board-width", width + "px");
     }
 
