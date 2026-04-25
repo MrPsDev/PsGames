@@ -2836,8 +2836,12 @@
       moveZ /= len;
       const sin = Math.sin(fpsYaw);
       const cos = Math.cos(fpsYaw);
-      fpsCamera.position.x += (moveX * cos - moveZ * sin) * speed * dt;
-      fpsCamera.position.z += (moveX * sin + moveZ * cos) * speed * dt;
+      const forwardX = -sin;
+      const forwardZ = -cos;
+      const rightX = cos;
+      const rightZ = -sin;
+      fpsCamera.position.x += (rightX * moveX + forwardX * -moveZ) * speed * dt;
+      fpsCamera.position.z += (rightZ * moveX + forwardZ * -moveZ) * speed * dt;
       fpsCamera.position.x = Math.max(-25, Math.min(25, fpsCamera.position.x));
       fpsCamera.position.z = Math.max(-25, Math.min(25, fpsCamera.position.z));
     }
