@@ -35,6 +35,8 @@
       --sky: #7bc7ff;
       --violet: #9ea8ff;
       --shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+      --tetris-board-width: clamp(180px, calc(100vh - 420px), 240px);
+      --tetris-side-width: clamp(190px, 18vw, 260px);
     }
 
     body {
@@ -365,9 +367,9 @@
     #tetris-layout {
       width: 100%;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 180px;
+      grid-template-columns: minmax(0, 1fr) var(--tetris-side-width);
       gap: 18px;
-      align-items: start;
+      align-items: center;
       margin-top: 12px;
     }
 
@@ -390,6 +392,10 @@
       touch-action: none;
     }
 
+    #board {
+      width: var(--tetris-board-width);
+    }
+
     #msg,
     #tank-msg {
       min-height: 18px;
@@ -403,6 +409,8 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      width: 100%;
+      max-width: var(--tetris-side-width);
     }
 
     .next-panel {
@@ -859,6 +867,103 @@
       #tank-screen:-webkit-full-screen #tank-board {
         width: 100%;
         max-height: none;
+      }
+    }
+
+    @media (max-height: 980px) and (min-width: 841px) {
+      body {
+        padding: 18px 14px 26px;
+      }
+
+      .title {
+        font-size: clamp(32px, 5vw, 46px);
+        margin-bottom: 4px;
+      }
+
+      .subtitle {
+        margin-bottom: 18px;
+        font-size: 11px;
+      }
+
+      #main-panel {
+        padding: 18px;
+        gap: 12px;
+      }
+
+      .screen-head {
+        margin-bottom: 2px;
+      }
+
+      .hint {
+        font-size: 11px;
+      }
+
+      .top-row {
+        gap: 8px;
+      }
+
+      button {
+        padding: 10px 14px;
+      }
+
+      .hud {
+        gap: 8px;
+      }
+
+      .hud-box {
+        padding: 9px 11px;
+      }
+
+      .hud-value {
+        font-size: 22px;
+      }
+
+      #tetris-layout {
+        gap: 14px;
+        margin-top: 6px;
+      }
+
+      #tetris-left {
+        gap: 8px;
+      }
+
+      #board {
+        width: clamp(170px, calc(100vh - 430px), 220px);
+      }
+
+      #tetris-side {
+        max-width: clamp(180px, 17vw, 220px);
+      }
+
+      #next-canvas {
+        width: 92px;
+        height: 92px;
+      }
+
+      .mini-panel {
+        padding: 10px;
+      }
+
+      .controls-panel {
+        gap: 10px;
+      }
+
+      .control-list {
+        gap: 8px;
+      }
+
+      .control-row {
+        gap: 8px;
+      }
+
+      .control-action {
+        font-size: 12px;
+      }
+
+      .key-chip {
+        min-width: 30px;
+        padding: 5px 7px;
+        font-size: 10px;
       }
     }
 
