@@ -4,17 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ArmaPS Games | Retro Arcade</title>
-  <meta name="description" content="Play Tetris, Mini Tank, and a 3D arena shooter in ArmaPS Games, a fast retro arcade you can open on desktop or phone." />
+  <meta name="description" content="Play Tetris and Mini Tank in ArmaPS Games, a fast retro arcade you can open on desktop or phone." />
   <meta name="theme-color" content="#07111a" />
   <meta name="robots" content="index,follow" />
   <meta property="og:title" content="ArmaPS Games | Retro Arcade" />
-  <meta property="og:description" content="Play Tetris, Mini Tank, and a 3D arena shooter right in your browser." />
+  <meta property="og:description" content="Play Tetris and Mini Tank right in your browser." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://armapsgames.online/" />
   <meta property="og:image" content="https://armapsgames.online/favicon.svg" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="ArmaPS Games | Retro Arcade" />
-  <meta name="twitter:description" content="Play Tetris, Mini Tank, and a 3D arena shooter right in your browser." />
+  <meta name="twitter:description" content="Play Tetris and Mini Tank right in your browser." />
   <link rel="canonical" href="https://armapsgames.online/" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <style>
@@ -105,22 +105,6 @@
       text-align: center;
       position: relative;
       z-index: 1;
-    }
-
-    .model-credit-note {
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 12px;
-      text-align: center;
-    }
-
-    .model-credit-note a {
-      color: var(--sky);
-      text-decoration: none;
-    }
-
-    .model-credit-note a:hover {
-      text-decoration: underline;
     }
 
     #shell {
@@ -1204,19 +1188,6 @@
             </div>
           </article>
 
-          <article class="game-card">
-            <div class="shine"></div>
-            <div class="card-top">
-              <span class="badge">3D</span>
-            </div>
-            <div class="card-bottom">
-              <h2>Arena Shooter</h2>
-              <p>Move through a neon arena, aim with the mouse, and tag enemy drones before they reach you.</p>
-            </div>
-            <div class="cta-row card-bottom">
-              <button class="primary" id="open-fps">Play Arena Shooter</button>
-            </div>
-          </article>
         </div>
       </div>
 
@@ -1429,15 +1400,10 @@
             </div>
           </div>
         </div>
-        <p class="model-credit-note">
-          3D models by Sketchfab creators under CC-BY. Credits:
-          <a href="https://github.com/MrPsDev/PsGames/blob/main/MODEL_CREDITS.md" target="_blank" rel="noopener">MODEL_CREDITS.md</a>
-        </p>
       </div>
     </section>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
   <script>
     const menuScreen = document.getElementById("menu-screen");
     const tetrisScreen = document.getElementById("tetris-screen");
@@ -1563,11 +1529,6 @@
       showScreen("tank");
       drawTankStartScreen();
       requestAnimationFrame(syncTankLayout);
-    });
-
-    document.getElementById("open-fps").addEventListener("click", () => {
-      showScreen("fps");
-      drawFpsStartScreen();
     });
 
     document.getElementById("back-from-tetris").addEventListener("click", returnToMenu);
