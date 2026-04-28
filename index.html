@@ -1258,8 +1258,10 @@
 
       #tank-screen:fullscreen #tank-board,
       #tank-screen:-webkit-full-screen #tank-board {
-        max-height: calc(100svh - 240px);
-        width: 100%;
+        width: var(--tank-live-board-width);
+        max-width: 100%;
+        max-height: none;
+        aspect-ratio: 920 / 560;
       }
 
       #tank-screen:fullscreen #tank-msg,
@@ -1294,20 +1296,20 @@
     /* Left joystick zone */
     .gp-zone-left {
       position: absolute;
-      bottom: 18px;
-      left: 18px;
-      width: 160px;
-      height: 160px;
+      bottom: 14px;
+      left: 14px;
+      width: 170px;
+      height: 170px;
       pointer-events: all;
     }
 
     /* Right fire-aim zone */
     .gp-zone-right {
       position: absolute;
-      bottom: 18px;
-      right: 18px;
-      width: 160px;
-      height: 160px;
+      bottom: 14px;
+      right: 14px;
+      width: 170px;
+      height: 170px;
       pointer-events: all;
     }
 
@@ -1781,20 +1783,26 @@
 
     async function toggleFullscreen(element) {
       try {
-        if (isFullscreenActiveFor(element)) {
-          await document.exitFullscreen();
+        const isFs = document.fullscreenElement === element ||
+                     document.webkitFullscreenElement === element;
+        if (isFs) {
+          if (document.exitFullscreen) await document.exitFullscreen();
+          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
         } else {
-          await element.requestFullscreen();
+          if (element.requestFullscreen) await element.requestFullscreen();
+          else if (element.webkitRequestFullscreen) element.webkitRequestFullscreen();
         }
       } catch (err) {
         console.error("Fullscreen failed", err);
       }
+      setTimeout(syncGamepad, 100);
     }
 
     async function exitFullscreenIfNeeded() {
-      if (!document.fullscreenElement) return;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) return;
       try {
-        await document.exitFullscreen();
+        if (document.exitFullscreen) await document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
       } catch (err) {
         console.error("Exit fullscreen failed", err);
       }
@@ -1810,9 +1818,12 @@
     }
 
     function refreshFullscreenLabels() {
-      tetrisFullscreenButton.textContent = isFullscreenActiveFor(tetrisScreen) ? "Exit Fullscreen" : "Fullscreen";
-      tankFullscreenButton.textContent = isFullscreenActiveFor(tankScreen) ? "Exit Fullscreen" : "Fullscreen";
-      fpsFullscreenButton.textContent = isFullscreenActiveFor(fpsScreen) ? "Exit Fullscreen" : "Fullscreen";
+      const tetrisFs = document.fullscreenElement === tetrisScreen || document.webkitFullscreenElement === tetrisScreen;
+      const tankFs   = document.fullscreenElement === tankScreen   || document.webkitFullscreenElement === tankScreen;
+      const fpsFs    = document.fullscreenElement === fpsScreen    || document.webkitFullscreenElement === fpsScreen;
+      tetrisFullscreenButton.textContent = tetrisFs ? "Exit Fullscreen" : "Fullscreen";
+      tankFullscreenButton.textContent   = tankFs   ? "Exit Fullscreen" : "Fullscreen";
+      fpsFullscreenButton.textContent    = fpsFs    ? "Exit Fullscreen" : "Fullscreen";
     }
 
     function syncLayouts() {
@@ -1882,12 +1893,12 @@
     const gpFireKnob = document.getElementById("gp-fire-knob");
 
     function syncGamepad() {
-      const tankFs = isFullscreenActiveFor(tankScreen);
+      const tankFs = document.fullscreenElement === tankScreen ||
+                     document.webkitFullscreenElement === tankScreen;
       const touch  = isTouchDevice();
       if (tankFs && touch) {
         tankGamepad.classList.add("active");
         tankGamepad.setAttribute("aria-hidden", "false");
-        // Try to lock to landscape
         try {
           if (screen.orientation && screen.orientation.lock) {
             screen.orientation.lock("landscape").catch(() => {});
@@ -1896,7 +1907,6 @@
       } else {
         tankGamepad.classList.remove("active");
         tankGamepad.setAttribute("aria-hidden", "true");
-        // Unlock orientation
         try {
           if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
         } catch (e) {}
@@ -2004,17 +2014,20 @@
       }
     );
 
-    document.addEventListener("fullscreenchange", () => {
+    function onFullscreenChange() {
       refreshFullscreenLabels();
       syncGamepad();
       requestAnimationFrame(syncLayouts);
       setTimeout(syncLayouts, 80);
-      if (!document.fullscreenElement && !menuScreen.classList.contains("hidden")) {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement &&
+          !menuScreen.classList.contains("hidden")) {
         tetrisScreen.classList.add("hidden");
         tankScreen.classList.add("hidden");
         fpsScreen.classList.add("hidden");
       }
-    });
+    }
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
     window.addEventListener("resize", syncLayouts);
     if (window.visualViewport) window.visualViewport.addEventListener("resize", syncLayouts);
 
@@ -2404,7 +2417,19 @@
       if (!tankCanvas) return;
       const viewportHeight = Math.max(window.innerHeight, window.visualViewport ? Math.round(window.visualViewport.height) : 0);
       const viewportWidth = Math.max(window.innerWidth, window.visualViewport ? Math.round(window.visualViewport.width) : 0);
-      const fullscreenTank = isFullscreenActiveFor(tankScreen);
+      const fullscreenTank = document.fullscreenElement === tankScreen || document.webkitFullscreenElement === tankScreen;
+      const mobileFullscreen = fullscreenTank && isTouchDevice();
+
+      if (mobileFullscreen) {
+        // On mobile fullscreen: canvas fits above the gamepad (190px reserved at bottom)
+        const availH = viewportHeight - 180 - 190; // header ~180px, gamepad ~190px
+        const availW = viewportWidth - 16;
+        const widthFromH = Math.floor(availH * (920 / 560));
+        const width = Math.max(300, Math.min(widthFromH, availW));
+        document.documentElement.style.setProperty("--tank-live-board-width", width + "px");
+        return;
+      }
+
       const rect = tankCanvas.getBoundingClientRect();
       const remainingHeight = Math.max(300, viewportHeight - rect.top - (fullscreenTank ? 12 : 54));
       const maxWidthFromHeight = Math.floor(remainingHeight * (920 / 560));
