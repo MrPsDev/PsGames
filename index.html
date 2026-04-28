@@ -1214,15 +1214,32 @@
       #tank-screen:fullscreen,
       #tank-screen:-webkit-full-screen {
         flex-direction: column;
-        justify-content: space-between;
-        padding: 6px 8px;
-        gap: 4px;
+        justify-content: flex-start;
+        padding: 4px 6px 0;
+        gap: 2px;
+        position: relative;
       }
 
       #tank-screen:fullscreen .screen-head,
       #tank-screen:-webkit-full-screen .screen-head {
         flex-shrink: 0;
         margin-bottom: 0;
+        flex-wrap: nowrap;
+        align-items: center;
+      }
+
+      /* Shrink all header buttons */
+      #tank-screen:fullscreen .screen-head button,
+      #tank-screen:-webkit-full-screen .screen-head button {
+        font-size: 10px;
+        padding: 5px 8px;
+        border-radius: 8px;
+        min-width: 0;
+      }
+
+      #tank-screen:fullscreen .screen-title,
+      #tank-screen:-webkit-full-screen .screen-title {
+        font-size: 14px;
       }
 
       #tank-screen:fullscreen .difficulty-row,
@@ -1233,60 +1250,75 @@
       #tank-screen:fullscreen .hud,
       #tank-screen:-webkit-full-screen .hud {
         grid-template-columns: repeat(3, 1fr);
-        gap: 4px;
+        gap: 3px;
         flex-shrink: 0;
       }
 
       #tank-screen:fullscreen .hud-box,
       #tank-screen:-webkit-full-screen .hud-box {
-        padding: 4px 8px;
+        padding: 2px 6px;
+      }
+
+      #tank-screen:fullscreen .hud-label,
+      #tank-screen:-webkit-full-screen .hud-label {
+        font-size: 9px;
+        margin-bottom: 0;
       }
 
       #tank-screen:fullscreen .hud-value,
       #tank-screen:-webkit-full-screen .hud-value {
-        font-size: 18px;
+        font-size: 14px;
+        line-height: 1;
       }
 
       #tank-screen:fullscreen .tank-wrap,
       #tank-screen:-webkit-full-screen .tank-wrap {
         flex: 1;
-        margin-top: 0;
-        gap: 4px;
+        margin-top: 2px;
+        gap: 2px;
         min-height: 0;
         justify-content: center;
+        align-items: center;
       }
 
       #tank-screen:fullscreen #tank-board,
       #tank-screen:-webkit-full-screen #tank-board {
+        /* JS sets --tank-live-board-width; CSS keeps correct ratio */
         width: var(--tank-live-board-width);
         max-width: 100%;
-        max-height: none;
         aspect-ratio: 920 / 560;
+        height: auto;
       }
 
       #tank-screen:fullscreen #tank-msg,
       #tank-screen:-webkit-full-screen #tank-msg {
-        font-size: 11px;
-        min-height: 14px;
+        font-size: 10px;
+        min-height: 12px;
       }
 
-      /* Hide old mobile controls in fullscreen — replaced by floating gamepad */
+      /* Hide old mobile controls in fullscreen */
       #tank-screen:fullscreen #tank-mobile-controls,
       #tank-screen:-webkit-full-screen #tank-mobile-controls {
         display: none !important;
       }
     }
 
-    /* ── Floating gamepad overlay (shown only in fullscreen on touch devices) ── */
+    /* ── Gamepad overlay — lives INSIDE #tank-screen ── */
     #tank-gamepad {
       display: none;
-      position: fixed;
+      position: absolute;
       inset: 0;
       pointer-events: none;
-      z-index: 999;
+      z-index: 10;
       touch-action: none;
       user-select: none;
       -webkit-user-select: none;
+    }
+
+    /* Show only when tank-screen is fullscreen */
+    #tank-screen:fullscreen #tank-gamepad,
+    #tank-screen:-webkit-full-screen #tank-gamepad {
+      display: block;
     }
 
     #tank-gamepad.active {
@@ -1600,6 +1632,20 @@
             <p class="mobile-copy">Drag inside the pad to aim. Keep touching to keep shooting.</p>
           </div>
         </div>
+
+        <!-- Gamepad overlay — inside tank-screen so it works in fullscreen -->
+        <div id="tank-gamepad" aria-hidden="true">
+          <div class="gp-zone-left" id="gp-move-zone">
+            <div class="gp-ring"></div>
+            <div class="gp-label">MOVE</div>
+            <div class="gp-knob" id="gp-move-knob"></div>
+          </div>
+          <div class="gp-zone-right" id="gp-fire-zone">
+            <div class="gp-ring gp-ring-fire"></div>
+            <div class="gp-label gp-label-fire">AIM&amp;FIRE</div>
+            <div class="gp-knob gp-knob-fire" id="gp-fire-knob"></div>
+          </div>
+        </div>
       </div>
 
       <div id="fps-screen" class="hidden">
@@ -1662,20 +1708,6 @@
         </div>
       </div>
     </section>
-  </div>
-
-  <!-- Floating gamepad overlay for tank fullscreen on mobile -->
-  <div id="tank-gamepad" aria-hidden="true">
-    <div class="gp-zone-left" id="gp-move-zone">
-      <div class="gp-ring"></div>
-      <div class="gp-label">MOVE</div>
-      <div class="gp-knob" id="gp-move-knob"></div>
-    </div>
-    <div class="gp-zone-right" id="gp-fire-zone">
-      <div class="gp-ring gp-ring-fire"></div>
-      <div class="gp-label gp-label-fire">AIM&amp;FIRE</div>
-      <div class="gp-knob gp-knob-fire" id="gp-fire-knob"></div>
-    </div>
   </div>
 
   <div class="admin-panel" id="admin-panel" aria-hidden="true">
@@ -1895,18 +1927,13 @@
     function syncGamepad() {
       const tankFs = document.fullscreenElement === tankScreen ||
                      document.webkitFullscreenElement === tankScreen;
-      const touch  = isTouchDevice();
-      if (tankFs && touch) {
-        tankGamepad.classList.add("active");
-        tankGamepad.setAttribute("aria-hidden", "false");
+      if (tankFs) {
         try {
           if (screen.orientation && screen.orientation.lock) {
             screen.orientation.lock("landscape").catch(() => {});
           }
         } catch (e) {}
       } else {
-        tankGamepad.classList.remove("active");
-        tankGamepad.setAttribute("aria-hidden", "true");
         try {
           if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
         } catch (e) {}
@@ -2421,11 +2448,14 @@
       const mobileFullscreen = fullscreenTank && isTouchDevice();
 
       if (mobileFullscreen) {
-        // On mobile fullscreen: canvas fits above the gamepad (190px reserved at bottom)
-        const availH = viewportHeight - 180 - 190; // header ~180px, gamepad ~190px
-        const availW = viewportWidth - 16;
+        // Header (screen-head + hud) ~90px, bottom padding 4px
+        // Gamepad is absolute overlay — canvas can use almost full height
+        const reservedH = 90;
+        const availH = Math.max(200, viewportHeight - reservedH);
+        const availW = Math.max(300, viewportWidth - 12);
+        // Keep 920:560 ratio
         const widthFromH = Math.floor(availH * (920 / 560));
-        const width = Math.max(300, Math.min(widthFromH, availW));
+        const width = Math.min(widthFromH, availW);
         document.documentElement.style.setProperty("--tank-live-board-width", width + "px");
         return;
       }
