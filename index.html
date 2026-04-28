@@ -1277,15 +1277,17 @@
         margin-top: 2px;
         gap: 2px;
         min-height: 0;
+        overflow: hidden;
         justify-content: center;
         align-items: center;
       }
 
       #tank-screen:fullscreen #tank-board,
       #tank-screen:-webkit-full-screen #tank-board {
-        /* JS sets --tank-live-board-width; CSS keeps correct ratio */
-        width: var(--tank-live-board-width);
+        /* Let the wrap's height constrain canvas — never overflow into HUD */
+        width: auto;
         max-width: 100%;
+        max-height: 100%;
         aspect-ratio: 920 / 560;
         height: auto;
       }
