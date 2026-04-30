@@ -1243,13 +1243,13 @@
       #tetris-screen:-webkit-full-screen #tetris-left {
         flex: 1;
         min-height: 0;
-        gap: 6px;
+        gap: 4px;
       }
 
       #tetris-screen:fullscreen #board,
       #tetris-screen:-webkit-full-screen #board {
-        max-width: min(100%, 300px);
-        max-height: min(44vh, 56vw);
+        max-width: min(100%, 340px);
+        max-height: min(52vh, 68vw);
       }
 
       #tetris-screen:fullscreen #tetris-side,
@@ -1257,13 +1257,13 @@
         max-width: none;
         flex-direction: row;
         align-items: stretch;
-        gap: 8px;
+        gap: 6px;
       }
 
       #tetris-screen:fullscreen .mini-panel,
       #tetris-screen:-webkit-full-screen .mini-panel {
-        flex: 1;
-        padding: 8px;
+        flex: 0 0 auto;
+        padding: 6px;
       }
 
       #tetris-screen:fullscreen .controls-panel,
@@ -1278,27 +1278,27 @@
 
       #tetris-screen:fullscreen #next-canvas,
       #tetris-screen:-webkit-full-screen #next-canvas {
-        width: 72px;
-        height: 72px;
+        width: 56px;
+        height: 56px;
       }
 
       #tetris-screen:fullscreen #tetris-mobile-controls,
       #tetris-screen:-webkit-full-screen #tetris-mobile-controls {
         margin-top: 0;
-        gap: 8px;
+        gap: 6px;
       }
 
       #tetris-screen:fullscreen .mobile-pad,
       #tetris-screen:-webkit-full-screen .mobile-pad,
       #tetris-screen:fullscreen .mobile-actions,
       #tetris-screen:-webkit-full-screen .mobile-actions {
-        padding: 8px;
+        padding: 6px;
       }
 
       #tetris-screen:fullscreen .mobile-label,
       #tetris-screen:-webkit-full-screen .mobile-label {
-        margin-bottom: 6px;
-        font-size: 9px;
+        margin-bottom: 4px;
+        font-size: 8px;
       }
 
       #tetris-screen:fullscreen .tetris-btn-move,
@@ -1307,8 +1307,8 @@
       #tetris-screen:-webkit-full-screen .tetris-btn-drop,
       #tetris-screen:fullscreen .tetris-btn-rotate,
       #tetris-screen:-webkit-full-screen .tetris-btn-rotate {
-        min-height: 52px;
-        font-size: 15px;
+        min-height: 42px;
+        font-size: 13px;
       }
     }
 
@@ -2095,10 +2095,10 @@
         const hudHeight = tetrisHud ? tetrisHud.offsetHeight : 0;
         const sideHeight = tetrisSide ? tetrisSide.offsetHeight : 0;
         const controlsHeight = tetrisMobileControls ? tetrisMobileControls.offsetHeight : 0;
-        const reservedHeight = headHeight + hudHeight + sideHeight + controlsHeight + 42;
+        const reservedHeight = headHeight + hudHeight + sideHeight + controlsHeight + 24;
         const availableBoardHeight = Math.max(180, viewportHeight - reservedHeight);
         const maxBoardFromHeight = Math.floor(availableBoardHeight / 2);
-        const maxBoardFromWidth = Math.max(160, Math.floor(Math.min(viewportWidth - 24, 300)));
+        const maxBoardFromWidth = Math.max(180, Math.floor(Math.min(viewportWidth - 20, 340)));
         const finalWidth = Math.max(150, Math.min(maxBoardFromWidth, maxBoardFromHeight));
         document.documentElement.style.setProperty("--tetris-live-board-width", finalWidth + "px");
         return;
