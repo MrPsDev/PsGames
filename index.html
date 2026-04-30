@@ -1817,10 +1817,16 @@
     }
 
     function isTouchDevice() {
-      return window.matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
+      return window.matchMedia("(any-pointer: coarse)").matches ||
+             navigator.maxTouchPoints > 0 ||
+             "ontouchstart" in window;
     }
 
-    document.body.classList.toggle("touch-device", isTouchDevice());
+    function syncTouchDeviceClass() {
+      document.body.classList.toggle("touch-device", isTouchDevice());
+    }
+
+    syncTouchDeviceClass();
 
     function isFullscreenActiveFor(element) {
       return document.fullscreenElement === element;
@@ -2068,6 +2074,8 @@
     }
     document.addEventListener("fullscreenchange", onFullscreenChange);
     document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+    window.addEventListener("resize", syncTouchDeviceClass);
+    window.addEventListener("orientationchange", syncTouchDeviceClass);
     window.addEventListener("resize", syncLayouts);
     if (window.visualViewport) window.visualViewport.addEventListener("resize", syncLayouts);
 
