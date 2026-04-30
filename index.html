@@ -1068,7 +1068,7 @@
         order: -1;
       }
 
-      .mobile-controls {
+      body.touch-device .mobile-controls {
         display: flex;
         flex-direction: column;
       }
@@ -1207,6 +1207,235 @@
     @keyframes drift {
       0%, 100% { transform: translateY(0) translateX(0); }
       50% { transform: translateY(-18px) translateX(10px); }
+    }
+
+    /* ── Mobile fullscreen landscape force ── */
+    @media (pointer: coarse) {
+      #tank-screen:fullscreen,
+      #tank-screen:-webkit-full-screen {
+        flex-direction: column;
+        justify-content: flex-start;
+        padding: 4px 6px 0;
+        gap: 2px;
+        position: relative;
+      }
+
+      #tank-screen:fullscreen .screen-head,
+      #tank-screen:-webkit-full-screen .screen-head {
+        flex-shrink: 0;
+        margin-bottom: 0;
+        flex-wrap: nowrap;
+        align-items: center;
+      }
+
+      /* Shrink all header buttons */
+      #tank-screen:fullscreen .screen-head button,
+      #tank-screen:-webkit-full-screen .screen-head button {
+        font-size: 10px;
+        padding: 5px 8px;
+        border-radius: 8px;
+        min-width: 0;
+      }
+
+      #tank-screen:fullscreen .screen-title,
+      #tank-screen:-webkit-full-screen .screen-title {
+        font-size: 14px;
+      }
+
+      #tank-screen:fullscreen .difficulty-row,
+      #tank-screen:-webkit-full-screen .difficulty-row {
+        display: none;
+      }
+
+      #tank-screen:fullscreen .hud,
+      #tank-screen:-webkit-full-screen .hud {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 3px;
+        flex-shrink: 0;
+      }
+
+      #tank-screen:fullscreen .hud-box,
+      #tank-screen:-webkit-full-screen .hud-box {
+        padding: 2px 6px;
+      }
+
+      #tank-screen:fullscreen .hud-label,
+      #tank-screen:-webkit-full-screen .hud-label {
+        font-size: 9px;
+        margin-bottom: 0;
+      }
+
+      #tank-screen:fullscreen .hud-value,
+      #tank-screen:-webkit-full-screen .hud-value {
+        font-size: 14px;
+        line-height: 1;
+      }
+
+      #tank-screen:fullscreen .tank-wrap,
+      #tank-screen:-webkit-full-screen .tank-wrap {
+        flex: 1;
+        margin-top: 2px;
+        gap: 2px;
+        min-height: 0;
+        overflow: hidden;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #tank-screen:fullscreen #tank-board,
+      #tank-screen:-webkit-full-screen #tank-board {
+        /* Let the wrap's height constrain canvas — never overflow into HUD */
+        width: auto;
+        max-width: 100%;
+        max-height: 100%;
+        aspect-ratio: 920 / 560;
+        height: auto;
+      }
+
+      #tank-screen:fullscreen #tank-msg,
+      #tank-screen:-webkit-full-screen #tank-msg {
+        font-size: 10px;
+        min-height: 12px;
+      }
+
+      /* Hide old mobile controls in fullscreen */
+      #tank-screen:fullscreen #tank-mobile-controls,
+      #tank-screen:-webkit-full-screen #tank-mobile-controls {
+        display: none !important;
+      }
+    }
+
+    /* ── Gamepad overlay — lives INSIDE #tank-screen ── */
+    #tank-gamepad {
+      display: none;
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Show only when tank-screen is fullscreen */
+    body.touch-device #tank-screen:fullscreen #tank-gamepad,
+    body.touch-device #tank-screen:-webkit-full-screen #tank-gamepad {
+      display: block;
+    }
+
+    body.touch-device #tank-gamepad.active {
+      display: block;
+    }
+
+    /* Left joystick zone */
+    .gp-zone-left {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      width: 170px;
+      height: 170px;
+      pointer-events: all;
+    }
+
+    /* Right fire-aim zone */
+    .gp-zone-right {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      width: 170px;
+      height: 170px;
+      pointer-events: all;
+    }
+
+    .gp-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid rgba(121, 240, 200, 0.30);
+      background: rgba(8, 20, 30, 0.55);
+      backdrop-filter: blur(6px);
+    }
+
+    .gp-ring-fire {
+      border-color: rgba(255, 115, 102, 0.40);
+      background: rgba(30, 8, 8, 0.55);
+    }
+
+    .gp-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(121, 240, 200, 0.45);
+      pointer-events: none;
+    }
+
+    .gp-label-fire {
+      color: rgba(255, 115, 102, 0.45);
+    }
+
+    /* The draggable knob */
+    .gp-knob {
+      position: absolute;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, rgba(121, 240, 200, 0.90), rgba(29, 158, 117, 0.80));
+      box-shadow:
+        0 0 0 3px rgba(121, 240, 200, 0.22),
+        0 6px 24px rgba(0, 0, 0, 0.55);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: box-shadow 0.1s;
+      pointer-events: none;
+    }
+
+    .gp-knob-fire {
+      background: radial-gradient(circle at 35% 30%, rgba(255, 150, 120, 0.90), rgba(200, 60, 50, 0.80));
+      box-shadow:
+        0 0 0 3px rgba(255, 115, 102, 0.22),
+        0 6px 24px rgba(0, 0, 0, 0.55);
+    }
+
+    .gp-knob.pressed {
+      box-shadow:
+        0 0 0 6px rgba(121, 240, 200, 0.38),
+        0 4px 14px rgba(0, 0, 0, 0.6);
+    }
+
+    .gp-knob-fire.pressed {
+      box-shadow:
+        0 0 0 6px rgba(255, 115, 102, 0.38),
+        0 4px 14px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Direction arrows on move knob */
+    .gp-arrows {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .gp-arrows::before,
+    .gp-arrows::after {
+      content: "";
+      position: absolute;
+      border: solid rgba(255,255,255,0.55);
+    }
+
+    /* Shoot icon on fire knob */
+    .gp-fire-icon {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -1405,6 +1634,20 @@
             <p class="mobile-copy">Drag inside the pad to aim. Keep touching to keep shooting.</p>
           </div>
         </div>
+
+        <!-- Gamepad overlay — inside tank-screen so it works in fullscreen -->
+        <div id="tank-gamepad" aria-hidden="true">
+          <div class="gp-zone-left" id="gp-move-zone">
+            <div class="gp-ring"></div>
+            <div class="gp-label">MOVE</div>
+            <div class="gp-knob" id="gp-move-knob"></div>
+          </div>
+          <div class="gp-zone-right" id="gp-fire-zone">
+            <div class="gp-ring gp-ring-fire"></div>
+            <div class="gp-label gp-label-fire">AIM&amp;FIRE</div>
+            <div class="gp-knob gp-knob-fire" id="gp-fire-knob"></div>
+          </div>
+        </div>
       </div>
 
       <div id="fps-screen" class="hidden">
@@ -1568,26 +1811,34 @@
       return window.matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
     }
 
+    document.body.classList.toggle("touch-device", isTouchDevice());
+
     function isFullscreenActiveFor(element) {
       return document.fullscreenElement === element;
     }
 
     async function toggleFullscreen(element) {
       try {
-        if (isFullscreenActiveFor(element)) {
-          await document.exitFullscreen();
+        const isFs = document.fullscreenElement === element ||
+                     document.webkitFullscreenElement === element;
+        if (isFs) {
+          if (document.exitFullscreen) await document.exitFullscreen();
+          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
         } else {
-          await element.requestFullscreen();
+          if (element.requestFullscreen) await element.requestFullscreen();
+          else if (element.webkitRequestFullscreen) element.webkitRequestFullscreen();
         }
       } catch (err) {
         console.error("Fullscreen failed", err);
       }
+      setTimeout(syncGamepad, 100);
     }
 
     async function exitFullscreenIfNeeded() {
-      if (!document.fullscreenElement) return;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) return;
       try {
-        await document.exitFullscreen();
+        if (document.exitFullscreen) await document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
       } catch (err) {
         console.error("Exit fullscreen failed", err);
       }
@@ -1603,9 +1854,12 @@
     }
 
     function refreshFullscreenLabels() {
-      tetrisFullscreenButton.textContent = isFullscreenActiveFor(tetrisScreen) ? "Exit Fullscreen" : "Fullscreen";
-      tankFullscreenButton.textContent = isFullscreenActiveFor(tankScreen) ? "Exit Fullscreen" : "Fullscreen";
-      fpsFullscreenButton.textContent = isFullscreenActiveFor(fpsScreen) ? "Exit Fullscreen" : "Fullscreen";
+      const tetrisFs = document.fullscreenElement === tetrisScreen || document.webkitFullscreenElement === tetrisScreen;
+      const tankFs   = document.fullscreenElement === tankScreen   || document.webkitFullscreenElement === tankScreen;
+      const fpsFs    = document.fullscreenElement === fpsScreen    || document.webkitFullscreenElement === fpsScreen;
+      tetrisFullscreenButton.textContent = tetrisFs ? "Exit Fullscreen" : "Fullscreen";
+      tankFullscreenButton.textContent   = tankFs   ? "Exit Fullscreen" : "Fullscreen";
+      fpsFullscreenButton.textContent    = fpsFs    ? "Exit Fullscreen" : "Fullscreen";
     }
 
     function syncLayouts() {
@@ -1666,16 +1920,145 @@
     tetrisFullscreenButton.addEventListener("click", () => toggleFullscreen(tetrisScreen));
     tankFullscreenButton.addEventListener("click", () => toggleFullscreen(tankScreen));
     fpsFullscreenButton.addEventListener("click", () => toggleFullscreen(fpsScreen));
-    document.addEventListener("fullscreenchange", () => {
+
+    // ── Gamepad overlay helpers ──────────────────────────────
+    const tankGamepad = document.getElementById("tank-gamepad");
+    const gpMoveZone = document.getElementById("gp-move-zone");
+    const gpFireZone = document.getElementById("gp-fire-zone");
+    const gpMoveKnob = document.getElementById("gp-move-knob");
+    const gpFireKnob = document.getElementById("gp-fire-knob");
+
+    function syncGamepad() {
+      const tankFs = document.fullscreenElement === tankScreen ||
+                     document.webkitFullscreenElement === tankScreen;
+      if (tankFs) {
+        try {
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock("landscape").catch(() => {});
+          }
+        } catch (e) {}
+      } else {
+        try {
+          if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+        } catch (e) {}
+      }
+    }
+
+    // ── Joystick logic ───────────────────────────────────────
+    function setupJoystick(zone, knob, onMove, onEnd) {
+      let activeTouchId = null;
+      const RADIUS = zone.offsetWidth / 2 || 80; // half of 160px
+      const KNOB_LIMIT = 48; // max travel px from centre
+
+      function getCenter() {
+        const r = zone.getBoundingClientRect();
+        return { cx: r.left + r.width / 2, cy: r.top + r.height / 2, r: r.width / 2 };
+      }
+
+      function moveTo(clientX, clientY) {
+        const { cx, cy, r } = getCenter();
+        let dx = clientX - cx;
+        let dy = clientY - cy;
+        const dist = Math.hypot(dx, dy);
+        const limit = Math.min(r - 16, KNOB_LIMIT);
+        if (dist > limit) {
+          dx = (dx / dist) * limit;
+          dy = (dy / dist) * limit;
+        }
+        knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+        // Normalise to -1..1
+        const nx = dx / limit;
+        const ny = dy / limit;
+        onMove(nx, ny);
+      }
+
+      function reset() {
+        knob.style.transform = "translate(-50%, -50%)";
+        knob.classList.remove("pressed");
+        onEnd();
+        activeTouchId = null;
+      }
+
+      zone.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        if (activeTouchId !== null) return;
+        const t = e.changedTouches[0];
+        activeTouchId = t.identifier;
+        knob.classList.add("pressed");
+        moveTo(t.clientX, t.clientY);
+      }, { passive: false });
+
+      zone.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+        for (const t of e.changedTouches) {
+          if (t.identifier === activeTouchId) {
+            moveTo(t.clientX, t.clientY);
+            break;
+          }
+        }
+      }, { passive: false });
+
+      zone.addEventListener("touchend", (e) => {
+        for (const t of e.changedTouches) {
+          if (t.identifier === activeTouchId) { reset(); break; }
+        }
+      }, { passive: false });
+
+      zone.addEventListener("touchcancel", (e) => {
+        for (const t of e.changedTouches) {
+          if (t.identifier === activeTouchId) { reset(); break; }
+        }
+      }, { passive: false });
+    }
+
+    // Move joystick → sets tankKeys
+    const GP_DEAD = 0.25;
+    setupJoystick(gpMoveZone, gpMoveKnob,
+      (nx, ny) => {
+        if (nx < -GP_DEAD) tankKeys.add("ArrowLeft"); else tankKeys.delete("ArrowLeft");
+        if (nx >  GP_DEAD) tankKeys.add("ArrowRight"); else tankKeys.delete("ArrowRight");
+        if (ny < -GP_DEAD) tankKeys.add("ArrowUp");   else tankKeys.delete("ArrowUp");
+        if (ny >  GP_DEAD) tankKeys.add("ArrowDown");  else tankKeys.delete("ArrowDown");
+      },
+      () => {
+        ["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].forEach(k => tankKeys.delete(k));
+      }
+    );
+
+    // Fire joystick → aims tank turret and fires
+    let gpFireActive = false;
+    let gpFireNX = 0, gpFireNY = 0;
+    setupJoystick(gpFireZone, gpFireKnob,
+      (nx, ny) => {
+        gpFireActive = true;
+        gpFireNX = nx; gpFireNY = ny;
+        if (tankState && Math.hypot(nx, ny) > GP_DEAD) {
+          const range = 300;
+          tankState.mouseX = tankState.player.x + nx * range;
+          tankState.mouseY = tankState.player.y + ny * range;
+          tankState.shooting = true;
+        }
+      },
+      () => {
+        gpFireActive = false;
+        if (tankState) tankState.shooting = false;
+      }
+    );
+
+    function onFullscreenChange() {
       refreshFullscreenLabels();
+      syncGamepad();
       requestAnimationFrame(syncLayouts);
       setTimeout(syncLayouts, 80);
-      if (!document.fullscreenElement && !menuScreen.classList.contains("hidden")) {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement &&
+          !menuScreen.classList.contains("hidden")) {
         tetrisScreen.classList.add("hidden");
         tankScreen.classList.add("hidden");
         fpsScreen.classList.add("hidden");
       }
-    });
+    }
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
     window.addEventListener("resize", syncLayouts);
     if (window.visualViewport) window.visualViewport.addEventListener("resize", syncLayouts);
 
@@ -2065,7 +2448,22 @@
       if (!tankCanvas) return;
       const viewportHeight = Math.max(window.innerHeight, window.visualViewport ? Math.round(window.visualViewport.height) : 0);
       const viewportWidth = Math.max(window.innerWidth, window.visualViewport ? Math.round(window.visualViewport.width) : 0);
-      const fullscreenTank = isFullscreenActiveFor(tankScreen);
+      const fullscreenTank = document.fullscreenElement === tankScreen || document.webkitFullscreenElement === tankScreen;
+      const mobileFullscreen = fullscreenTank && isTouchDevice();
+
+      if (mobileFullscreen) {
+        // Header (screen-head + hud) ~90px, bottom padding 4px
+        // Gamepad is absolute overlay — canvas can use almost full height
+        const reservedH = 90;
+        const availH = Math.max(200, viewportHeight - reservedH);
+        const availW = Math.max(300, viewportWidth - 12);
+        // Keep 920:560 ratio
+        const widthFromH = Math.floor(availH * (920 / 560));
+        const width = Math.min(widthFromH, availW);
+        document.documentElement.style.setProperty("--tank-live-board-width", width + "px");
+        return;
+      }
+
       const rect = tankCanvas.getBoundingClientRect();
       const remainingHeight = Math.max(300, viewportHeight - rect.top - (fullscreenTank ? 12 : 54));
       const maxWidthFromHeight = Math.floor(remainingHeight * (920 / 560));
