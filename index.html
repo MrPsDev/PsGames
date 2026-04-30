@@ -1175,6 +1175,143 @@
       }
     }
 
+    @media (hover: none) and (pointer: coarse), (any-pointer: coarse) {
+      #tetris-screen:fullscreen,
+      #tetris-screen:-webkit-full-screen {
+        padding: 8px 8px 10px;
+        gap: 6px;
+      }
+
+      #tetris-screen:fullscreen .screen-head,
+      #tetris-screen:-webkit-full-screen .screen-head {
+        align-items: stretch;
+        gap: 8px;
+      }
+
+      #tetris-screen:fullscreen .screen-title,
+      #tetris-screen:-webkit-full-screen .screen-title {
+        font-size: 18px;
+      }
+
+      #tetris-screen:fullscreen .top-row,
+      #tetris-screen:-webkit-full-screen .top-row {
+        width: 100%;
+      }
+
+      #tetris-screen:fullscreen .top-row button,
+      #tetris-screen:-webkit-full-screen .top-row button {
+        flex: 1;
+        font-size: 11px;
+        padding: 7px 8px;
+      }
+
+      #tetris-screen:fullscreen .hud,
+      #tetris-screen:-webkit-full-screen .hud {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      #tetris-screen:fullscreen .hud-box,
+      #tetris-screen:-webkit-full-screen .hud-box {
+        min-height: 0;
+        padding: 5px 8px;
+      }
+
+      #tetris-screen:fullscreen .hud-label,
+      #tetris-screen:-webkit-full-screen .hud-label {
+        font-size: 8px;
+      }
+
+      #tetris-screen:fullscreen .hud-value,
+      #tetris-screen:-webkit-full-screen .hud-value {
+        font-size: 16px;
+      }
+
+      #tetris-screen:fullscreen #tetris-layout,
+      #tetris-screen:-webkit-full-screen #tetris-layout {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 8px;
+        margin-top: 0;
+        min-height: 0;
+      }
+
+      #tetris-screen:fullscreen #tetris-left,
+      #tetris-screen:-webkit-full-screen #tetris-left {
+        flex: 1;
+        min-height: 0;
+        gap: 6px;
+      }
+
+      #tetris-screen:fullscreen #board,
+      #tetris-screen:-webkit-full-screen #board {
+        max-width: min(100%, 300px);
+        max-height: min(44vh, 56vw);
+      }
+
+      #tetris-screen:fullscreen #tetris-side,
+      #tetris-screen:-webkit-full-screen #tetris-side {
+        max-width: none;
+        flex-direction: row;
+        align-items: stretch;
+        gap: 8px;
+      }
+
+      #tetris-screen:fullscreen .mini-panel,
+      #tetris-screen:-webkit-full-screen .mini-panel {
+        flex: 1;
+        padding: 8px;
+      }
+
+      #tetris-screen:fullscreen .controls-panel,
+      #tetris-screen:-webkit-full-screen .controls-panel {
+        display: none;
+      }
+
+      #tetris-screen:fullscreen .control-list,
+      #tetris-screen:-webkit-full-screen .control-list {
+        display: none;
+      }
+
+      #tetris-screen:fullscreen #next-canvas,
+      #tetris-screen:-webkit-full-screen #next-canvas {
+        width: 72px;
+        height: 72px;
+      }
+
+      #tetris-screen:fullscreen #tetris-mobile-controls,
+      #tetris-screen:-webkit-full-screen #tetris-mobile-controls {
+        margin-top: 0;
+        gap: 8px;
+      }
+
+      #tetris-screen:fullscreen .mobile-pad,
+      #tetris-screen:-webkit-full-screen .mobile-pad,
+      #tetris-screen:fullscreen .mobile-actions,
+      #tetris-screen:-webkit-full-screen .mobile-actions {
+        padding: 8px;
+      }
+
+      #tetris-screen:fullscreen .mobile-label,
+      #tetris-screen:-webkit-full-screen .mobile-label {
+        margin-bottom: 6px;
+        font-size: 9px;
+      }
+
+      #tetris-screen:fullscreen .tetris-btn-move,
+      #tetris-screen:-webkit-full-screen .tetris-btn-move,
+      #tetris-screen:fullscreen .tetris-btn-drop,
+      #tetris-screen:-webkit-full-screen .tetris-btn-drop,
+      #tetris-screen:fullscreen .tetris-btn-rotate,
+      #tetris-screen:-webkit-full-screen .tetris-btn-rotate {
+        min-height: 52px;
+        font-size: 15px;
+      }
+    }
+
     @media (max-height: 980px) and (min-width: 841px) {
       body {
         padding: 18px 14px 26px;
@@ -1826,6 +1963,7 @@
     const tetrisHud = tetrisScreen.querySelector(".hud");
     const tetrisLayout = document.getElementById("tetris-layout");
     const tetrisSide = document.getElementById("tetris-side");
+    const tetrisMobileControls = document.getElementById("tetris-mobile-controls");
     const pageTitle = document.querySelector(".title");
     const pageSubtitle = document.querySelector(".subtitle");
     const adminPanel = document.getElementById("admin-panel");
@@ -1948,7 +2086,23 @@
     function syncTetrisLayout() {
       const viewportHeight = Math.max(window.innerHeight, window.visualViewport ? Math.round(window.visualViewport.height) : 0);
       const viewportWidth = Math.max(window.innerWidth, window.visualViewport ? Math.round(window.visualViewport.width) : 0);
-      const fullscreenTetris = isFullscreenActiveFor(tetrisScreen);
+      const fullscreenTetris = document.fullscreenElement === tetrisScreen || document.webkitFullscreenElement === tetrisScreen;
+      const mobileFullscreenTetris = fullscreenTetris && isTouchDevice();
+
+      if (mobileFullscreenTetris) {
+        const screenHead = tetrisScreen.querySelector(".screen-head");
+        const headHeight = screenHead ? screenHead.offsetHeight : 0;
+        const hudHeight = tetrisHud ? tetrisHud.offsetHeight : 0;
+        const sideHeight = tetrisSide ? tetrisSide.offsetHeight : 0;
+        const controlsHeight = tetrisMobileControls ? tetrisMobileControls.offsetHeight : 0;
+        const reservedHeight = headHeight + hudHeight + sideHeight + controlsHeight + 42;
+        const availableBoardHeight = Math.max(180, viewportHeight - reservedHeight);
+        const maxBoardFromHeight = Math.floor(availableBoardHeight / 2);
+        const maxBoardFromWidth = Math.max(160, Math.floor(Math.min(viewportWidth - 24, 300)));
+        const finalWidth = Math.max(150, Math.min(maxBoardFromWidth, maxBoardFromHeight));
+        document.documentElement.style.setProperty("--tetris-live-board-width", finalWidth + "px");
+        return;
+      }
 
       const sideWidth = fullscreenTetris ? 300 : Math.min(260, Math.max(190, Math.round(viewportWidth * 0.2)));
       const layoutGap = fullscreenTetris ? 18 : 18;
