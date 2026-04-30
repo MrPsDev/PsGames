@@ -789,8 +789,53 @@
       touch-action: manipulation;
     }
 
+    .mobile-btn:active,
+    .mobile-btn.pressed {
+      transform: translateY(1px) scale(0.985);
+      background: rgba(121, 240, 200, 0.12);
+      border-color: rgba(121, 240, 200, 0.34);
+    }
+
     .mobile-btn.wide {
       grid-column: span 2;
+    }
+
+    .tetris-mobile-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
+      gap: 12px;
+      width: 100%;
+    }
+
+    .tetris-move-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .tetris-action-grid {
+      display: grid;
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      height: 100%;
+    }
+
+    .tetris-btn-move,
+    .tetris-btn-drop,
+    .tetris-btn-rotate {
+      min-height: 72px;
+      font-size: 17px;
+    }
+
+    .tetris-btn-drop {
+      background: linear-gradient(180deg, rgba(255, 143, 82, 0.18), rgba(255, 255, 255, 0.04));
+      border-color: rgba(255, 143, 82, 0.24);
+    }
+
+    .tetris-btn-rotate {
+      background: linear-gradient(180deg, rgba(123, 199, 255, 0.18), rgba(255, 255, 255, 0.04));
+      border-color: rgba(123, 199, 255, 0.28);
     }
 
     .aim-pad {
@@ -1091,6 +1136,22 @@
       .mobile-controls {
         display: flex;
         flex-direction: column;
+      }
+
+      .tetris-mobile-layout {
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      }
+    }
+
+    @media (max-width: 460px) {
+      .tetris-mobile-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .tetris-btn-move,
+      .tetris-btn-drop,
+      .tetris-btn-rotate {
+        min-height: 68px;
       }
     }
 
@@ -1564,16 +1625,21 @@
         </div>
 
         <div class="mobile-controls" id="tetris-mobile-controls">
-          <div class="mobile-pad">
-            <div class="mobile-label">Phone Controls</div>
-            <div class="mobile-grid tetris-grid">
-              <div class="touch-spacer"></div>
-              <button class="mobile-btn" data-tetris-action="rotate">Rotate</button>
-              <div class="touch-spacer"></div>
-              <button class="mobile-btn" data-tetris-action="left">Left</button>
-              <button class="mobile-btn" data-tetris-action="down">Down</button>
-              <button class="mobile-btn" data-tetris-action="right">Right</button>
-              <button class="mobile-btn wide" data-tetris-action="drop">Hard Drop</button>
+          <div class="tetris-mobile-layout">
+            <div class="mobile-pad">
+              <div class="mobile-label">Move</div>
+              <div class="tetris-move-grid">
+                <button class="mobile-btn tetris-btn-move" data-tetris-action="left">Left</button>
+                <button class="mobile-btn tetris-btn-move" data-tetris-action="down">Down</button>
+                <button class="mobile-btn tetris-btn-move" data-tetris-action="right">Right</button>
+              </div>
+            </div>
+            <div class="mobile-actions">
+              <div class="mobile-label">Actions</div>
+              <div class="tetris-action-grid">
+                <button class="mobile-btn tetris-btn-rotate" data-tetris-action="rotate">Rotate</button>
+                <button class="mobile-btn tetris-btn-drop" data-tetris-action="drop">Hard Drop</button>
+              </div>
             </div>
           </div>
         </div>
@@ -2400,6 +2466,31 @@
       }
     }
 
+    const tetrisRepeatableActions = new Set(["left", "right", "down"]);
+    const tetrisHoldState = new Map();
+
+    function stopTetrisActionHold(action) {
+      const hold = tetrisHoldState.get(action);
+      if (!hold) return;
+      clearTimeout(hold.timeoutId);
+      clearInterval(hold.intervalId);
+      tetrisHoldState.delete(action);
+    }
+
+    function startTetrisActionHold(action) {
+      stopTetrisActionHold(action);
+      runTetrisAction(action);
+      if (!tetrisRepeatableActions.has(action)) return;
+
+      const hold = {
+        timeoutId: setTimeout(() => {
+          hold.intervalId = setInterval(() => runTetrisAction(action), action === "down" ? 70 : 110);
+        }, 170),
+        intervalId: null
+      };
+      tetrisHoldState.set(action, hold);
+    }
+
     document.addEventListener("keydown", (e) => {
       if (!running || menuScreen.classList.contains("hidden") === false || tetrisScreen.classList.contains("hidden")) return;
 
@@ -2438,13 +2529,31 @@
 
     tetrisActionButtons.forEach((button) => {
       const action = button.dataset.tetrisAction;
-      const trigger = (e) => {
+      const start = (e) => {
         e.preventDefault();
-        runTetrisAction(action);
+        button.classList.add("pressed");
+        startTetrisActionHold(action);
+      };
+      const stop = (e) => {
+        if (e) e.preventDefault();
+        button.classList.remove("pressed");
+        stopTetrisActionHold(action);
       };
 
-      button.addEventListener("click", trigger);
-      button.addEventListener("touchstart", trigger, { passive: false });
+      button.addEventListener("click", (e) => e.preventDefault());
+      button.addEventListener("mousedown", start);
+      button.addEventListener("touchstart", start, { passive: false });
+      button.addEventListener("mouseup", stop);
+      button.addEventListener("mouseleave", stop);
+      button.addEventListener("touchend", stop, { passive: false });
+      button.addEventListener("touchcancel", stop, { passive: false });
+    });
+
+    window.addEventListener("mouseup", () => {
+      tetrisActionButtons.forEach((button) => {
+        button.classList.remove("pressed");
+        stopTetrisActionHold(button.dataset.tetrisAction);
+      });
     });
 
     const tankCanvas = document.getElementById("tank-board");
