@@ -246,11 +246,7 @@ SPACE - also shoots</p>
       }
 
       if (enemies && enemies.length) {
-        enemies.forEach((e) => {
-          e.baseX = (e.baseX / prevW) * W;
-          e.x = (e.x / prevW) * W;
-          e.y = (e.y / prevH) * H;
-        });
+        relayoutEnemies();
       }
 
       if (stars && stars.length) {
@@ -340,16 +336,32 @@ SPACE - also shoots</p>
       const form = getFormation(wave);
       const cfg = waveConfig(wave);
       const cx = W / 2;
-      const cy = Math.max(115, H * 0.24);
+      const cy = Math.max(150, H * 0.3);
       const maxScaleFromWidth = W / 13.5;
-      const maxScaleFromHeight = H / 9.5;
+      const maxScaleFromHeight = H / 11;
       const maxScaleFromTop = (cy - 34) / 2;
       const scale = Math.max(26, Math.min(maxScaleFromWidth, maxScaleFromHeight, maxScaleFromTop));
       form.forEach(([dx, dy], i) => {
         const type = wave <= 2 ? "basic" : i % 6 === 0 && wave > 5 ? "boss" : i % 3 === 0 && wave > 3 ? "fast" : "basic";
         const baseX = Math.max(40, Math.min(W - 40, cx + dx * scale));
-        const y = Math.max(36, Math.min(H * 0.68, cy + dy * scale));
-        enemies.push({ x: baseX, y, baseX, type, hp: type === "boss" ? 2 : 1, shootTimer: 80 + Math.random() * cfg.shootRate, cfg });
+        const y = Math.max(72, Math.min(H * 0.68, cy + dy * scale));
+        enemies.push({ x: baseX, y, baseX, dx, dy, type, hp: type === "boss" ? 2 : 1, shootTimer: 80 + Math.random() * cfg.shootRate, cfg });
+      });
+    }
+
+    function relayoutEnemies() {
+      if (!enemies || !enemies.length) return;
+      const cx = W / 2;
+      const cy = Math.max(150, H * 0.3);
+      const maxScaleFromWidth = W / 13.5;
+      const maxScaleFromHeight = H / 11;
+      const maxScaleFromTop = (cy - 34) / 2;
+      const scale = Math.max(26, Math.min(maxScaleFromWidth, maxScaleFromHeight, maxScaleFromTop));
+      enemies.forEach((e) => {
+        if (typeof e.dx !== "number" || typeof e.dy !== "number") return;
+        e.baseX = Math.max(40, Math.min(W - 40, cx + e.dx * scale));
+        e.x = e.baseX;
+        e.y = Math.max(72, Math.min(H * 0.68, cy + e.dy * scale));
       });
     }
 

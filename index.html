@@ -2148,8 +2148,10 @@
     }
 
     async function returnToMenu() {
+      const leavingSpace = !spaceScreen.classList.contains("hidden");
       await exitFullscreenIfNeeded();
       showScreen("menu");
+      if (leavingSpace) spaceFrame.src = spaceFrame.src;
       requestAnimationFrame(() => {
         refreshFullscreenLabels();
         syncLayouts();
