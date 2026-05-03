@@ -342,7 +342,8 @@ SPACE - also shoots</p>
     }
 
     function playerSize() {
-      return 1.15 * viewScale() * Math.max(0.9, waveScale + 0.02);
+      const bossScale = wave === 20 ? 0.8 : 1;
+      return 1.15 * viewScale() * Math.max(0.9, waveScale + 0.02) * bossScale;
     }
 
     function enemySize(type) {
