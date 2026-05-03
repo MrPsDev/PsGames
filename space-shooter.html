@@ -40,11 +40,11 @@
 
     #hud span {
       color: #7ef8ff;
-      font-size: 13px;
-      font-weight: 500;
+      font-size: 18px;
+      font-weight: 700;
       background: rgba(0, 0, 0, 0.4);
-      padding: 3px 8px;
-      border-radius: 4px;
+      padding: 8px 14px;
+      border-radius: 8px;
     }
 
     #ov {
@@ -59,14 +59,14 @@
 
     #ov h2 {
       color: #7ef8ff;
-      font-size: 22px;
+      font-size: 34px;
       margin: 0 0 8px;
       letter-spacing: 2px;
     }
 
     #ov p {
       color: #aaa;
-      font-size: 13px;
+      font-size: 18px;
       margin: 0 0 18px;
       text-align: center;
       line-height: 1.8;
@@ -77,9 +77,9 @@
       background: transparent;
       border: 1px solid #7ef8ff;
       color: #7ef8ff;
-      padding: 10px 28px;
+      padding: 14px 38px;
       font-family: "Courier New", monospace;
-      font-size: 14px;
+      font-size: 18px;
       letter-spacing: 1px;
       cursor: pointer;
       border-radius: 4px;
@@ -151,7 +151,7 @@
       left: 50%;
       transform: translateX(-50%);
       color: rgba(255, 255, 0, 0.15);
-      font-size: 10px;
+      font-size: 12px;
       pointer-events: none;
       letter-spacing: 1px;
     }
@@ -162,16 +162,16 @@
       }
 
       #hud span {
-        font-size: 11px;
-        padding: 3px 6px;
+        font-size: 13px;
+        padding: 5px 8px;
       }
 
       #ov h2 {
-        font-size: 18px;
+        font-size: 22px;
       }
 
       #ov p {
-        font-size: 11px;
+        font-size: 13px;
         padding: 0 12px;
       }
     }
@@ -201,7 +201,7 @@ SPACE - also shoots</p>
         <button id="aclear">CLEAR ENEMIES</button>
       </div>
     </div>
-    <div id="cheat">armachest</div>
+    <div id="cheat">armacheat</div>
   </div>
   <script>
     const root = document.getElementById("gc");
@@ -227,6 +227,7 @@ SPACE - also shoots</p>
     let rapidFire = false;
     let rapidTimer = 0;
     let cheatBuf = "";
+    let waveQueued = false;
 
     function resizeGame() {
       const prevW = W || 680;
@@ -248,6 +249,19 @@ SPACE - also shoots</p>
           s.y = Math.min(H, (s.y / prevH) * H);
         });
       }
+    }
+
+    function viewScale() {
+      return Math.max(1, Math.min(W / 680, H / 480, 2.1));
+    }
+
+    function playerSize() {
+      return 1.4 * viewScale();
+    }
+
+    function enemySize(type) {
+      const base = type === "boss" ? 1.5 : type === "fast" ? 1.2 : 1.3;
+      return base * viewScale();
     }
 
     const SHAPES = [
@@ -312,6 +326,7 @@ SPACE - also shoots</p>
       enemies = [];
       bullets = [];
       frame = 0;
+      waveQueued = false;
       const form = getFormation(wave);
       const cfg = waveConfig(wave);
       const cx = W / 2;
@@ -331,10 +346,11 @@ SPACE - also shoots</p>
       frame = 0;
       cooldown = 0;
       wt = 0;
+      waveQueued = false;
       mouseDown = false;
       rapidFire = false;
       rapidTimer = 0;
-      player = { x: W / 2, y: H - 55, invul: 0 };
+      player = { x: W / 2, y: H - Math.max(80, H * 0.12), invul: 0 };
       bullets = [];
       enemies = [];
       particles = [];
@@ -353,69 +369,71 @@ SPACE - also shoots</p>
 
     function drawShip(x, y, inv) {
       if (inv > 0 && Math.floor(inv / 5) % 2) return;
+      const s = playerSize();
       ctx.save();
       ctx.translate(x, y);
-      const g = ctx.createLinearGradient(0, -14, 0, 14);
+      const g = ctx.createLinearGradient(0, -20 * s, 0, 20 * s);
       g.addColorStop(0, rapidFire ? "#ffee44" : "#7ef8ff");
       g.addColorStop(1, rapidFire ? "#aa6600" : "#1a6a8a");
       ctx.fillStyle = g;
       ctx.beginPath();
-      ctx.moveTo(0, -16);
-      ctx.lineTo(14, 10);
-      ctx.lineTo(6, 6);
-      ctx.lineTo(0, 10);
-      ctx.lineTo(-6, 6);
-      ctx.lineTo(-14, 10);
+      ctx.moveTo(0, -16 * s);
+      ctx.lineTo(14 * s, 10 * s);
+      ctx.lineTo(6 * s, 6 * s);
+      ctx.lineTo(0, 10 * s);
+      ctx.lineTo(-6 * s, 6 * s);
+      ctx.lineTo(-14 * s, 10 * s);
       ctx.closePath();
       ctx.fill();
       ctx.fillStyle = "#fff8a0";
       ctx.beginPath();
-      ctx.arc(0, -2, 4, 0, Math.PI * 2);
+      ctx.arc(0, -2 * s, 4.5 * s, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
 
     function drawEnemy(e) {
+      const s = enemySize(e.type);
       ctx.save();
       ctx.translate(e.x, e.y);
       if (e.type === "boss") {
         ctx.fillStyle = e.hp === 2 ? "#ff4466" : "#ff8899";
         ctx.beginPath();
-        ctx.moveTo(0, -12);
-        ctx.lineTo(12, 8);
-        ctx.lineTo(6, 4);
-        ctx.lineTo(0, 8);
-        ctx.lineTo(-6, 4);
-        ctx.lineTo(-12, 8);
+        ctx.moveTo(0, -12 * s);
+        ctx.lineTo(12 * s, 8 * s);
+        ctx.lineTo(6 * s, 4 * s);
+        ctx.lineTo(0, 8 * s);
+        ctx.lineTo(-6 * s, 4 * s);
+        ctx.lineTo(-12 * s, 8 * s);
         ctx.closePath();
         ctx.fill();
         ctx.fillStyle = "#fff";
-        ctx.font = "9px Courier New";
+        ctx.font = Math.max(11, Math.round(10 * s)) + "px Courier New";
         ctx.textAlign = "center";
-        ctx.fillText(e.hp, 0, 3);
+        ctx.fillText(e.hp, 0, 3 * s);
       } else if (e.type === "fast") {
         ctx.fillStyle = "#ffaa22";
         ctx.beginPath();
-        ctx.moveTo(0, -10);
-        ctx.lineTo(10, 8);
-        ctx.lineTo(0, 4);
-        ctx.lineTo(-10, 8);
+        ctx.moveTo(0, -10 * s);
+        ctx.lineTo(10 * s, 8 * s);
+        ctx.lineTo(0, 4 * s);
+        ctx.lineTo(-10 * s, 8 * s);
         ctx.closePath();
         ctx.fill();
       } else {
         ctx.fillStyle = "#aa44ff";
         ctx.beginPath();
-        ctx.moveTo(0, -11);
-        ctx.lineTo(11, 8);
-        ctx.lineTo(4, 4);
-        ctx.lineTo(0, 8);
-        ctx.lineTo(-4, 4);
-        ctx.lineTo(-11, 8);
+        ctx.moveTo(0, -11 * s);
+        ctx.lineTo(11 * s, 8 * s);
+        ctx.lineTo(4 * s, 4 * s);
+        ctx.lineTo(0, 8 * s);
+        ctx.lineTo(-4 * s, 4 * s);
+        ctx.lineTo(-11 * s, 8 * s);
         ctx.closePath();
         ctx.fill();
         ctx.fillStyle = "#cc88ff";
         ctx.beginPath();
-        ctx.arc(0, -1, 3, 0, Math.PI * 2);
+        ctx.arc(0, -1 * s, 3.5 * s, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.restore();
@@ -428,7 +446,7 @@ SPACE - also shoots</p>
         return;
       }
       wave++;
-      wt = 110;
+      wt = 24;
       spawnWave();
     }
 
@@ -443,13 +461,14 @@ SPACE - also shoots</p>
         if (s.y > H) s.y = 0;
       });
 
-      const spd = 5;
+      const shipRadius = 20 * playerSize();
+      const spd = 5 * Math.min(1.6, viewScale());
       if (keys.ArrowLeft || keys.a || keys.A) player.x -= spd;
       if (keys.ArrowRight || keys.d || keys.D) player.x += spd;
       if (keys.ArrowUp || keys.w || keys.W) player.y -= spd;
       if (keys.ArrowDown || keys.s || keys.S) player.y += spd;
-      player.x = Math.max(20, Math.min(W - 20, player.x));
-      player.y = Math.max(20, Math.min(H - 20, player.y));
+      player.x = Math.max(shipRadius, Math.min(W - shipRadius, player.x));
+      player.y = Math.max(shipRadius, Math.min(H - shipRadius, player.y));
 
       if (player.invul > 0) player.invul--;
       if (cooldown > 0) cooldown--;
@@ -460,10 +479,10 @@ SPACE - also shoots</p>
 
       const fireRate = rapidFire ? 2 : 10;
       if ((keys[" "] || keys.z || mouseDown) && cooldown <= 0) {
-        bullets.push({ x: player.x, y: player.y - 18, spd: 13, own: "p" });
+        bullets.push({ x: player.x, y: player.y - 18 * playerSize(), spd: 13 * Math.min(1.5, viewScale()), own: "p" });
         if (rapidFire) {
-          bullets.push({ x: player.x - 6, y: player.y - 12, spd: 13, own: "p" });
-          bullets.push({ x: player.x + 6, y: player.y - 12, spd: 13, own: "p" });
+          bullets.push({ x: player.x - 10 * playerSize(), y: player.y - 12 * playerSize(), spd: 13 * Math.min(1.5, viewScale()), own: "p" });
+          bullets.push({ x: player.x + 10 * playerSize(), y: player.y - 12 * playerSize(), spd: 13 * Math.min(1.5, viewScale()), own: "p" });
         }
         cooldown = fireRate;
       }
@@ -472,7 +491,7 @@ SPACE - also shoots</p>
         e.x = e.baseX + Math.sin(frame * e.cfg.swaySpd + e.baseX * 0.03) * e.cfg.swayAmp;
         e.shootTimer--;
         if (e.shootTimer <= 0) {
-          bullets.push({ x: e.x, y: e.y + 14, spd: e.cfg.bulletSpd, own: "e" });
+          bullets.push({ x: e.x, y: e.y + 14 * enemySize(e.type), spd: e.cfg.bulletSpd * Math.min(1.5, viewScale()), own: "e" });
           e.shootTimer = e.cfg.shootRate * 0.5 + Math.random() * e.cfg.shootRate;
         }
       });
@@ -487,7 +506,8 @@ SPACE - also shoots</p>
         if (b.own !== "p") continue;
         for (let j = enemies.length - 1; j >= 0; j--) {
           const e = enemies[j];
-          if (Math.abs(b.x - e.x) < 14 && Math.abs(b.y - e.y) < 13) {
+          const hit = 15 * enemySize(e.type);
+          if (Math.abs(b.x - e.x) < hit && Math.abs(b.y - e.y) < hit) {
             bullets.splice(i, 1);
             e.hp--;
             spark(e.x, e.y, e.type === "boss" ? "#ff4466" : e.type === "fast" ? "#ffaa22" : "#cc88ff", 5);
@@ -506,7 +526,8 @@ SPACE - also shoots</p>
         for (let i = bullets.length - 1; i >= 0; i--) {
           const b = bullets[i];
           if (b.own !== "e") continue;
-          if (Math.abs(b.x - player.x) < 15 && Math.abs(b.y - player.y) < 13) {
+          const hit = 16 * playerSize();
+          if (Math.abs(b.x - player.x) < hit && Math.abs(b.y - player.y) < hit) {
             bullets.splice(i, 1);
             lives--;
             player.invul = 100;
@@ -533,7 +554,10 @@ SPACE - also shoots</p>
       });
       explosions = explosions.filter((e) => e.life > 0);
 
-      if (enemies.length === 0 && wt === 0) nextWave();
+      if (enemies.length === 0 && wt === 0 && !waveQueued) {
+        waveQueued = true;
+        nextWave();
+      }
 
       document.getElementById("sc").textContent = "SCORE: " + score + (rapidFire ? " *" : "");
       document.getElementById("wv").textContent = "WAVE " + wave + "/20";
@@ -583,11 +607,11 @@ SPACE - also shoots</p>
           ctx.fillStyle = rapidFire ? "#ffee44" : "#7ef8ff";
           ctx.shadowBlur = 6;
           ctx.shadowColor = rapidFire ? "#ffee44" : "#7ef8ff";
-          ctx.fillRect(b.x - 2, b.y - 8, 4, 12);
+          ctx.fillRect(b.x - 3, b.y - 12, 6, 18);
           ctx.shadowBlur = 0;
         } else {
           ctx.fillStyle = "#ff6644";
-          ctx.fillRect(b.x - 2, b.y - 5, 4, 9);
+          ctx.fillRect(b.x - 3, b.y - 7, 6, 12);
         }
       });
       enemies.forEach((e) => drawEnemy(e));
@@ -595,9 +619,9 @@ SPACE - also shoots</p>
 
       if (rapidFire) {
         ctx.fillStyle = "rgba(255,238,68,0.18)";
-        ctx.font = "bold 11px Courier New";
+        ctx.font = "bold " + Math.max(14, Math.round(14 * viewScale())) + "px Courier New";
         ctx.textAlign = "left";
-        ctx.fillText("* RAPID FIRE: " + Math.ceil(rapidTimer / 60) + "s", 8, H - 8);
+        ctx.fillText("* RAPID FIRE: " + Math.ceil(rapidTimer / 60) + "s", 14, H - 16);
       }
     }
 
@@ -636,6 +660,7 @@ SPACE - also shoots</p>
       if (state === "playing") {
         enemies = [];
         bullets = [];
+        waveQueued = false;
         nextWave();
       }
     });
@@ -656,6 +681,7 @@ SPACE - also shoots</p>
         });
         enemies = [];
         bullets = [];
+        waveQueued = false;
       }
     });
 
@@ -663,7 +689,7 @@ SPACE - also shoots</p>
       keys[e.key] = true;
       if (e.key === " ") e.preventDefault();
       cheatBuf = (cheatBuf + e.key.toLowerCase()).slice(-10);
-      if (cheatBuf.endsWith("armachest")) toggleAdmin();
+      if (cheatBuf.endsWith("armachest") || cheatBuf.endsWith("armacheat")) toggleAdmin();
     });
 
     document.addEventListener("keyup", (e) => {
