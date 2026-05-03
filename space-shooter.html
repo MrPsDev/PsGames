@@ -185,6 +185,10 @@
       cursor: pointer;
     }
 
+    #cheat.hidden {
+      display: none;
+    }
+
     @media (max-width: 760px) {
       #hud {
         padding: 8px 10px;
@@ -1138,6 +1142,13 @@ SPACE - also shoots</p>
       adm.style.display = adm.style.display === "block" ? "none" : "block";
     }
 
+    function syncCheatVisibility() {
+      const cheatButton = document.getElementById("cheat");
+      const hasAccess = sessionStorage.getItem(ADMIN_AUTH_KEY) === "1";
+      cheatButton.classList.toggle("hidden", !hasAccess);
+      if (!hasAccess) document.getElementById("adm").style.display = "none";
+    }
+
     async function ensureAdminAccess() {
       if (sessionStorage.getItem(ADMIN_AUTH_KEY) === "1") return true;
       window.alert("Login first with arma / owner on main menu.");
@@ -1232,7 +1243,9 @@ SPACE - also shoots</p>
       if (e.button === 0) mouseDown = false;
     });
 
+    window.addEventListener("focus", syncCheatVisibility);
     window.addEventListener("resize", resizeGame);
+    syncCheatVisibility();
     syncAdminButtons();
     resizeGame();
   </script>
