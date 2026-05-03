@@ -59,6 +59,10 @@
       transform: translateX(-50%);
     }
 
+    #gc.boss-fight #wv {
+      top: 54px;
+    }
+
     #lv {
       position: absolute;
       right: 14px;
@@ -577,6 +581,21 @@ SPACE - also shoots</p>
       }
     }
 
+    function roundedRectPath(x, y, w, h, r) {
+      const rr = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + rr, y);
+      ctx.lineTo(x + w - rr, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + rr);
+      ctx.lineTo(x + w, y + h - rr);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - rr, y + h);
+      ctx.lineTo(x + rr, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - rr);
+      ctx.lineTo(x, y + rr);
+      ctx.quadraticCurveTo(x, y, x + rr, y);
+      ctx.closePath();
+    }
+
     function drawShip(x, y, inv) {
       if (inv > 0 && Math.floor(inv / 5) % 2) return;
       const s = playerSize();
@@ -949,6 +968,7 @@ SPACE - also shoots</p>
         nextWave();
       }
 
+      root.classList.toggle("boss-fight", enemies.some((e) => e.type === "finalBoss"));
       document.getElementById("wv").textContent = "WAVE: " + wave + "/20";
       document.getElementById("lv").textContent = "HP: " + Math.max(0, lives);
     }
@@ -1013,21 +1033,39 @@ SPACE - also shoots</p>
 
       const boss = enemies.find((e) => e.type === "finalBoss");
       if (boss) {
-        const barW = Math.min(W * 0.64, 520);
-        const barH = Math.max(16, 18 * viewScale());
+        const barW = Math.min(W * 0.66, 560);
+        const barH = Math.max(18, 20 * viewScale());
         const bx = (W - barW) / 2;
-        const by = 14;
-        ctx.fillStyle = "rgba(40,0,0,0.72)";
-        ctx.fillRect(bx, by, barW, barH);
-        ctx.fillStyle = "#ff304f";
-        ctx.fillRect(bx, by, barW * Math.max(0, boss.hp / boss.maxHp), barH);
-        ctx.strokeStyle = "rgba(255,180,190,0.9)";
+        const by = 16;
+        const radius = 10;
+        ctx.fillStyle = "rgba(18,3,7,0.84)";
+        ctx.beginPath();
+        ctx.roundRect(bx, by, barW, barH, radius);
+        ctx.fill();
+        const fillW = barW * Math.max(0, boss.hp / boss.maxHp);
+        const grad = ctx.createLinearGradient(bx, by, bx + barW, by);
+        grad.addColorStop(0, "#ff3655");
+        grad.addColorStop(0.55, "#ff5f6f");
+        grad.addColorStop(1, "#ff9b8d");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.roundRect(bx, by, fillW, barH, radius);
+        ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,0.14)";
+        ctx.beginPath();
+        ctx.roundRect(bx + 3, by + 3, Math.max(0, fillW - 6), Math.max(0, barH * 0.34), 8);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,194,202,0.95)";
         ctx.lineWidth = 2;
-        ctx.strokeRect(bx, by, barW, barH);
-        ctx.fillStyle = "#ffd8dd";
+        ctx.beginPath();
+        ctx.roundRect(bx, by, barW, barH, radius);
+        ctx.stroke();
+        ctx.fillStyle = "#ffe6ea";
         ctx.font = "bold " + Math.max(12, Math.round(13 * viewScale())) + "px Courier New";
         ctx.textAlign = "center";
-        ctx.fillText("BOSS HP", W / 2, by + barH - 4);
+        ctx.fillText("FINAL BOSS", W / 2, by - 6);
+        ctx.font = "bold " + Math.max(11, Math.round(12 * viewScale())) + "px Courier New";
+        ctx.fillText(Math.max(0, boss.hp) + " / " + boss.maxHp, W / 2, by + barH - 4);
       }
 
       if (shieldBoostTimer > 0) {
