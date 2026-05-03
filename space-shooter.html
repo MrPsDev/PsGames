@@ -40,10 +40,10 @@
 
     #hud span {
       color: #7ef8ff;
-      font-size: 18px;
+      font-size: 24px;
       font-weight: 700;
       background: rgba(0, 0, 0, 0.4);
-      padding: 8px 14px;
+      padding: 10px 18px;
       border-radius: 8px;
     }
 
@@ -162,7 +162,7 @@
       }
 
       #hud span {
-        font-size: 13px;
+        font-size: 15px;
         padding: 5px 8px;
       }
 
@@ -228,6 +228,8 @@ SPACE - also shoots</p>
     let rapidTimer = 0;
     let cheatBuf = "";
     let waveQueued = false;
+    const WAVE_INTRO_FRAMES = 72;
+    const ADMIN_CODE = "armacheat";
 
     function resizeGame() {
       const prevW = W || 680;
@@ -241,6 +243,14 @@ SPACE - also shoots</p>
       if (player) {
         player.x = (player.x / prevW) * W;
         player.y = (player.y / prevH) * H;
+      }
+
+      if (enemies && enemies.length) {
+        enemies.forEach((e) => {
+          e.baseX = (e.baseX / prevW) * W;
+          e.x = (e.x / prevW) * W;
+          e.y = (e.y / prevH) * H;
+        });
       }
 
       if (stars && stars.length) {
@@ -299,7 +309,7 @@ SPACE - also shoots</p>
         const ext = [];
         base.forEach(([x, y]) => {
           ext.push([x, y]);
-          ext.push([x + 5, y]);
+          ext.push([x + 3, y]);
         });
         const seen = new Set();
         return ext.filter(([x, y]) => {
@@ -330,11 +340,16 @@ SPACE - also shoots</p>
       const form = getFormation(wave);
       const cfg = waveConfig(wave);
       const cx = W / 2;
-      const cy = Math.max(90, H * 0.22);
-      const scale = Math.min(W / 13.5, H / 8.5);
+      const cy = Math.max(115, H * 0.24);
+      const maxScaleFromWidth = W / 13.5;
+      const maxScaleFromHeight = H / 9.5;
+      const maxScaleFromTop = (cy - 34) / 2;
+      const scale = Math.max(26, Math.min(maxScaleFromWidth, maxScaleFromHeight, maxScaleFromTop));
       form.forEach(([dx, dy], i) => {
         const type = wave <= 2 ? "basic" : i % 6 === 0 && wave > 5 ? "boss" : i % 3 === 0 && wave > 3 ? "fast" : "basic";
-        enemies.push({ x: cx + dx * scale, y: cy + dy * scale, baseX: cx + dx * scale, type, hp: type === "boss" ? 2 : 1, shootTimer: 80 + Math.random() * cfg.shootRate, cfg });
+        const baseX = Math.max(40, Math.min(W - 40, cx + dx * scale));
+        const y = Math.max(36, Math.min(H * 0.68, cy + dy * scale));
+        enemies.push({ x: baseX, y, baseX, type, hp: type === "boss" ? 2 : 1, shootTimer: 80 + Math.random() * cfg.shootRate, cfg });
       });
     }
 
@@ -446,7 +461,7 @@ SPACE - also shoots</p>
         return;
       }
       wave++;
-      wt = 24;
+      wt = WAVE_INTRO_FRAMES;
       spawnWave();
     }
 
@@ -560,7 +575,7 @@ SPACE - also shoots</p>
       }
 
       document.getElementById("sc").textContent = "SCORE: " + score + (rapidFire ? " *" : "");
-      document.getElementById("wv").textContent = "WAVE " + wave + "/20";
+      document.getElementById("wv").textContent = "WAVE: " + wave + "/20";
       document.getElementById("lv").textContent = "HP: " + Math.max(0, lives);
     }
 
@@ -575,15 +590,14 @@ SPACE - also shoots</p>
       });
 
       if (wt > 0) {
-        const a = Math.min(1, wt > 70 ? 1 : (110 - wt) / 40);
+        const a = Math.min(1, wt > WAVE_INTRO_FRAMES - 18 ? 1 : (WAVE_INTRO_FRAMES - wt) / 18);
         ctx.fillStyle = "rgba(126,248,255," + a + ")";
-        ctx.font = "bold 26px Courier New";
+        ctx.font = "bold 34px Courier New";
         ctx.textAlign = "center";
-        ctx.fillText("WAVE " + wave + " / 20", W / 2, H / 2 - 14);
-        const msgs = ["Start!", "More!", "Faster!", "Incoming!", "Danger!", "Serious!", "Hard!", "Halfway!", "Crisis!", "Keep going!", "Closer!", "Oof!", "Quick!", "Now!", "Final!", "", "", "", "", ""];
-        ctx.font = "14px Courier New";
+        ctx.fillText("NEXT WAVE " + wave, W / 2, H / 2 - 16);
+        ctx.font = "18px Courier New";
         ctx.fillStyle = "rgba(170,170,170," + a + ")";
-        ctx.fillText(msgs[wave - 1] || "", W / 2, H / 2 + 16);
+        ctx.fillText("Get ready", W / 2, H / 2 + 20);
         return;
       }
 
@@ -688,8 +702,8 @@ SPACE - also shoots</p>
     document.addEventListener("keydown", (e) => {
       keys[e.key] = true;
       if (e.key === " ") e.preventDefault();
-      cheatBuf = (cheatBuf + e.key.toLowerCase()).slice(-10);
-      if (cheatBuf.endsWith("armachest") || cheatBuf.endsWith("armacheat")) toggleAdmin();
+      cheatBuf = (cheatBuf + e.key.toLowerCase()).slice(-ADMIN_CODE.length);
+      if (cheatBuf.endsWith(ADMIN_CODE)) toggleAdmin();
     });
 
     document.addEventListener("keyup", (e) => {
