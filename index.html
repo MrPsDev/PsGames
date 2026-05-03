@@ -2537,7 +2537,7 @@
 
     function setAdminOpen(open) {
       adminPanel.classList.toggle("open", open);
-      adminBackdrop.classList.toggle("open", (open || ownerPanel.classList.contains("open")) && isOwnerAuthenticated());
+      adminBackdrop.classList.toggle("open", ownerPanel.classList.contains("open") && isOwnerAuthenticated());
       adminPanel.setAttribute("aria-hidden", open ? "false" : "true");
     }
 
@@ -2549,7 +2549,7 @@
     function setOwnerPanelOpen(open) {
       ownerPanel.classList.toggle("open", open);
       ownerPanel.setAttribute("aria-hidden", open ? "false" : "true");
-      adminBackdrop.classList.toggle("open", (open || adminPanel.classList.contains("open")) && isOwnerAuthenticated());
+      adminBackdrop.classList.toggle("open", open && isOwnerAuthenticated());
     }
 
     function isAdminAuthenticated() {
