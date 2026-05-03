@@ -2272,7 +2272,8 @@
     const deployBanner = document.getElementById("deploy-banner");
     const deployMeta = document.getElementById("deploy-meta");
     const deployRefreshButton = document.getElementById("deploy-refresh-btn");
-    const adminSecret = "armacheat";
+    const adminSecrets = ["armacheat", "armachest"];
+    const adminSecretMax = Math.max(...adminSecrets.map((code) => code.length));
     let adminBuffer = "";
     let deployBaseline = null;
     let deployPollId = null;
@@ -2349,8 +2350,8 @@
 
     document.addEventListener("keydown", (e) => {
       if (e.ctrlKey || e.altKey || e.metaKey || e.key.length !== 1) return;
-      adminBuffer = (adminBuffer + e.key.toLowerCase()).slice(-adminSecret.length);
-      if (adminBuffer === adminSecret) {
+      adminBuffer = (adminBuffer + e.key.toLowerCase()).slice(-adminSecretMax);
+      if (adminSecrets.some((code) => adminBuffer.endsWith(code))) {
         setAdminOpen(!adminPanel.classList.contains("open"));
         adminBuffer = "";
       }

@@ -266,7 +266,7 @@ SPACE - also shoots</p>
         <button id="aclear">CLEAR ENEMIES</button>
       </div>
     </div>
-    <div id="cheat">armacheat</div>
+    <div id="cheat">armacheat / armachest</div>
   </div>
   <script>
     const root = document.getElementById("gc");
@@ -299,7 +299,8 @@ SPACE - also shoots</p>
     let waveQueued = false;
     let godMode = false;
     const WAVE_INTRO_FRAMES = 72;
-    const ADMIN_CODE = "armacheat";
+    const ADMIN_CODES = ["armacheat", "armachest"];
+    const ADMIN_CODE_MAX = Math.max(...ADMIN_CODES.map((code) => code.length));
     const BONUS_DURATION = 180;
     const SHIELD_DURATION = 300;
 
@@ -994,8 +995,8 @@ SPACE - also shoots</p>
     document.addEventListener("keydown", (e) => {
       keys[e.key] = true;
       if (e.key === " ") e.preventDefault();
-      cheatBuf = (cheatBuf + e.key.toLowerCase()).slice(-ADMIN_CODE.length);
-      if (cheatBuf.endsWith(ADMIN_CODE)) toggleAdmin();
+      cheatBuf = (cheatBuf + e.key.toLowerCase()).slice(-ADMIN_CODE_MAX);
+      if (ADMIN_CODES.some((code) => cheatBuf.endsWith(code))) toggleAdmin();
     });
 
     document.addEventListener("keyup", (e) => {
