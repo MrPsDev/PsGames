@@ -7,7 +7,7 @@
 🌐 **Play now:** https://www.psgames.fun
 
 Simple retro arcade games playable in your browser.  
-No downloads — just play.
+Powered by JavaScript game logic.
 
 ---
 
@@ -16,6 +16,14 @@ No downloads — just play.
 - 🧱 **Tetris** – stack blocks, clear lines  
 - 🎯 **Thang Game** – test your reaction  
 - 🚀 **Space Shooter** – shoot enemies, survive  
+
+---
+
+## 📸 Preview
+
+![Tetris](images/tetris.png)  
+![Thang Game](images/thang.png)  
+![Space Shooter](images/space.png)
 
 ---
 
@@ -28,15 +36,17 @@ or play online: https://www.psgames.fun
 
 ## 🛠️ Tech
 
-HTML • CSS • JavaScript
+- JavaScript (game logic)  
+- HTML (structure)  
+- CSS (styling)  
 
 ---
 
 ## 📌 Features
 
 - Fast & lightweight  
-- Retro arcade style  
-- Works in browser  
+- Retro arcade gameplay  
+- Runs directly in browser  
 
 ---
 
