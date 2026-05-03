@@ -2288,6 +2288,8 @@
     const deployRefreshButton = document.getElementById("deploy-refresh-btn");
     const adminSecrets = ["pscheat"];
     const adminSecretMax = Math.max(...adminSecrets.map((code) => code.length));
+    const ADMIN_AUTH_KEY = "psgames-admin-auth";
+    const ADMIN_PASSWORD_HASH = "095d42bf22546757a4db0283e42e7c1aecc9c3d28a56994d66dd91e82c17aa04";
     let adminBuffer = "";
     let deployBaseline = null;
     let deployPollId = null;
@@ -2301,6 +2303,25 @@
     function setAdminOpen(open) {
       adminPanel.classList.toggle("open", open);
       adminPanel.setAttribute("aria-hidden", open ? "false" : "true");
+    }
+
+    async function sha256(text) {
+      const bytes = new TextEncoder().encode(text);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", bytes);
+      return Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    async function ensureAdminAccess() {
+      if (sessionStorage.getItem(ADMIN_AUTH_KEY) === "1") return true;
+      const password = window.prompt("Enter admin password");
+      if (!password) return false;
+      const hash = await sha256(password.trim());
+      if (hash === ADMIN_PASSWORD_HASH) {
+        sessionStorage.setItem(ADMIN_AUTH_KEY, "1");
+        return true;
+      }
+      window.alert("Wrong password");
+      return false;
     }
 
     function refreshAdminButtons() {
@@ -2358,15 +2379,22 @@
     }
 
     adminClose.addEventListener("click", () => setAdminOpen(false));
-    adminLaunch.addEventListener("click", () => setAdminOpen(!adminPanel.classList.contains("open")));
+    adminLaunch.addEventListener("click", async () => {
+      if (!(await ensureAdminAccess())) return;
+      setAdminOpen(!adminPanel.classList.contains("open"));
+    });
     deployRefreshButton.addEventListener("click", () => {
       window.location.reload();
     });
 
-    document.addEventListener("keydown", (e) => {
+    document.addEventListener("keydown", async (e) => {
       if (e.ctrlKey || e.altKey || e.metaKey || e.key.length !== 1) return;
       adminBuffer = (adminBuffer + e.key.toLowerCase()).slice(-adminSecretMax);
       if (adminSecrets.some((code) => adminBuffer.endsWith(code))) {
+        if (!(await ensureAdminAccess())) {
+          adminBuffer = "";
+          return;
+        }
         setAdminOpen(!adminPanel.classList.contains("open"));
         adminBuffer = "";
       }

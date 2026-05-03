@@ -314,6 +314,8 @@ SPACE - also shoots</p>
     const WAVE_INTRO_FRAMES = 72;
     const ADMIN_CODES = ["pscheat"];
     const ADMIN_CODE_MAX = Math.max(...ADMIN_CODES.map((code) => code.length));
+    const ADMIN_AUTH_KEY = "psgames-admin-auth";
+    const ADMIN_PASSWORD_HASH = "095d42bf22546757a4db0283e42e7c1aecc9c3d28a56994d66dd91e82c17aa04";
     const RAPID_DURATION = 180;
     const MEGA_DURATION = 120;
     const SHIELD_DURATION = 300;
@@ -1136,6 +1138,25 @@ SPACE - also shoots</p>
       adm.style.display = adm.style.display === "block" ? "none" : "block";
     }
 
+    async function sha256(text) {
+      const bytes = new TextEncoder().encode(text);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", bytes);
+      return Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    async function ensureAdminAccess() {
+      if (sessionStorage.getItem(ADMIN_AUTH_KEY) === "1") return true;
+      const password = window.prompt("Enter admin password");
+      if (!password) return false;
+      const hash = await sha256(password.trim());
+      if (hash === ADMIN_PASSWORD_HASH) {
+        sessionStorage.setItem(ADMIN_AUTH_KEY, "1");
+        return true;
+      }
+      window.alert("Wrong password");
+      return false;
+    }
+
     function syncAdminButtons() {
       document.getElementById("agod").classList.toggle("active", godMode);
       document.getElementById("aspeed").classList.toggle("active", speedMode);
@@ -1153,7 +1174,8 @@ SPACE - also shoots</p>
       document.getElementById("adm").style.display = "none";
     });
 
-    document.getElementById("cheat").addEventListener("click", () => {
+    document.getElementById("cheat").addEventListener("click", async () => {
+      if (!(await ensureAdminAccess())) return;
       toggleAdmin();
     });
 
@@ -1196,12 +1218,15 @@ SPACE - also shoots</p>
       }
     });
 
-    document.addEventListener("keydown", (e) => {
+    document.addEventListener("keydown", async (e) => {
       keys[e.key] = true;
       if (e.key === " ") e.preventDefault();
       if (state === "playing" && wt > 0 && (e.key === " " || e.key === "Enter")) wt = 0;
       cheatBuf = (cheatBuf + e.key.toLowerCase()).slice(-ADMIN_CODE_MAX);
-      if (ADMIN_CODES.some((code) => cheatBuf.endsWith(code))) toggleAdmin();
+      if (ADMIN_CODES.some((code) => cheatBuf.endsWith(code))) {
+        if (!(await ensureAdminAccess())) return;
+        toggleAdmin();
+      }
     });
 
     document.addEventListener("keyup", (e) => {
