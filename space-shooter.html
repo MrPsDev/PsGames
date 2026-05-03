@@ -35,7 +35,7 @@
       pointer-events: none;
       padding: 10px 14px;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
     }
 
     #hud span {
@@ -45,6 +45,21 @@
       background: rgba(0, 0, 0, 0.4);
       padding: 10px 18px;
       border-radius: 8px;
+    }
+
+    #sc {
+      display: none;
+    }
+
+    #wv {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    #lv {
+      position: absolute;
+      right: 14px;
     }
 
     #ov {
@@ -171,6 +186,10 @@
         padding: 5px 8px;
       }
 
+      #lv {
+        right: 10px;
+      }
+
       #ov h2 {
         font-size: 22px;
       }
@@ -187,6 +206,37 @@
         font-size: 30px;
         padding: 12px 22px;
       }
+    }
+
+    :fullscreen #adm,
+    :-webkit-full-screen #adm {
+      min-width: 460px;
+      padding: 18px 24px;
+      bottom: 22px;
+    }
+
+    :fullscreen #adm .atitle,
+    :-webkit-full-screen #adm .atitle {
+      font-size: 16px;
+      margin-bottom: 14px;
+    }
+
+    :fullscreen #adm .arow,
+    :-webkit-full-screen #adm .arow {
+      gap: 12px;
+    }
+
+    :fullscreen #adm button,
+    :-webkit-full-screen #adm button {
+      font-size: 15px;
+      padding: 10px 18px;
+    }
+
+    :fullscreen #adm .aclose,
+    :-webkit-full-screen #adm .aclose {
+      font-size: 18px;
+      top: 8px;
+      right: 12px;
     }
   </style>
 </head>
@@ -272,7 +322,7 @@ SPACE - also shoots</p>
     }
 
     function viewScale() {
-      return Math.max(1, Math.min(W / 680, H / 480, 2.1));
+      return Math.max(0.92, Math.min(W / 680, H / 480, 2.6));
     }
 
     function playerSize() {
@@ -451,9 +501,12 @@ SPACE - also shoots</p>
         ctx.lineTo(-12 * s, 8 * s);
         ctx.closePath();
         ctx.fill();
-        ctx.fillStyle = "#111";
-        ctx.font = Math.max(11, Math.round(10 * s)) + "px Courier New";
+        ctx.fillStyle = "#050505";
+        ctx.lineWidth = Math.max(1.5, 1.8 * s);
+        ctx.strokeStyle = "rgba(255,255,255,0.18)";
+        ctx.font = "900 " + Math.max(13, Math.round(11 * s)) + "px Courier New";
         ctx.textAlign = "center";
+        ctx.strokeText(e.hp, 0, 3 * s);
         ctx.fillText(e.hp, 0, 3 * s);
       } else if (e.type === "fast") {
         ctx.fillStyle = "#ffaa22";
@@ -600,7 +653,6 @@ SPACE - also shoots</p>
         nextWave();
       }
 
-      document.getElementById("sc").textContent = "SCORE: " + score + (rapidFire ? " *" : "");
       document.getElementById("wv").textContent = "WAVE: " + wave + "/20";
       document.getElementById("lv").textContent = "HP: " + Math.max(0, lives);
     }
