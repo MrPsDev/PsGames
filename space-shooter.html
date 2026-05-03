@@ -371,9 +371,10 @@ SPACE - also shoots</p>
 
     function maybeSpawnBonus(force) {
       if (!bonuses) bonuses = [];
-      if (!force && bonuses.length >= 2) return;
+      if (!force && bonuses.length >= 1) return;
+      if (!force && Math.random() < 0.5) return;
       const roll = Math.random();
-      const type = roll < 0.2 ? "rapid" : roll < 0.4 ? "speed" : roll < 0.6 ? "combo" : roll < 0.8 ? "shield" : "medkit";
+      const type = roll < 0.45 ? "speed" : roll < 0.68 ? "rapid" : roll < 0.9 ? "shield" : "mega";
       spawnBonus(type);
     }
 
@@ -441,7 +442,7 @@ SPACE - also shoots</p>
       bonuses = [];
       frame = 0;
       waveQueued = false;
-      bonusSpawnTimer = 120;
+      bonusSpawnTimer = 220;
       if (player) {
         player.x = W / 2;
         player.y = H - Math.max(80, H * 0.12);
@@ -460,7 +461,7 @@ SPACE - also shoots</p>
         const y = Math.max(72, Math.min(H * 0.68, cy + dy * scale));
         enemies.push({ x: baseX, y, baseX, dx, dy, type, hp: type === "boss" ? 2 : 1, shootTimer: 80 + Math.random() * cfg.shootRate, cfg });
       });
-      maybeSpawnBonus(true);
+      if (Math.random() < 0.7) maybeSpawnBonus(true);
       if (Math.random() < 0.3) spawnBonus("medkit");
     }
 
@@ -659,7 +660,7 @@ SPACE - also shoots</p>
       } else if (b.type === "medkit") {
         ctx.fillRect(-3, -9, 6, 18);
         ctx.fillRect(-9, -3, 18, 6);
-      } else {
+      } else if (b.type === "mega") {
         ctx.beginPath();
         ctx.moveTo(0, -9);
         ctx.lineTo(4, -2);
@@ -704,7 +705,7 @@ SPACE - also shoots</p>
         bonusSpawnTimer--;
       } else if (state === "playing") {
         maybeSpawnBonus(false);
-        bonusSpawnTimer = 260;
+        bonusSpawnTimer = 420;
       }
 
       const shipRadius = 20 * playerSize();
@@ -746,9 +747,9 @@ SPACE - also shoots</p>
               rapidBoostTimer = BONUS_DURATION;
               speedBoostTimer = BONUS_DURATION;
             }
-            spark(b.x, b.y, b.type === "speed" ? "#6bffcb" : b.type === "combo" ? "#c6ff54" : b.type === "shield" ? "#7ef8ff" : b.type === "medkit" ? "#ff6b6b" : "#ffe96b", 12);
+            spark(b.x, b.y, b.type === "speed" ? "#6bffcb" : b.type === "mega" ? "#c6ff54" : b.type === "shield" ? "#7ef8ff" : b.type === "medkit" ? "#ff6b6b" : "#ffe96b", 12);
             bonuses.splice(i, 1);
-            bonusSpawnTimer = 180;
+            bonusSpawnTimer = 320;
           }
         }
       }
