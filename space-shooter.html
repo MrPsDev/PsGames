@@ -351,7 +351,7 @@ SPACE - also shoots</p>
     }
 
     function playerSize() {
-      const bossScale = wave === 20 ? 0.8 : 1;
+      const bossScale = wave === 20 ? 0.76 : 1;
       return 1.15 * viewScale() * Math.max(0.9, waveScale + 0.02) * bossScale;
     }
 
@@ -468,10 +468,10 @@ SPACE - also shoots</p>
 
     function spawnFinalBoss() {
       const cfg = {
-        swayAmp: 28,
-        swaySpd: 0.02,
-        shootRate: 50,
-        bulletSpd: 3.2
+        swayAmp: 22,
+        swaySpd: 0.016,
+        shootRate: 62,
+        bulletSpd: 2.5
       };
       const boss = {
         type: "finalBoss",
@@ -482,7 +482,7 @@ SPACE - also shoots</p>
         dy: 0,
         hp: 120,
         maxHp: 120,
-        shootTimer: 45,
+        shootTimer: 60,
         cfg,
         attackCycle: 0
       };
@@ -861,35 +861,35 @@ SPACE - also shoots</p>
                 bullets.push({
                   x: e.x + spread * 16,
                   y: e.y + 18 * enemySize(e.type),
-                  vx: (dx / len) * 2.6 + spread * 0.7,
-                  vy: (dy / len) * 2.6,
-                  own: "e"
-                });
-              }
-              e.shootTimer = 34;
-            } else if (e.attackCycle === 1) {
-              for (let k = 0; k < 12; k++) {
-                const a = (Math.PI * 2 * k) / 12;
-                bullets.push({
-                  x: e.x,
-                  y: e.y + 10,
-                  vx: Math.cos(a) * 2.5,
-                  vy: Math.sin(a) * 2.5,
-                  own: "e"
-                });
-              }
-              e.shootTimer = 60;
-            } else {
-              for (let k = 0; k < 6; k++) {
-                bullets.push({
-                  x: W * (0.14 + k * 0.14) + Math.random() * 24,
-                  y: e.y + 8,
-                  vx: 0,
-                  vy: 3.7,
+                  vx: (dx / len) * 2.15 + spread * 0.45,
+                  vy: (dy / len) * 2.15,
                   own: "e"
                 });
               }
               e.shootTimer = 52;
+            } else if (e.attackCycle === 1) {
+              for (let k = 0; k < 10; k++) {
+                const a = (Math.PI * 2 * k) / 10;
+                bullets.push({
+                  x: e.x,
+                  y: e.y + 10,
+                  vx: Math.cos(a) * 2.05,
+                  vy: Math.sin(a) * 2.05,
+                  own: "e"
+                });
+              }
+              e.shootTimer = 78;
+            } else {
+              for (let k = 0; k < 5; k++) {
+                bullets.push({
+                  x: W * (0.18 + k * 0.16) + Math.random() * 12,
+                  y: e.y + 8,
+                  vx: 0,
+                  vy: 2.9,
+                  own: "e"
+                });
+              }
+              e.shootTimer = 72;
             }
             e.attackCycle = (e.attackCycle + 1) % 3;
           }
@@ -934,7 +934,7 @@ SPACE - also shoots</p>
         for (let i = bullets.length - 1; i >= 0; i--) {
           const b = bullets[i];
           if (b.own !== "e") continue;
-          const hit = 14.5 * playerSize();
+          const hit = wave === 20 ? 12.2 * playerSize() : 14.5 * playerSize();
           if (Math.abs(b.x - player.x) < hit && Math.abs(b.y - player.y) < hit) {
             bullets.splice(i, 1);
             if (shieldBoostTimer > 0) {
@@ -1027,8 +1027,9 @@ SPACE - also shoots</p>
           ctx.shadowBlur = 0;
         } else {
           ctx.fillStyle = "#ff6644";
-          const ew = Math.max(3, 5 * Math.max(0.78, waveScale));
-          const eh = Math.max(9, 11 * Math.max(0.78, waveScale));
+          const bossBulletScale = wave === 20 ? 0.7 : 1;
+          const ew = Math.max(2, 5 * Math.max(0.78, waveScale) * bossBulletScale);
+          const eh = Math.max(7, 11 * Math.max(0.78, waveScale) * bossBulletScale);
           ctx.fillRect(b.x - ew / 2, b.y - eh / 2, ew, eh);
         }
       });
