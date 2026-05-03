@@ -2402,6 +2402,7 @@
       loginModal.setAttribute("aria-hidden", open ? "false" : "true");
       if (open) {
         loginError.textContent = "";
+        loginName.value = "";
         loginPassword.value = "";
         setTimeout(() => loginName.focus(), 0);
       }
@@ -2463,10 +2464,6 @@
 
     adminClose.addEventListener("click", () => setAdminOpen(false));
     adminLaunch.addEventListener("click", () => {
-      if (isAdminAuthenticated()) {
-        setAdminOpen(!adminPanel.classList.contains("open"));
-        return;
-      }
       setLoginOpen(true);
     });
     loginCancel.addEventListener("click", () => setLoginOpen(false));
