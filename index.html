@@ -720,20 +720,37 @@
 
     .space-wrap {
       position: relative;
-      width: 100%;
+      width: min(920px, 92%);
+      margin-left: auto;
+      margin-right: auto;
       margin-top: 18px;
       border-radius: 16px;
       border: 1px solid var(--line);
       overflow: hidden;
     }
 
+    .space-overlay-controls {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      z-index: 6;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .space-overlay-group {
+      display: flex;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
     .space-overlay-btn {
       position: absolute;
-      right: 14px;
-      bottom: 14px;
       z-index: 5;
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       border: 1px solid rgba(123, 199, 255, 0.34);
       border-radius: 7px;
       background: rgba(5, 12, 18, 0.82);
@@ -766,6 +783,55 @@
     .space-overlay-btn:hover {
       border-color: rgba(123, 199, 255, 0.62);
       background: rgba(10, 20, 32, 0.92);
+    }
+
+    .space-overlay-btn.menu-btn,
+    .space-overlay-btn.reload-btn,
+    .space-overlay-btn.fullscreen-btn-mini {
+      position: relative;
+    }
+
+    .space-overlay-btn.menu-btn::before,
+    .space-overlay-btn.menu-btn::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      width: 20px;
+      height: 3px;
+      border-radius: 999px;
+      background: #7ef8ff;
+      box-shadow: 0 7px 0 #7ef8ff, 0 14px 0 #7ef8ff;
+      top: 8px;
+    }
+
+    .space-overlay-btn.menu-btn::after {
+      display: none;
+    }
+
+    .space-overlay-btn.reload-btn::before {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      width: 14px;
+      height: 14px;
+      border: 4px solid #7ef8ff;
+      border-right-color: transparent;
+      border-radius: 50%;
+      transform: rotate(25deg);
+    }
+
+    .space-overlay-btn.reload-btn::after {
+      content: "";
+      position: absolute;
+      right: 7px;
+      top: 7px;
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 8px solid #7ef8ff;
+      transform: rotate(18deg);
     }
 
     .space-frame {
@@ -2060,13 +2126,18 @@
             <div class="screen-title">Space Shooter</div>
             <div class="hint">WASD or arrows to move. Hold left mouse or press Space to shoot.</div>
           </div>
-          <div class="top-row">
-            <button class="secondary" id="back-from-space">Menu</button>
-            <button class="primary" id="space-start-btn">Reload Game</button>
-          </div>
         </div>
 
         <div class="space-wrap">
+          <div class="space-overlay-controls">
+            <div class="space-overlay-group">
+              <button class="space-overlay-btn menu-btn" id="back-from-space" type="button" aria-label="Menu" title="Menu"></button>
+              <button class="space-overlay-btn reload-btn" id="space-start-btn" type="button" aria-label="Reload Game" title="Reload Game"></button>
+            </div>
+            <div class="space-overlay-group">
+              <button class="space-overlay-btn fullscreen-btn-mini" id="space-overlay-fullscreen" type="button" aria-label="Fullscreen" title="Fullscreen"></button>
+            </div>
+          </div>
           <iframe
             id="space-frame"
             class="space-frame"
@@ -2075,7 +2146,6 @@
             loading="lazy"
             allow="fullscreen"
           ></iframe>
-          <button class="space-overlay-btn" id="space-overlay-fullscreen" type="button" aria-label="Fullscreen" title="Fullscreen"></button>
         </div>
       </div>
     </section>
