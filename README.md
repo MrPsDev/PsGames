@@ -1,7 +1,7 @@
 # 🕹️ Retro Arcade Games
 
 ![status](https://img.shields.io/badge/status-active-brightgreen)
-![made with](https://img.shields.io/badge/made%20with-JavaScript-yellow)
+![built with](https://img.shields.io/badge/built%20with-HTML%20%7C%20CSS%20%7C%20JS-blue)
 ![games](https://img.shields.io/badge/games-3-blue)
 
 🌐 **Play now:** https://www.psgames.fun
