@@ -396,6 +396,10 @@ SPACE - also shoots</p>
       bullets = [];
       frame = 0;
       waveQueued = false;
+      if (player) {
+        player.x = W / 2;
+        player.y = H - Math.max(80, H * 0.12);
+      }
       const form = getFormation(wave);
       const cfg = waveConfig(wave);
       const cx = W / 2;
