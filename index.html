@@ -180,16 +180,6 @@
       display: grid;
     }
 
-    .admin-panel.owner-mode {
-      top: 50%;
-      left: 50%;
-      right: auto;
-      transform: translate(-50%, -50%);
-      width: min(720px, calc(100vw - 28px));
-      z-index: 32;
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.48);
-    }
-
     .admin-launch {
       position: fixed;
       top: 14px;
@@ -246,6 +236,40 @@
 
     .admin-backdrop.open {
       display: block;
+    }
+
+    .owner-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 33;
+      display: none;
+      width: min(360px, calc(100vw - 28px));
+      padding: 20px;
+      border: 1px solid rgba(151, 194, 220, 0.22);
+      border-radius: 18px;
+      background: rgba(8, 16, 24, 0.96);
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.44);
+      gap: 12px;
+    }
+
+    .owner-panel.open {
+      display: grid;
+    }
+
+    .owner-title {
+      color: var(--text);
+      font-size: 26px;
+      font-weight: 900;
+      text-align: center;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .owner-actions {
+      display: grid;
+      gap: 10px;
     }
 
     .login-modal {
@@ -2394,6 +2418,14 @@
   </div>
   <div class="admin-backdrop" id="admin-backdrop"></div>
 
+  <div class="owner-panel" id="owner-panel" aria-hidden="true">
+    <div class="owner-title">Owner</div>
+    <div class="owner-actions">
+      <button class="primary" id="owner-cheat" type="button">Cheat</button>
+      <button class="secondary" id="owner-logout" type="button">Log out</button>
+    </div>
+  </div>
+
   <div class="login-modal" id="login-modal" aria-hidden="true">
     <div class="login-card">
       <div class="login-title">Login</div>
@@ -2451,6 +2483,9 @@
     const pageSubtitle = document.querySelector(".subtitle");
     const adminPanel = document.getElementById("admin-panel");
     const adminBackdrop = document.getElementById("admin-backdrop");
+    const ownerPanel = document.getElementById("owner-panel");
+    const ownerCheat = document.getElementById("owner-cheat");
+    const ownerLogout = document.getElementById("owner-logout");
     const adminClose = document.getElementById("admin-close");
     const adminLaunch = document.getElementById("admin-launch");
     const profilePop = document.getElementById("profile-pop");
@@ -2480,13 +2515,19 @@
 
     function setAdminOpen(open) {
       adminPanel.classList.toggle("open", open);
-      adminBackdrop.classList.toggle("open", open && isOwnerAuthenticated());
+      adminBackdrop.classList.toggle("open", (open || ownerPanel.classList.contains("open")) && isOwnerAuthenticated());
       adminPanel.setAttribute("aria-hidden", open ? "false" : "true");
     }
 
     function setProfileOpen(open) {
       profilePop.classList.toggle("open", open);
       profilePop.setAttribute("aria-hidden", open ? "false" : "true");
+    }
+
+    function setOwnerPanelOpen(open) {
+      ownerPanel.classList.toggle("open", open);
+      ownerPanel.setAttribute("aria-hidden", open ? "false" : "true");
+      adminBackdrop.classList.toggle("open", (open || adminPanel.classList.contains("open")) && isOwnerAuthenticated());
     }
 
     function isAdminAuthenticated() {
@@ -2517,7 +2558,6 @@
       const label = sessionStorage.getItem(ADMIN_LABEL_KEY) || "Login";
       adminLaunch.textContent = label;
       profileText.textContent = "login-" + label;
-      adminPanel.classList.toggle("owner-mode", isOwnerAuthenticated());
     }
 
     function refreshAdminButtons() {
@@ -2576,11 +2616,15 @@
 
     syncAdminLaunchLabel();
     adminClose.addEventListener("click", () => setAdminOpen(false));
-    adminBackdrop.addEventListener("click", () => setAdminOpen(false));
+    adminBackdrop.addEventListener("click", () => {
+      setAdminOpen(false);
+      setOwnerPanelOpen(false);
+    });
     adminLaunch.addEventListener("click", () => {
       if (isOwnerAuthenticated()) {
         setProfileOpen(false);
-        setAdminOpen(!adminPanel.classList.contains("open"));
+        setAdminOpen(false);
+        setOwnerPanelOpen(!ownerPanel.classList.contains("open"));
         return;
       }
       if (sessionStorage.getItem(ADMIN_LABEL_KEY)) {
@@ -2605,7 +2649,7 @@
         syncAdminLaunchLabel();
         setProfileOpen(false);
         setLoginOpen(false);
-        setAdminOpen(true);
+        setOwnerPanelOpen(true);
         return;
       }
       sessionStorage.removeItem(ADMIN_AUTH_KEY);
@@ -2620,6 +2664,19 @@
       if (e.key === "Enter") loginSubmit.click();
     });
     successClose.addEventListener("click", () => setSuccessOpen(false));
+    ownerCheat.addEventListener("click", () => {
+      setOwnerPanelOpen(false);
+      setAdminOpen(true);
+    });
+    ownerLogout.addEventListener("click", () => {
+      sessionStorage.removeItem(ADMIN_AUTH_KEY);
+      sessionStorage.removeItem(ADMIN_OWNER_KEY);
+      sessionStorage.removeItem(ADMIN_LABEL_KEY);
+      syncAdminLaunchLabel();
+      setAdminOpen(false);
+      setOwnerPanelOpen(false);
+      setProfileOpen(false);
+    });
     document.addEventListener("click", (e) => {
       if (!profilePop.classList.contains("open")) return;
       if (profilePop.contains(e.target) || adminLaunch.contains(e.target)) return;
