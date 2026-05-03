@@ -133,6 +133,11 @@
       background: rgba(255, 255, 0, 0.12);
     }
 
+    #adm button.active {
+      background: rgba(255, 255, 0, 0.18);
+      box-shadow: 0 0 0 1px rgba(255, 255, 0, 0.28);
+    }
+
     #adm .aclose {
       position: absolute;
       top: 6px;
@@ -175,6 +180,13 @@
         padding: 0 12px;
       }
     }
+
+    @media (min-width: 1200px), (min-height: 900px) {
+      #hud span {
+        font-size: 30px;
+        padding: 12px 22px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -196,6 +208,7 @@ SPACE - also shoots</p>
       <button class="aclose" id="admclose">X</button>
       <div class="atitle">ADMIN PANEL</div>
       <div class="arow">
+        <button id="agod">GOD MODE</button>
         <button id="askip">SKIP WAVE</button>
         <button id="arapid">RAPID FIRE</button>
         <button id="aclear">CLEAR ENEMIES</button>
@@ -228,6 +241,7 @@ SPACE - also shoots</p>
     let rapidTimer = 0;
     let cheatBuf = "";
     let waveQueued = false;
+    let godMode = false;
     const WAVE_INTRO_FRAMES = 72;
     const ADMIN_CODE = "armacheat";
 
@@ -556,12 +570,14 @@ SPACE - also shoots</p>
           const hit = 16 * playerSize();
           if (Math.abs(b.x - player.x) < hit && Math.abs(b.y - player.y) < hit) {
             bullets.splice(i, 1);
-            lives--;
-            player.invul = 100;
-            spark(player.x, player.y, "#7ef8ff", 14);
-            if (lives <= 0) {
-              state = "over";
-              showOv("GAME OVER", "Score: " + score + "\nReached wave: " + wave, "PLAY AGAIN");
+            if (!godMode) {
+              lives--;
+              player.invul = 100;
+              spark(player.x, player.y, "#7ef8ff", 14);
+              if (lives <= 0) {
+                state = "over";
+                showOv("GAME OVER", "Score: " + score + "\nReached wave: " + wave, "PLAY AGAIN");
+              }
             }
           }
         }
@@ -671,6 +687,10 @@ SPACE - also shoots</p>
       adm.style.display = adm.style.display === "block" ? "none" : "block";
     }
 
+    function syncAdminButtons() {
+      document.getElementById("agod").classList.toggle("active", godMode);
+    }
+
     document.getElementById("sb").addEventListener("click", () => {
       document.getElementById("ov").style.display = "none";
       init();
@@ -680,6 +700,11 @@ SPACE - also shoots</p>
 
     document.getElementById("admclose").addEventListener("click", () => {
       document.getElementById("adm").style.display = "none";
+    });
+
+    document.getElementById("agod").addEventListener("click", () => {
+      godMode = !godMode;
+      syncAdminButtons();
     });
 
     document.getElementById("askip").addEventListener("click", () => {
@@ -731,6 +756,7 @@ SPACE - also shoots</p>
     });
 
     window.addEventListener("resize", resizeGame);
+    syncAdminButtons();
     resizeGame();
   </script>
 </body>
