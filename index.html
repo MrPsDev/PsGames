@@ -197,6 +197,44 @@
       z-index: 19;
     }
 
+    .profile-pop {
+      position: fixed;
+      top: 64px;
+      right: 14px;
+      z-index: 21;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      min-width: 220px;
+      padding: 12px 14px;
+      border: 1px solid rgba(151, 194, 220, 0.22);
+      border-radius: 16px;
+      background: rgba(8, 16, 24, 0.96);
+      box-shadow: 0 20px 46px rgba(0, 0, 0, 0.38);
+    }
+
+    .profile-pop.open {
+      display: flex;
+    }
+
+    .profile-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 1px solid rgba(151, 194, 220, 0.2);
+      background: rgba(255, 255, 255, 0.04);
+      flex: 0 0 auto;
+    }
+
+    .profile-text {
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
     .admin-backdrop {
       position: fixed;
       inset: 0;
@@ -2350,6 +2388,10 @@
   </div>
 
   <button class="secondary admin-launch" id="admin-launch" type="button">Login</button>
+  <div class="profile-pop" id="profile-pop" aria-hidden="true">
+    <img class="profile-avatar" src="./avatar.png" alt="Avatar" />
+    <div class="profile-text" id="profile-text">login-guest</div>
+  </div>
   <div class="admin-backdrop" id="admin-backdrop"></div>
 
   <div class="login-modal" id="login-modal" aria-hidden="true">
@@ -2411,6 +2453,8 @@
     const adminBackdrop = document.getElementById("admin-backdrop");
     const adminClose = document.getElementById("admin-close");
     const adminLaunch = document.getElementById("admin-launch");
+    const profilePop = document.getElementById("profile-pop");
+    const profileText = document.getElementById("profile-text");
     const loginModal = document.getElementById("login-modal");
     const loginName = document.getElementById("login-name");
     const loginPassword = document.getElementById("login-password");
@@ -2440,6 +2484,11 @@
       adminPanel.setAttribute("aria-hidden", open ? "false" : "true");
     }
 
+    function setProfileOpen(open) {
+      profilePop.classList.toggle("open", open);
+      profilePop.setAttribute("aria-hidden", open ? "false" : "true");
+    }
+
     function isAdminAuthenticated() {
       return sessionStorage.getItem(ADMIN_AUTH_KEY) === "1";
     }
@@ -2465,7 +2514,9 @@
     }
 
     function syncAdminLaunchLabel() {
-      adminLaunch.textContent = sessionStorage.getItem(ADMIN_LABEL_KEY) || "Login";
+      const label = sessionStorage.getItem(ADMIN_LABEL_KEY) || "Login";
+      adminLaunch.textContent = label;
+      profileText.textContent = "login-" + label;
       adminPanel.classList.toggle("owner-mode", isOwnerAuthenticated());
     }
 
@@ -2528,7 +2579,13 @@
     adminBackdrop.addEventListener("click", () => setAdminOpen(false));
     adminLaunch.addEventListener("click", () => {
       if (isOwnerAuthenticated()) {
+        setProfileOpen(false);
         setAdminOpen(!adminPanel.classList.contains("open"));
+        return;
+      }
+      if (sessionStorage.getItem(ADMIN_LABEL_KEY)) {
+        setAdminOpen(false);
+        setProfileOpen(!profilePop.classList.contains("open"));
         return;
       }
       setLoginOpen(true);
@@ -2546,6 +2603,7 @@
         sessionStorage.setItem(ADMIN_OWNER_KEY, "1");
         sessionStorage.setItem(ADMIN_LABEL_KEY, "owner");
         syncAdminLaunchLabel();
+        setProfileOpen(false);
         setLoginOpen(false);
         setAdminOpen(true);
         return;
@@ -2555,12 +2613,18 @@
       sessionStorage.setItem(ADMIN_LABEL_KEY, user);
       syncAdminLaunchLabel();
       setLoginOpen(false);
+      setProfileOpen(false);
       setSuccessOpen(true);
     });
     loginPassword.addEventListener("keydown", (e) => {
       if (e.key === "Enter") loginSubmit.click();
     });
     successClose.addEventListener("click", () => setSuccessOpen(false));
+    document.addEventListener("click", (e) => {
+      if (!profilePop.classList.contains("open")) return;
+      if (profilePop.contains(e.target) || adminLaunch.contains(e.target)) return;
+      setProfileOpen(false);
+    });
     deployRefreshButton.addEventListener("click", () => {
       window.location.reload();
     });
