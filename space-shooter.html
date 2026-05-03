@@ -161,6 +161,48 @@
       letter-spacing: 1px;
     }
 
+    #fsbtn {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(126, 248, 255, 0.45);
+      border-radius: 6px;
+      background: rgba(4, 10, 18, 0.72);
+      cursor: pointer;
+      z-index: 12;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+    }
+
+    #fsbtn::before,
+    #fsbtn::after {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-color: #7ef8ff;
+    }
+
+    #fsbtn::before {
+      top: 6px;
+      left: 6px;
+      border-top: 2px solid #7ef8ff;
+      border-left: 2px solid #7ef8ff;
+    }
+
+    #fsbtn::after {
+      right: 6px;
+      bottom: 6px;
+      border-right: 2px solid #7ef8ff;
+      border-bottom: 2px solid #7ef8ff;
+    }
+
+    #fsbtn:hover {
+      background: rgba(10, 20, 32, 0.92);
+      border-color: rgba(126, 248, 255, 0.78);
+    }
+
     @media (max-width: 760px) {
       #hud {
         padding: 8px 10px;
@@ -178,6 +220,13 @@
       #ov p {
         font-size: 13px;
         padding: 0 12px;
+      }
+
+      #fsbtn {
+        right: 10px;
+        bottom: 10px;
+        width: 30px;
+        height: 30px;
       }
     }
 
@@ -215,6 +264,7 @@ SPACE - also shoots</p>
       </div>
     </div>
     <div id="cheat">armacheat</div>
+    <button id="fsbtn" type="button" aria-label="Toggle fullscreen" title="Fullscreen"></button>
   </div>
   <script>
     const root = document.getElementById("gc");
@@ -687,6 +737,22 @@ SPACE - also shoots</p>
       adm.style.display = adm.style.display === "block" ? "none" : "block";
     }
 
+    async function toggleFullscreen() {
+      try {
+        const current = document.fullscreenElement || document.webkitFullscreenElement;
+        if (current) {
+          if (document.exitFullscreen) await document.exitFullscreen();
+          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+          return;
+        }
+        const target = document.documentElement;
+        if (target.requestFullscreen) await target.requestFullscreen();
+        else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+      } catch (err) {
+        console.error("Space fullscreen failed", err);
+      }
+    }
+
     function syncAdminButtons() {
       document.getElementById("agod").classList.toggle("active", godMode);
     }
@@ -701,6 +767,8 @@ SPACE - also shoots</p>
     document.getElementById("admclose").addEventListener("click", () => {
       document.getElementById("adm").style.display = "none";
     });
+
+    document.getElementById("fsbtn").addEventListener("click", toggleFullscreen);
 
     document.getElementById("agod").addEventListener("click", () => {
       godMode = !godMode;

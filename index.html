@@ -2020,7 +2020,6 @@
           </div>
           <div class="top-row">
             <button class="secondary" id="back-from-space">Menu</button>
-            <button class="secondary fullscreen-btn" id="space-fullscreen-btn">Fullscreen</button>
             <button class="primary" id="space-start-btn">Reload Game</button>
           </div>
         </div>
@@ -2087,7 +2086,6 @@
     const tetrisFullscreenButton = document.getElementById("tetris-fullscreen-btn");
     const tankFullscreenButton = document.getElementById("tank-fullscreen-btn");
     const fpsFullscreenButton = document.getElementById("fps-fullscreen-btn");
-    const spaceFullscreenButton = document.getElementById("space-fullscreen-btn");
     const spaceFrame = document.getElementById("space-frame");
     const tetrisHud = tetrisScreen.querySelector(".hud");
     const tetrisLayout = document.getElementById("tetris-layout");
@@ -2255,11 +2253,9 @@
       const tetrisFs = document.fullscreenElement === tetrisScreen || document.webkitFullscreenElement === tetrisScreen;
       const tankFs   = document.fullscreenElement === tankScreen   || document.webkitFullscreenElement === tankScreen;
       const fpsFs    = document.fullscreenElement === fpsScreen    || document.webkitFullscreenElement === fpsScreen;
-      const spaceFs  = document.fullscreenElement === spaceScreen  || document.webkitFullscreenElement === spaceScreen;
       tetrisFullscreenButton.textContent = tetrisFs ? "Exit Fullscreen" : "Fullscreen";
       tankFullscreenButton.textContent   = tankFs   ? "Exit Fullscreen" : "Fullscreen";
       fpsFullscreenButton.textContent    = fpsFs    ? "Exit Fullscreen" : "Fullscreen";
-      spaceFullscreenButton.textContent  = spaceFs  ? "Exit Fullscreen" : "Fullscreen";
     }
 
     function syncLayouts() {
@@ -2341,8 +2337,6 @@
     tetrisFullscreenButton.addEventListener("click", () => toggleFullscreen(tetrisScreen));
     tankFullscreenButton.addEventListener("click", () => toggleFullscreen(tankScreen));
     fpsFullscreenButton.addEventListener("click", () => toggleFullscreen(fpsScreen));
-    spaceFullscreenButton.addEventListener("click", () => toggleFullscreen(spaceScreen));
-
     document.getElementById("space-start-btn").addEventListener("click", () => {
       showScreen("space");
       spaceFrame.src = spaceFrame.src;
