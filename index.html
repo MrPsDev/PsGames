@@ -180,11 +180,34 @@
       display: grid;
     }
 
+    .admin-panel.owner-mode {
+      top: 50%;
+      left: 50%;
+      right: auto;
+      transform: translate(-50%, -50%);
+      width: min(720px, calc(100vw - 28px));
+      z-index: 32;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.48);
+    }
+
     .admin-launch {
       position: fixed;
       top: 14px;
       right: 14px;
       z-index: 19;
+    }
+
+    .admin-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      background: rgba(4, 9, 14, 0.72);
+      backdrop-filter: blur(8px);
+      z-index: 31;
+    }
+
+    .admin-backdrop.open {
+      display: block;
     }
 
     .login-modal {
@@ -256,6 +279,13 @@
       display: flex;
       gap: 10px;
       justify-content: center;
+    }
+
+    .success-copy {
+      color: var(--text);
+      font-size: 18px;
+      text-align: center;
+      padding: 10px 0 4px;
     }
 
     .deploy-banner {
@@ -2320,6 +2350,7 @@
   </div>
 
   <button class="secondary admin-launch" id="admin-launch" type="button">Login</button>
+  <div class="admin-backdrop" id="admin-backdrop"></div>
 
   <div class="login-modal" id="login-modal" aria-hidden="true">
     <div class="login-card">
@@ -2332,6 +2363,16 @@
       <div class="login-actions">
         <button class="secondary" id="login-cancel" type="button">Close</button>
         <button class="primary" id="login-submit" type="button">Login</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-modal" id="success-modal" aria-hidden="true">
+    <div class="login-card">
+      <div class="login-title">Login</div>
+      <div class="success-copy">Login successful</div>
+      <div class="login-actions">
+        <button class="primary" id="success-close" type="button">Close</button>
       </div>
     </div>
   </div>
@@ -2367,6 +2408,7 @@
     const pageTitle = document.querySelector(".title");
     const pageSubtitle = document.querySelector(".subtitle");
     const adminPanel = document.getElementById("admin-panel");
+    const adminBackdrop = document.getElementById("admin-backdrop");
     const adminClose = document.getElementById("admin-close");
     const adminLaunch = document.getElementById("admin-launch");
     const loginModal = document.getElementById("login-modal");
@@ -2375,10 +2417,14 @@
     const loginError = document.getElementById("login-error");
     const loginCancel = document.getElementById("login-cancel");
     const loginSubmit = document.getElementById("login-submit");
+    const successModal = document.getElementById("success-modal");
+    const successClose = document.getElementById("success-close");
     const deployBanner = document.getElementById("deploy-banner");
     const deployMeta = document.getElementById("deploy-meta");
     const deployRefreshButton = document.getElementById("deploy-refresh-btn");
     const ADMIN_AUTH_KEY = "psgames-admin-auth";
+    const ADMIN_OWNER_KEY = "psgames-owner-auth";
+    const ADMIN_LABEL_KEY = "psgames-login-label";
     let deployBaseline = null;
     let deployPollId = null;
     const cheatState = {
@@ -2390,11 +2436,16 @@
 
     function setAdminOpen(open) {
       adminPanel.classList.toggle("open", open);
+      adminBackdrop.classList.toggle("open", open && isOwnerAuthenticated());
       adminPanel.setAttribute("aria-hidden", open ? "false" : "true");
     }
 
     function isAdminAuthenticated() {
       return sessionStorage.getItem(ADMIN_AUTH_KEY) === "1";
+    }
+
+    function isOwnerAuthenticated() {
+      return sessionStorage.getItem(ADMIN_OWNER_KEY) === "1";
     }
 
     function setLoginOpen(open) {
@@ -2406,6 +2457,16 @@
         loginPassword.value = "";
         setTimeout(() => loginName.focus(), 0);
       }
+    }
+
+    function setSuccessOpen(open) {
+      successModal.classList.toggle("open", open);
+      successModal.setAttribute("aria-hidden", open ? "false" : "true");
+    }
+
+    function syncAdminLaunchLabel() {
+      adminLaunch.textContent = sessionStorage.getItem(ADMIN_LABEL_KEY) || "Login";
+      adminPanel.classList.toggle("owner-mode", isOwnerAuthenticated());
     }
 
     function refreshAdminButtons() {
@@ -2462,25 +2523,44 @@
       }
     }
 
+    syncAdminLaunchLabel();
     adminClose.addEventListener("click", () => setAdminOpen(false));
+    adminBackdrop.addEventListener("click", () => setAdminOpen(false));
     adminLaunch.addEventListener("click", () => {
+      if (isOwnerAuthenticated()) {
+        setAdminOpen(!adminPanel.classList.contains("open"));
+        return;
+      }
       setLoginOpen(true);
     });
     loginCancel.addEventListener("click", () => setLoginOpen(false));
     loginSubmit.addEventListener("click", () => {
       const user = loginName.value.trim().toLowerCase();
       const pass = loginPassword.value.trim();
+      if (!user || !pass) {
+        loginError.textContent = "Enter login and password";
+        return;
+      }
       if (user === "arma" && pass === "owner") {
         sessionStorage.setItem(ADMIN_AUTH_KEY, "1");
+        sessionStorage.setItem(ADMIN_OWNER_KEY, "1");
+        sessionStorage.setItem(ADMIN_LABEL_KEY, "owner");
+        syncAdminLaunchLabel();
         setLoginOpen(false);
         setAdminOpen(true);
         return;
       }
-      loginError.textContent = "Wrong login or password";
+      sessionStorage.removeItem(ADMIN_AUTH_KEY);
+      sessionStorage.removeItem(ADMIN_OWNER_KEY);
+      sessionStorage.setItem(ADMIN_LABEL_KEY, user);
+      syncAdminLaunchLabel();
+      setLoginOpen(false);
+      setSuccessOpen(true);
     });
     loginPassword.addEventListener("keydown", (e) => {
       if (e.key === "Enter") loginSubmit.click();
     });
+    successClose.addEventListener("click", () => setSuccessOpen(false));
     deployRefreshButton.addEventListener("click", () => {
       window.location.reload();
     });
