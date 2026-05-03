@@ -114,23 +114,23 @@
       transform: translateX(-50%);
       background: rgba(5, 15, 25, 0.97);
       border: 1px solid #ff0;
-      border-radius: 8px;
-      padding: 12px 18px;
-      min-width: 320px;
+      border-radius: 10px;
+      padding: 16px 22px;
+      min-width: 420px;
       z-index: 10;
     }
 
     #adm .atitle {
       color: #ff0;
-      font-size: 12px;
+      font-size: 14px;
       letter-spacing: 2px;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
       text-align: center;
     }
 
     #adm .arow {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       justify-content: center;
     }
 
@@ -139,8 +139,8 @@
       border: 1px solid #ff0;
       color: #ff0;
       font-family: "Courier New", monospace;
-      font-size: 12px;
-      padding: 6px 14px;
+      font-size: 14px;
+      padding: 8px 16px;
       cursor: pointer;
       border-radius: 4px;
       letter-spacing: 1px;
@@ -157,11 +157,11 @@
 
     #adm .aclose {
       position: absolute;
-      top: 6px;
-      right: 10px;
+      top: 8px;
+      right: 12px;
       border: none;
       color: #ff0;
-      font-size: 14px;
+      font-size: 16px;
       padding: 2px 6px;
       background: transparent;
       cursor: pointer;
@@ -212,8 +212,8 @@
 
     :fullscreen #adm,
     :-webkit-full-screen #adm {
-      min-width: 760px;
-      padding: 30px 36px;
+      min-width: 860px;
+      padding: 34px 40px;
       bottom: 40px;
       border-width: 2px;
       border-radius: 12px;
@@ -221,24 +221,24 @@
 
     :fullscreen #adm .atitle,
     :-webkit-full-screen #adm .atitle {
-      font-size: 24px;
-      margin-bottom: 22px;
+      font-size: 28px;
+      margin-bottom: 24px;
     }
 
     :fullscreen #adm .arow,
     :-webkit-full-screen #adm .arow {
-      gap: 18px;
+      gap: 20px;
     }
 
     :fullscreen #adm button,
     :-webkit-full-screen #adm button {
-      font-size: 20px;
-      padding: 15px 28px;
+      font-size: 22px;
+      padding: 17px 30px;
     }
 
     :fullscreen #adm .aclose,
     :-webkit-full-screen #adm .aclose {
-      font-size: 26px;
+      font-size: 30px;
       top: 12px;
       right: 16px;
     }
@@ -298,6 +298,7 @@ SPACE - also shoots</p>
     let speedBoostTimer = 0;
     let shieldBoostTimer = 0;
     let bonusSpawnTimer = 0;
+    let waveScale = 1;
     let cheatBuf = "";
     let waveQueued = false;
     let godMode = false;
@@ -339,12 +340,12 @@ SPACE - also shoots</p>
     }
 
     function playerSize() {
-      return 1.15 * viewScale();
+      return 1.15 * viewScale() * Math.max(0.9, waveScale + 0.02);
     }
 
     function enemySize(type) {
       const base = type === "boss" ? 1.5 : type === "fast" ? 1.2 : 1.3;
-      return base * viewScale();
+      return base * viewScale() * waveScale;
     }
 
     function bonusRadius() {
@@ -468,13 +469,14 @@ SPACE - also shoots</p>
         player.y = H - Math.max(80, H * 0.12);
       }
       const form = getFormation(wave);
+      waveScale = Math.max(0.72, 1 - Math.max(0, form.length - 8) * 0.028);
       const cfg = waveConfig(wave);
       const cx = W / 2;
       const cy = Math.max(150, H * 0.3);
       const maxScaleFromWidth = W / 13.5;
       const maxScaleFromHeight = H / 11;
       const maxScaleFromTop = (cy - 34) / 2;
-      const scale = Math.max(26, Math.min(maxScaleFromWidth, maxScaleFromHeight, maxScaleFromTop));
+      const scale = Math.max(22, Math.min(maxScaleFromWidth, maxScaleFromHeight, maxScaleFromTop) * Math.max(0.82, waveScale));
       form.forEach(([dx, dy], i) => {
         const type = wave <= 2 ? "basic" : i % 6 === 0 && wave > 5 ? "boss" : i % 3 === 0 && wave > 3 ? "fast" : "basic";
         const baseX = Math.max(40, Math.min(W - 40, cx + dx * scale));
@@ -492,7 +494,7 @@ SPACE - also shoots</p>
       const maxScaleFromWidth = W / 13.5;
       const maxScaleFromHeight = H / 11;
       const maxScaleFromTop = (cy - 34) / 2;
-      const scale = Math.max(26, Math.min(maxScaleFromWidth, maxScaleFromHeight, maxScaleFromTop));
+      const scale = Math.max(22, Math.min(maxScaleFromWidth, maxScaleFromHeight, maxScaleFromTop) * Math.max(0.82, waveScale));
       enemies.forEach((e) => {
         if (typeof e.dx !== "number" || typeof e.dy !== "number") return;
         e.baseX = Math.max(40, Math.min(W - 40, cx + e.dx * scale));
@@ -779,7 +781,7 @@ SPACE - also shoots</p>
         e.x = e.baseX + Math.sin(frame * e.cfg.swaySpd + e.baseX * 0.03) * e.cfg.swayAmp;
         e.shootTimer--;
         if (e.shootTimer <= 0) {
-          bullets.push({ x: e.x, y: e.y + 14 * enemySize(e.type), spd: e.cfg.bulletSpd * Math.min(1.5, viewScale()), own: "e" });
+          bullets.push({ x: e.x, y: e.y + 14 * enemySize(e.type), spd: e.cfg.bulletSpd * Math.min(1.4, viewScale()) * Math.max(0.88, waveScale), own: "e" });
           e.shootTimer = e.cfg.shootRate * 0.5 + Math.random() * e.cfg.shootRate;
         }
       });
@@ -794,7 +796,7 @@ SPACE - also shoots</p>
         if (b.own !== "p") continue;
         for (let j = enemies.length - 1; j >= 0; j--) {
           const e = enemies[j];
-          const hit = 15 * enemySize(e.type);
+          const hit = 13.5 * enemySize(e.type);
           if (Math.abs(b.x - e.x) < hit && Math.abs(b.y - e.y) < hit) {
             bullets.splice(i, 1);
             e.hp--;
@@ -814,7 +816,7 @@ SPACE - also shoots</p>
         for (let i = bullets.length - 1; i >= 0; i--) {
           const b = bullets[i];
           if (b.own !== "e") continue;
-          const hit = 16 * playerSize();
+          const hit = 14.5 * playerSize();
           if (Math.abs(b.x - player.x) < hit && Math.abs(b.y - player.y) < hit) {
             bullets.splice(i, 1);
             if (shieldBoostTimer > 0) {
@@ -900,11 +902,15 @@ SPACE - also shoots</p>
           ctx.fillStyle = rapidOn ? "#ffee44" : "#7ef8ff";
           ctx.shadowBlur = 6;
           ctx.shadowColor = rapidOn ? "#ffee44" : "#7ef8ff";
-          ctx.fillRect(b.x - 3, b.y - 12, 6, 18);
+          const bw = Math.max(4, 5 * Math.max(0.84, waveScale));
+          const bh = Math.max(12, 16 * Math.max(0.84, waveScale));
+          ctx.fillRect(b.x - bw / 2, b.y - bh * 0.7, bw, bh);
           ctx.shadowBlur = 0;
         } else {
           ctx.fillStyle = "#ff6644";
-          ctx.fillRect(b.x - 3, b.y - 7, 6, 12);
+          const ew = Math.max(3, 5 * Math.max(0.78, waveScale));
+          const eh = Math.max(9, 11 * Math.max(0.78, waveScale));
+          ctx.fillRect(b.x - ew / 2, b.y - eh / 2, ew, eh);
         }
       });
       bonuses.forEach((b) => drawBonus(b));
