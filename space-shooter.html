@@ -586,7 +586,7 @@ SPACE - also shoots</p>
         ctx.fill();
         ctx.fillStyle = "#050505";
         ctx.lineWidth = Math.max(1.8, 2.2 * s);
-        ctx.strokeStyle = "rgba(255,255,255,0.28)";
+        ctx.strokeStyle = "rgba(0,0,0,0.55)";
         ctx.font = "700 " + Math.max(11, Math.round(9.5 * s)) + "px 'Doto', monospace";
         ctx.fontVariationSettings = "'ROND' 100";
         ctx.textAlign = "center";
@@ -1026,6 +1026,7 @@ SPACE - also shoots</p>
     document.addEventListener("keydown", (e) => {
       keys[e.key] = true;
       if (e.key === " ") e.preventDefault();
+      if (state === "playing" && wt > 0 && (e.key === " " || e.key === "Enter")) wt = 0;
       cheatBuf = (cheatBuf + e.key.toLowerCase()).slice(-ADMIN_CODE_MAX);
       if (ADMIN_CODES.some((code) => cheatBuf.endsWith(code))) toggleAdmin();
     });
@@ -1035,6 +1036,10 @@ SPACE - also shoots</p>
     });
 
     canvas.addEventListener("mousedown", (e) => {
+      if (state === "playing" && wt > 0 && e.button === 0) {
+        wt = 0;
+        return;
+      }
       if (e.button === 0) mouseDown = true;
     });
 
