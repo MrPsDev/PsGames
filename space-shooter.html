@@ -15,16 +15,14 @@
     }
 
     #gc {
-      position: relative;
-      width: 100%;
-      height: 100%;
+      position: fixed;
+      inset: 0;
       font-family: "Courier New", monospace;
     }
 
     #c {
-      display: block;
-      width: 100%;
-      height: 100%;
+      position: absolute;
+      inset: 0;
       background: #0a0a1a;
       cursor: crosshair;
     }
@@ -181,7 +179,7 @@
 </head>
 <body>
   <div id="gc">
-    <canvas id="c" width="680" height="480"></canvas>
+    <canvas id="c"></canvas>
     <div id="hud">
       <span id="sc">SCORE: 0</span>
       <span id="wv">WAVE 1/20</span>
@@ -206,10 +204,11 @@ SPACE - also shoots</p>
     <div id="cheat">armachest</div>
   </div>
   <script>
+    const root = document.getElementById("gc");
     const canvas = document.getElementById("c");
     const ctx = canvas.getContext("2d");
-    const W = 680;
-    const H = 480;
+    let W = 0;
+    let H = 0;
     let state = "menu";
     let score = 0;
     let lives = 3;
@@ -228,6 +227,28 @@ SPACE - also shoots</p>
     let rapidFire = false;
     let rapidTimer = 0;
     let cheatBuf = "";
+
+    function resizeGame() {
+      const prevW = W || 680;
+      const prevH = H || 480;
+      const rect = root.getBoundingClientRect();
+      W = Math.max(320, Math.floor(rect.width));
+      H = Math.max(240, Math.floor(rect.height));
+      canvas.width = W;
+      canvas.height = H;
+
+      if (player) {
+        player.x = (player.x / prevW) * W;
+        player.y = (player.y / prevH) * H;
+      }
+
+      if (stars && stars.length) {
+        stars.forEach((s) => {
+          s.x = Math.min(W, (s.x / prevW) * W);
+          s.y = Math.min(H, (s.y / prevH) * H);
+        });
+      }
+    }
 
     const SHAPES = [
       [[0, -2], [-1, -1], [1, -1], [-2, 0], [2, 0]],
@@ -294,8 +315,8 @@ SPACE - also shoots</p>
       const form = getFormation(wave);
       const cfg = waveConfig(wave);
       const cx = W / 2;
-      const cy = 110;
-      const scale = 50;
+      const cy = Math.max(90, H * 0.22);
+      const scale = Math.min(W / 13.5, H / 8.5);
       form.forEach(([dx, dy], i) => {
         const type = wave <= 2 ? "basic" : i % 6 === 0 && wave > 5 ? "boss" : i % 3 === 0 && wave > 3 ? "fast" : "basic";
         enemies.push({ x: cx + dx * scale, y: cy + dy * scale, baseX: cx + dx * scale, type, hp: type === "boss" ? 2 : 1, shootTimer: 80 + Math.random() * cfg.shootRate, cfg });
@@ -303,6 +324,7 @@ SPACE - also shoots</p>
     }
 
     function init() {
+      resizeGame();
       score = 0;
       lives = 3;
       wave = 1;
@@ -655,6 +677,9 @@ SPACE - also shoots</p>
     document.addEventListener("mouseup", (e) => {
       if (e.button === 0) mouseDown = false;
     });
+
+    window.addEventListener("resize", resizeGame);
+    resizeGame();
   </script>
 </body>
 </html>
