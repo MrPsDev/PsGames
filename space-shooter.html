@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Space Shooter</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Doto:wght@628&display=swap');
+
     html, body {
       margin: 0;
       width: 100%;
@@ -302,7 +304,8 @@ SPACE - also shoots</p>
     const WAVE_INTRO_FRAMES = 72;
     const ADMIN_CODES = ["armacheat"];
     const ADMIN_CODE_MAX = Math.max(...ADMIN_CODES.map((code) => code.length));
-    const BONUS_DURATION = 180;
+    const RAPID_DURATION = 180;
+    const MEGA_DURATION = 120;
     const SHIELD_DURATION = 300;
 
     function resizeGame() {
@@ -373,8 +376,22 @@ SPACE - also shoots</p>
       if (!bonuses) bonuses = [];
       if (!force && bonuses.length >= 1) return;
       if (!force && Math.random() < 0.5) return;
-      const roll = Math.random();
-      const type = roll < 0.45 ? "speed" : roll < 0.68 ? "rapid" : roll < 0.9 ? "shield" : "mega";
+      const eligible = [];
+      if (wave >= 5) eligible.push({ type: "speed", weight: 50 });
+      if (wave >= 10) eligible.push({ type: "rapid", weight: 24 });
+      if (wave >= 10) eligible.push({ type: "shield", weight: 24 });
+      if (wave >= 15) eligible.push({ type: "mega", weight: 8 });
+      if (!eligible.length) return;
+      const totalWeight = eligible.reduce((sum, item) => sum + item.weight, 0);
+      let roll = Math.random() * totalWeight;
+      let type = eligible[0].type;
+      for (const item of eligible) {
+        roll -= item.weight;
+        if (roll <= 0) {
+          type = item.type;
+          break;
+        }
+      }
       spawnBonus(type);
     }
 
@@ -443,6 +460,9 @@ SPACE - also shoots</p>
       frame = 0;
       waveQueued = false;
       bonusSpawnTimer = 220;
+      rapidBoostTimer = 0;
+      speedBoostTimer = 0;
+      shieldBoostTimer = 0;
       if (player) {
         player.x = W / 2;
         player.y = H - Math.max(80, H * 0.12);
@@ -567,7 +587,8 @@ SPACE - also shoots</p>
         ctx.fillStyle = "#050505";
         ctx.lineWidth = Math.max(1.5, 1.8 * s);
         ctx.strokeStyle = "rgba(255,255,255,0.18)";
-        ctx.font = "900 " + Math.max(13, Math.round(11 * s)) + "px Courier New";
+        ctx.font = "628 " + Math.max(14, Math.round(12 * s)) + "px 'Doto', monospace";
+        ctx.fontVariationSettings = "'ROND' 100";
         ctx.textAlign = "center";
         ctx.strokeText(e.hp, 0, 3 * s);
         ctx.fillText(e.hp, 0, 3 * s);
@@ -736,16 +757,16 @@ SPACE - also shoots</p>
           const b = bonuses[i];
           if (Math.abs(b.x - player.x) < shipRadius + b.r && Math.abs(b.y - player.y) < shipRadius + b.r) {
             if (b.type === "rapid") {
-              rapidBoostTimer = BONUS_DURATION;
+              rapidBoostTimer = RAPID_DURATION;
             } else if (b.type === "speed") {
-              speedBoostTimer = BONUS_DURATION;
+              speedBoostTimer = RAPID_DURATION;
             } else if (b.type === "medkit") {
               lives = Math.min(3, lives + 1);
             } else if (b.type === "shield") {
               shieldBoostTimer = SHIELD_DURATION;
             } else {
-              rapidBoostTimer = BONUS_DURATION;
-              speedBoostTimer = BONUS_DURATION;
+              rapidBoostTimer = MEGA_DURATION;
+              speedBoostTimer = MEGA_DURATION;
             }
             spark(b.x, b.y, b.type === "speed" ? "#6bffcb" : b.type === "mega" ? "#c6ff54" : b.type === "shield" ? "#7ef8ff" : b.type === "medkit" ? "#ff6b6b" : "#ffe96b", 12);
             bonuses.splice(i, 1);
