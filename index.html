@@ -4,17 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ArmaPS Games | Retro Arcade</title>
-  <meta name="description" content="Play Tetris and Mini Tank in ArmaPS Games, a fast retro arcade you can open on desktop or phone." />
+  <meta name="description" content="Play Tetris, Mini Tank, and Space Shooter in ArmaPS Games, a fast retro arcade you can open on desktop or phone." />
   <meta name="theme-color" content="#07111a" />
   <meta name="robots" content="index,follow" />
   <meta property="og:title" content="ArmaPS Games | Retro Arcade" />
-  <meta property="og:description" content="Play Tetris and Mini Tank right in your browser." />
+  <meta property="og:description" content="Play Tetris, Mini Tank, and Space Shooter right in your browser." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://armapsgames.online/" />
   <meta property="og:image" content="https://armapsgames.online/favicon.svg" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="ArmaPS Games | Retro Arcade" />
-  <meta name="twitter:description" content="Play Tetris and Mini Tank right in your browser." />
+  <meta name="twitter:description" content="Play Tetris, Mini Tank, and Space Shooter right in your browser." />
   <link rel="canonical" href="https://armapsgames.online/" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <style>
@@ -145,7 +145,8 @@
     #menu-screen,
     #tetris-screen,
     #tank-screen,
-    #fps-screen {
+    #fps-screen,
+    #space-screen {
       width: 100%;
       position: relative;
       z-index: 1;
@@ -676,6 +677,26 @@
       z-index: 2;
     }
 
+    .space-wrap {
+      width: 100%;
+      margin-top: 18px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top, rgba(123, 199, 255, 0.08), transparent 28%),
+        linear-gradient(180deg, #061019, #08131d);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    }
+
+    .space-frame {
+      display: block;
+      width: 100%;
+      min-height: 620px;
+      border: 0;
+      background: transparent;
+    }
+
     .gunshop-title {
       color: var(--sand);
       font-size: 15px;
@@ -873,9 +894,11 @@
     #tetris-screen:fullscreen,
     #tank-screen:fullscreen,
     #fps-screen:fullscreen,
+    #space-screen:fullscreen,
     #tetris-screen:-webkit-full-screen,
     #tank-screen:-webkit-full-screen,
-    #fps-screen:-webkit-full-screen {
+    #fps-screen:-webkit-full-screen,
+    #space-screen:-webkit-full-screen {
       background:
         radial-gradient(circle at top, rgba(123, 199, 255, 0.16), transparent 28%),
         radial-gradient(circle at 20% 20%, rgba(121, 240, 200, 0.08), transparent 24%),
@@ -895,9 +918,11 @@
     #tetris-screen:fullscreen .screen-head,
     #tank-screen:fullscreen .screen-head,
     #fps-screen:fullscreen .screen-head,
+    #space-screen:fullscreen .screen-head,
     #tetris-screen:-webkit-full-screen .screen-head,
     #tank-screen:-webkit-full-screen .screen-head,
-    #fps-screen:-webkit-full-screen .screen-head {
+    #fps-screen:-webkit-full-screen .screen-head,
+    #space-screen:-webkit-full-screen .screen-head {
       gap: 14px;
       margin-bottom: 0;
       align-items: center;
@@ -907,9 +932,11 @@
     #tetris-screen:fullscreen .screen-title,
     #tank-screen:fullscreen .screen-title,
     #fps-screen:fullscreen .screen-title,
+    #space-screen:fullscreen .screen-title,
     #tetris-screen:-webkit-full-screen .screen-title,
     #tank-screen:-webkit-full-screen .screen-title,
-    #fps-screen:-webkit-full-screen .screen-title {
+    #fps-screen:-webkit-full-screen .screen-title,
+    #space-screen:-webkit-full-screen .screen-title {
       font-size: 28px;
       line-height: 1;
     }
@@ -917,18 +944,22 @@
     #tetris-screen:fullscreen .hint,
     #tank-screen:fullscreen .hint,
     #fps-screen:fullscreen .hint,
+    #space-screen:fullscreen .hint,
     #tetris-screen:-webkit-full-screen .hint,
     #tank-screen:-webkit-full-screen .hint,
-    #fps-screen:-webkit-full-screen .hint {
+    #fps-screen:-webkit-full-screen .hint,
+    #space-screen:-webkit-full-screen .hint {
       display: none;
     }
 
     #tetris-screen:fullscreen .top-row,
     #tank-screen:fullscreen .top-row,
     #fps-screen:fullscreen .top-row,
+    #space-screen:fullscreen .top-row,
     #tetris-screen:-webkit-full-screen .top-row,
     #tank-screen:-webkit-full-screen .top-row,
-    #fps-screen:-webkit-full-screen .top-row {
+    #fps-screen:-webkit-full-screen .top-row,
+    #space-screen:-webkit-full-screen .top-row {
       width: auto;
       flex-wrap: nowrap;
       justify-content: flex-end;
@@ -937,9 +968,11 @@
     #tetris-screen:fullscreen .top-row button,
     #tank-screen:fullscreen .top-row button,
     #fps-screen:fullscreen .top-row button,
+    #space-screen:fullscreen .top-row button,
     #tetris-screen:-webkit-full-screen .top-row button,
     #tank-screen:-webkit-full-screen .top-row button,
-    #fps-screen:-webkit-full-screen .top-row button {
+    #fps-screen:-webkit-full-screen .top-row button,
+    #space-screen:-webkit-full-screen .top-row button {
       font-size: 13px;
       padding: 9px 13px;
       border-radius: 11px;
@@ -1077,10 +1110,17 @@
     }
 
     #fps-screen:fullscreen .fps-wrap,
-    #fps-screen:-webkit-full-screen .fps-wrap {
+    #fps-screen:-webkit-full-screen .fps-wrap,
+    #space-screen:fullscreen .space-wrap,
+    #space-screen:-webkit-full-screen .space-wrap {
       flex: 1;
       min-height: 0;
       margin-top: 0;
+    }
+
+    #space-screen:fullscreen .space-frame,
+    #space-screen:-webkit-full-screen .space-frame {
+      min-height: calc(100vh - 110px);
     }
 
     #tetris-screen:fullscreen .control-action,
@@ -1686,6 +1726,20 @@
             </div>
           </article>
 
+          <article class="game-card">
+            <div class="shine"></div>
+            <div class="card-top">
+              <span class="badge">Arcade</span>
+            </div>
+            <div class="card-bottom">
+              <h2>Space Shooter</h2>
+              <p>Fly through 20 waves, dodge bullets, and wipe out enemy formations in a retro space fight.</p>
+            </div>
+            <div class="cta-row card-bottom">
+              <button class="primary" id="open-space">Play Space Shooter</button>
+            </div>
+          </article>
+
         </div>
       </div>
 
@@ -1918,6 +1972,31 @@
           </div>
         </div>
       </div>
+
+      <div id="space-screen" class="hidden">
+        <div class="screen-head">
+          <div>
+            <div class="screen-title">Space Shooter</div>
+            <div class="hint">WASD or arrows to move. Hold left mouse or press Space to shoot.</div>
+          </div>
+          <div class="top-row">
+            <button class="secondary" id="back-from-space">Menu</button>
+            <button class="secondary fullscreen-btn" id="space-fullscreen-btn">Fullscreen</button>
+            <button class="primary" id="space-start-btn">Reload Game</button>
+          </div>
+        </div>
+
+        <div class="space-wrap">
+          <iframe
+            id="space-frame"
+            class="space-frame"
+            src="./space-shooter.html"
+            title="Space Shooter"
+            loading="lazy"
+            allow="fullscreen"
+          ></iframe>
+        </div>
+      </div>
     </section>
   </div>
 
@@ -1952,6 +2031,7 @@
     const tetrisScreen = document.getElementById("tetris-screen");
     const tankScreen = document.getElementById("tank-screen");
     const fpsScreen = document.getElementById("fps-screen");
+    const spaceScreen = document.getElementById("space-screen");
     const shell = document.getElementById("shell");
     const tetrisActionButtons = Array.from(document.querySelectorAll("[data-tetris-action]"));
     const tankMoveButtons = Array.from(document.querySelectorAll("[data-tank-move]"));
@@ -1960,6 +2040,8 @@
     const tetrisFullscreenButton = document.getElementById("tetris-fullscreen-btn");
     const tankFullscreenButton = document.getElementById("tank-fullscreen-btn");
     const fpsFullscreenButton = document.getElementById("fps-fullscreen-btn");
+    const spaceFullscreenButton = document.getElementById("space-fullscreen-btn");
+    const spaceFrame = document.getElementById("space-frame");
     const tetrisHud = tetrisScreen.querySelector(".hud");
     const tetrisLayout = document.getElementById("tetris-layout");
     const tetrisSide = document.getElementById("tetris-side");
@@ -2010,6 +2092,7 @@
       tetrisScreen.classList.toggle("hidden", name !== "tetris");
       tankScreen.classList.toggle("hidden", name !== "tank");
       fpsScreen.classList.toggle("hidden", name !== "fps");
+      spaceScreen.classList.toggle("hidden", name !== "space");
       if (name !== "tetris") stopTetris();
       if (name !== "tank") stopTank();
       if (name !== "fps") stopFps();
@@ -2073,9 +2156,11 @@
       const tetrisFs = document.fullscreenElement === tetrisScreen || document.webkitFullscreenElement === tetrisScreen;
       const tankFs   = document.fullscreenElement === tankScreen   || document.webkitFullscreenElement === tankScreen;
       const fpsFs    = document.fullscreenElement === fpsScreen    || document.webkitFullscreenElement === fpsScreen;
+      const spaceFs  = document.fullscreenElement === spaceScreen  || document.webkitFullscreenElement === spaceScreen;
       tetrisFullscreenButton.textContent = tetrisFs ? "Exit Fullscreen" : "Fullscreen";
       tankFullscreenButton.textContent   = tankFs   ? "Exit Fullscreen" : "Fullscreen";
       fpsFullscreenButton.textContent    = fpsFs    ? "Exit Fullscreen" : "Fullscreen";
+      spaceFullscreenButton.textContent  = spaceFs  ? "Exit Fullscreen" : "Fullscreen";
     }
 
     function syncLayouts() {
@@ -2146,12 +2231,23 @@
       requestAnimationFrame(syncTankLayout);
     });
 
+    document.getElementById("open-space").addEventListener("click", () => {
+      showScreen("space");
+    });
+
     document.getElementById("back-from-tetris").addEventListener("click", returnToMenu);
     document.getElementById("back-from-tank").addEventListener("click", returnToMenu);
     document.getElementById("back-from-fps").addEventListener("click", returnToMenu);
+    document.getElementById("back-from-space").addEventListener("click", returnToMenu);
     tetrisFullscreenButton.addEventListener("click", () => toggleFullscreen(tetrisScreen));
     tankFullscreenButton.addEventListener("click", () => toggleFullscreen(tankScreen));
     fpsFullscreenButton.addEventListener("click", () => toggleFullscreen(fpsScreen));
+    spaceFullscreenButton.addEventListener("click", () => toggleFullscreen(spaceScreen));
+
+    document.getElementById("space-start-btn").addEventListener("click", () => {
+      showScreen("space");
+      spaceFrame.src = spaceFrame.src;
+    });
 
     // ── Gamepad overlay helpers ──────────────────────────────
     const tankGamepad = document.getElementById("tank-gamepad");
