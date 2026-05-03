@@ -122,7 +122,6 @@
     }
 
     #main-panel {
-      min-height: 620px;
       padding: 22px;
       display: flex;
       flex-direction: column;
@@ -150,6 +149,13 @@
       width: 100%;
       position: relative;
       z-index: 1;
+    }
+
+    #tetris-screen,
+    #tank-screen,
+    #fps-screen,
+    #space-screen {
+      min-height: 620px;
     }
 
     .hidden { display: none !important; }
@@ -683,18 +689,15 @@
       border-radius: 16px;
       border: 1px solid var(--line);
       overflow: hidden;
-      background:
-        radial-gradient(circle at top, rgba(123, 199, 255, 0.08), transparent 28%),
-        linear-gradient(180deg, #061019, #08131d);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
     }
 
     .space-frame {
       display: block;
       width: 100%;
-      min-height: 620px;
+      aspect-ratio: 680 / 480;
+      min-height: 0;
       border: 0;
-      background: transparent;
+      background: #07111a;
     }
 
     .gunshop-title {
@@ -1120,6 +1123,7 @@
 
     #space-screen:fullscreen .space-frame,
     #space-screen:-webkit-full-screen .space-frame {
+      aspect-ratio: auto;
       min-height: calc(100vh - 110px);
     }
 
