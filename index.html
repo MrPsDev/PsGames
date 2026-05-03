@@ -180,6 +180,13 @@
       display: grid;
     }
 
+    .admin-launch {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 19;
+    }
+
     .deploy-banner {
       position: fixed;
       left: 50%;
@@ -2241,6 +2248,8 @@
     </div>
   </div>
 
+  <button class="secondary admin-launch" id="admin-launch" type="button">Cheats</button>
+
   <div class="deploy-banner" id="deploy-banner" aria-live="polite">
     <div>
       <div class="deploy-text">Site updated on server.</div>
@@ -2273,10 +2282,11 @@
     const pageSubtitle = document.querySelector(".subtitle");
     const adminPanel = document.getElementById("admin-panel");
     const adminClose = document.getElementById("admin-close");
+    const adminLaunch = document.getElementById("admin-launch");
     const deployBanner = document.getElementById("deploy-banner");
     const deployMeta = document.getElementById("deploy-meta");
     const deployRefreshButton = document.getElementById("deploy-refresh-btn");
-    const adminSecrets = ["armacheat"];
+    const adminSecrets = ["cheat"];
     const adminSecretMax = Math.max(...adminSecrets.map((code) => code.length));
     let adminBuffer = "";
     let deployBaseline = null;
@@ -2348,6 +2358,7 @@
     }
 
     adminClose.addEventListener("click", () => setAdminOpen(false));
+    adminLaunch.addEventListener("click", () => setAdminOpen(!adminPanel.classList.contains("open")));
     deployRefreshButton.addEventListener("click", () => {
       window.location.reload();
     });

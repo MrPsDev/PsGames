@@ -173,13 +173,16 @@
 
     #cheat {
       position: absolute;
-      bottom: 4px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: rgba(255, 255, 0, 0.15);
+      bottom: 10px;
+      right: 10px;
+      color: rgba(255, 255, 0, 0.75);
       font-size: 12px;
-      pointer-events: none;
       letter-spacing: 1px;
+      padding: 6px 10px;
+      border: 1px solid rgba(255, 255, 0, 0.65);
+      border-radius: 6px;
+      background: rgba(10, 10, 0, 0.45);
+      cursor: pointer;
     }
 
     @media (max-width: 760px) {
@@ -274,7 +277,7 @@ SPACE - also shoots</p>
         <button id="aclear">CLEAR ENEMIES</button>
       </div>
     </div>
-    <div id="cheat">armacheat</div>
+    <button id="cheat" type="button">Cheats</button>
   </div>
   <script>
     const root = document.getElementById("gc");
@@ -309,7 +312,7 @@ SPACE - also shoots</p>
     let waveQueued = false;
     let godMode = false;
     const WAVE_INTRO_FRAMES = 72;
-    const ADMIN_CODES = ["armacheat"];
+    const ADMIN_CODES = ["cheat"];
     const ADMIN_CODE_MAX = Math.max(...ADMIN_CODES.map((code) => code.length));
     const RAPID_DURATION = 180;
     const MEGA_DURATION = 120;
@@ -1148,6 +1151,10 @@ SPACE - also shoots</p>
 
     document.getElementById("admclose").addEventListener("click", () => {
       document.getElementById("adm").style.display = "none";
+    });
+
+    document.getElementById("cheat").addEventListener("click", () => {
+      toggleAdmin();
     });
 
     document.getElementById("agod").addEventListener("click", () => {
