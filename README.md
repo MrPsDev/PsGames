@@ -1,50 +1,49 @@
-# 🎮 Tenkrc – Browser Games Collection
+# 🕹️ Tenkrc – Retro Arcade Games
 
-**Tenkrc** is a lightweight web-based gaming project featuring a small collection of classic and original mini-games, built entirely with modern front-end technologies.  
-The goal of this project is to combine simplicity, performance, and fun while exploring game development in the browser.
-
----
-
-## 🚀 Overview
-
-Tenkrc provides a clean and accessible platform where users can instantly play games without downloads or installations.  
-All games run directly in the browser and are designed to be responsive and easy to use.
+**Tenkrc** is a retro arcade-style browser gaming website featuring classic-inspired mini-games built with modern web technologies.  
+The project focuses on recreating the feel of old-school arcade games with simple mechanics, fast gameplay, and clean design.
 
 ---
 
-## 🕹️ Games Included
+## 🎮 About
+
+Tenkrc is a collection of **retro-inspired arcade games** that run directly in the browser — no downloads, no installations.
+
+The idea behind the project is to bring back the nostalgic arcade experience while keeping everything lightweight and accessible.
+
+---
+
+## 🕹️ Games
 
 ### 🧱 Tetris
-A modern take on the classic Tetris experience.
-- Smooth block movement and rotation
-- Line-clearing mechanics
-- Increasing difficulty over time
+A classic block-stacking arcade game:
+- Arrange falling pieces
+- Clear lines to score points
+- Increasing speed over time
 
 ### 🎯 Thang Game
-A custom-built game with unique gameplay mechanics.
-- Focuses on reaction and timing
-- Simple design with engaging interactions
-- Experimental concept
+A custom retro-style arcade experience:
+- Reaction-based gameplay
+- Simple but challenging mechanics
+- Designed for quick play sessions
 
 ### 🚀 Space Shooter
-An arcade-style space shooting game.
-- Control a spaceship and eliminate enemies
+A fast-paced arcade shooter:
+- Control a spaceship
+- Destroy enemies
 - Avoid obstacles and survive as long as possible
-- Score-based progression system
 
 ---
 
-## 🛠️ Technologies Used
+## 🛠️ Tech Stack
 
-- **HTML5** – structure and layout  
-- **CSS3** – styling and responsiveness  
-- **JavaScript (Vanilla)** – game logic and interactivity  
+- HTML5  
+- CSS3  
+- Vanilla JavaScript  
 
 ---
 
-## 📦 Installation & Usage
-
-Clone the repository and open it locally:
+## 🚀 Getting Started
 
 ```bash
 git clone https://github.com/MrPsDev/tenkrc.git
