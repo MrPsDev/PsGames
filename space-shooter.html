@@ -210,34 +210,35 @@
 
     :fullscreen #adm,
     :-webkit-full-screen #adm {
-      min-width: 620px;
-      padding: 24px 30px;
-      bottom: 28px;
+      min-width: 760px;
+      padding: 30px 36px;
+      bottom: 40px;
       border-width: 2px;
+      border-radius: 12px;
     }
 
     :fullscreen #adm .atitle,
     :-webkit-full-screen #adm .atitle {
-      font-size: 20px;
-      margin-bottom: 18px;
+      font-size: 24px;
+      margin-bottom: 22px;
     }
 
     :fullscreen #adm .arow,
     :-webkit-full-screen #adm .arow {
-      gap: 16px;
+      gap: 18px;
     }
 
     :fullscreen #adm button,
     :-webkit-full-screen #adm button {
-      font-size: 18px;
-      padding: 13px 24px;
+      font-size: 20px;
+      padding: 15px 28px;
     }
 
     :fullscreen #adm .aclose,
     :-webkit-full-screen #adm .aclose {
-      font-size: 22px;
-      top: 10px;
-      right: 14px;
+      font-size: 26px;
+      top: 12px;
+      right: 16px;
     }
   </style>
 </head>
@@ -371,7 +372,6 @@ SPACE - also shoots</p>
     function maybeSpawnBonus(force) {
       if (!bonuses) bonuses = [];
       if (!force && bonuses.length >= 2) return;
-      if (!force && Math.random() < 0.35) return;
       const roll = Math.random();
       const type = roll < 0.25 ? "rapid" : roll < 0.5 ? "speed" : roll < 0.75 ? "combo" : "shield";
       spawnBonus(type);
@@ -441,7 +441,7 @@ SPACE - also shoots</p>
       bonuses = [];
       frame = 0;
       waveQueued = false;
-      bonusSpawnTimer = 160;
+      bonusSpawnTimer = 120;
       if (player) {
         player.x = W / 2;
         player.y = H - Math.max(80, H * 0.12);
@@ -460,6 +460,7 @@ SPACE - also shoots</p>
         const y = Math.max(72, Math.min(H * 0.68, cy + dy * scale));
         enemies.push({ x: baseX, y, baseX, dx, dy, type, hp: type === "boss" ? 2 : 1, shootTimer: 80 + Math.random() * cfg.shootRate, cfg });
       });
+      maybeSpawnBonus(true);
     }
 
     function relayoutEnemies() {
@@ -697,7 +698,7 @@ SPACE - also shoots</p>
         bonusSpawnTimer--;
       } else if (state === "playing") {
         maybeSpawnBonus(false);
-        bonusSpawnTimer = 420;
+        bonusSpawnTimer = 260;
       }
 
       const shipRadius = 20 * playerSize();
@@ -739,7 +740,7 @@ SPACE - also shoots</p>
             }
             spark(b.x, b.y, b.type === "speed" ? "#6bffcb" : b.type === "combo" ? "#c6ff54" : b.type === "shield" ? "#7ef8ff" : "#ffe96b", 12);
             bonuses.splice(i, 1);
-            bonusSpawnTimer = 320;
+            bonusSpawnTimer = 180;
           }
         }
       }

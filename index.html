@@ -721,12 +721,15 @@
     .space-wrap {
       position: relative;
       width: min(920px, 92%);
+      aspect-ratio: 680 / 480;
       margin-left: auto;
       margin-right: auto;
       margin-top: 18px;
       border-radius: 16px;
       border: 1px solid var(--line);
       overflow: hidden;
+      background: #0a0a1a;
+      line-height: 0;
     }
 
     .space-overlay-controls {
@@ -795,8 +798,8 @@
 
     .space-corner-fullscreen {
       position: absolute;
-      right: 14px;
-      bottom: 14px;
+      right: 18px;
+      bottom: 18px;
       z-index: 7;
     }
 
@@ -846,6 +849,7 @@
     #space-screen:fullscreen .space-wrap,
     #space-screen:-webkit-full-screen .space-wrap {
       width: min(1400px, 100%);
+      aspect-ratio: auto;
     }
 
     #space-screen:fullscreen .space-overlay-btn,
@@ -892,15 +896,16 @@
 
     #space-screen:fullscreen .space-corner-fullscreen,
     #space-screen:-webkit-full-screen .space-corner-fullscreen {
-      right: 18px;
-      bottom: 18px;
+      right: 24px;
+      bottom: 24px;
     }
 
     .space-frame {
+      position: absolute;
+      inset: 0;
       display: block;
       width: 100%;
-      aspect-ratio: 680 / 480;
-      min-height: 0;
+      height: 100%;
       border: 0;
       background: #07111a;
     }
@@ -1113,7 +1118,7 @@
         linear-gradient(180deg, #091018 0%, #060b11 100%);
       width: 100%;
       height: 100%;
-      padding: 14px 18px;
+      padding: 14px 18px 20px;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -1328,8 +1333,7 @@
 
     #space-screen:fullscreen .space-frame,
     #space-screen:-webkit-full-screen .space-frame {
-      aspect-ratio: auto;
-      min-height: calc(100vh - 110px);
+      height: 100%;
     }
 
     #tetris-screen:fullscreen .control-action,
