@@ -208,13 +208,23 @@
     }
 
     .profile-avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
       object-fit: cover;
-      border: 1px solid rgba(151, 194, 220, 0.2);
-      background: rgba(255, 255, 255, 0.04);
+      border: 2px solid rgba(121, 240, 200, 0.42);
+      background:
+        radial-gradient(circle at top, rgba(123, 199, 255, 0.26), transparent 60%),
+        linear-gradient(180deg, rgba(6, 16, 24, 0.96), rgba(4, 10, 16, 0.96));
+      box-shadow:
+        0 0 0 4px rgba(121, 240, 200, 0.08),
+        0 10px 26px rgba(0, 0, 0, 0.34);
       flex: 0 0 auto;
+    }
+
+    .profile-meta {
+      display: grid;
+      gap: 8px;
     }
 
     .profile-text {
@@ -223,6 +233,14 @@
       font-weight: 700;
       line-height: 1.35;
       word-break: break-word;
+    }
+
+    .profile-logout {
+      justify-self: start;
+      min-height: 32px;
+      padding: 7px 12px;
+      border-radius: 10px;
+      font-size: 12px;
     }
 
     .admin-backdrop {
@@ -2414,7 +2432,10 @@
   <button class="secondary admin-launch" id="admin-launch" type="button">Login</button>
   <div class="profile-pop" id="profile-pop" aria-hidden="true">
     <img class="profile-avatar" src="./avatar.png" alt="Avatar" />
-    <div class="profile-text" id="profile-text">login-guest</div>
+    <div class="profile-meta">
+      <div class="profile-text" id="profile-text">login-guest</div>
+      <button class="secondary profile-logout" id="profile-logout" type="button">Log out</button>
+    </div>
   </div>
   <div class="admin-backdrop" id="admin-backdrop"></div>
 
@@ -2490,6 +2511,7 @@
     const adminLaunch = document.getElementById("admin-launch");
     const profilePop = document.getElementById("profile-pop");
     const profileText = document.getElementById("profile-text");
+    const profileLogout = document.getElementById("profile-logout");
     const loginModal = document.getElementById("login-modal");
     const loginName = document.getElementById("login-name");
     const loginPassword = document.getElementById("login-password");
@@ -2676,6 +2698,15 @@
       setAdminOpen(false);
       setOwnerPanelOpen(false);
       setProfileOpen(false);
+    });
+    profileLogout.addEventListener("click", () => {
+      sessionStorage.removeItem(ADMIN_AUTH_KEY);
+      sessionStorage.removeItem(ADMIN_OWNER_KEY);
+      sessionStorage.removeItem(ADMIN_LABEL_KEY);
+      syncAdminLaunchLabel();
+      setProfileOpen(false);
+      setAdminOpen(false);
+      setOwnerPanelOpen(false);
     });
     document.addEventListener("click", (e) => {
       if (!profilePop.classList.contains("open")) return;
