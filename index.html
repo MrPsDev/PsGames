@@ -2658,7 +2658,8 @@
     });
     loginCancel.addEventListener("click", () => setLoginOpen(false));
     loginSubmit.addEventListener("click", () => {
-      const user = loginName.value.trim().toLowerCase();
+      const rawUser = loginName.value.trim();
+      const user = rawUser.toLowerCase();
       const pass = loginPassword.value.trim();
       if (!user || !pass) {
         loginError.textContent = "Enter login and password";
@@ -2676,7 +2677,7 @@
       }
       sessionStorage.removeItem(ADMIN_AUTH_KEY);
       sessionStorage.removeItem(ADMIN_OWNER_KEY);
-      sessionStorage.setItem(ADMIN_LABEL_KEY, user);
+      sessionStorage.setItem(ADMIN_LABEL_KEY, rawUser);
       syncAdminLaunchLabel();
       setLoginOpen(false);
       setProfileOpen(false);
