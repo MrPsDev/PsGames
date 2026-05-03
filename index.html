@@ -719,11 +719,53 @@
     }
 
     .space-wrap {
+      position: relative;
       width: 100%;
       margin-top: 18px;
       border-radius: 16px;
       border: 1px solid var(--line);
       overflow: hidden;
+    }
+
+    .space-overlay-btn {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      z-index: 5;
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(123, 199, 255, 0.34);
+      border-radius: 7px;
+      background: rgba(5, 12, 18, 0.82);
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.26);
+    }
+
+    .space-overlay-btn::before,
+    .space-overlay-btn::after {
+      content: "";
+      position: absolute;
+      width: 9px;
+      height: 9px;
+    }
+
+    .space-overlay-btn::before {
+      top: 6px;
+      left: 6px;
+      border-top: 2px solid #7ef8ff;
+      border-left: 2px solid #7ef8ff;
+    }
+
+    .space-overlay-btn::after {
+      right: 6px;
+      bottom: 6px;
+      border-right: 2px solid #7ef8ff;
+      border-bottom: 2px solid #7ef8ff;
+    }
+
+    .space-overlay-btn:hover {
+      border-color: rgba(123, 199, 255, 0.62);
+      background: rgba(10, 20, 32, 0.92);
     }
 
     .space-frame {
@@ -2033,6 +2075,7 @@
             loading="lazy"
             allow="fullscreen"
           ></iframe>
+          <button class="space-overlay-btn" id="space-overlay-fullscreen" type="button" aria-label="Fullscreen" title="Fullscreen"></button>
         </div>
       </div>
     </section>
@@ -2087,6 +2130,7 @@
     const tankFullscreenButton = document.getElementById("tank-fullscreen-btn");
     const fpsFullscreenButton = document.getElementById("fps-fullscreen-btn");
     const spaceFrame = document.getElementById("space-frame");
+    const spaceOverlayFullscreenButton = document.getElementById("space-overlay-fullscreen");
     const tetrisHud = tetrisScreen.querySelector(".hud");
     const tetrisLayout = document.getElementById("tetris-layout");
     const tetrisSide = document.getElementById("tetris-side");
@@ -2337,6 +2381,7 @@
     tetrisFullscreenButton.addEventListener("click", () => toggleFullscreen(tetrisScreen));
     tankFullscreenButton.addEventListener("click", () => toggleFullscreen(tankScreen));
     fpsFullscreenButton.addEventListener("click", () => toggleFullscreen(fpsScreen));
+    spaceOverlayFullscreenButton.addEventListener("click", () => toggleFullscreen(spaceScreen));
     document.getElementById("space-start-btn").addEventListener("click", () => {
       showScreen("space");
       spaceFrame.src = spaceFrame.src;
