@@ -293,6 +293,7 @@ SPACE - also shoots</p>
     let rapidFire = false;
     let rapidBoostTimer = 0;
     let speedBoostTimer = 0;
+    let shieldBoostTimer = 0;
     let bonusSpawnTimer = 0;
     let cheatBuf = "";
     let waveQueued = false;
@@ -300,6 +301,7 @@ SPACE - also shoots</p>
     const WAVE_INTRO_FRAMES = 72;
     const ADMIN_CODE = "armacheat";
     const BONUS_DURATION = 180;
+    const SHIELD_DURATION = 300;
 
     function resizeGame() {
       const prevW = W || 680;
@@ -370,7 +372,7 @@ SPACE - also shoots</p>
       if (!force && bonuses.length >= 2) return;
       if (!force && Math.random() < 0.35) return;
       const roll = Math.random();
-      const type = roll < 0.34 ? "rapid" : roll < 0.67 ? "speed" : "combo";
+      const type = roll < 0.25 ? "rapid" : roll < 0.5 ? "speed" : roll < 0.75 ? "combo" : "shield";
       spawnBonus(type);
     }
 
@@ -497,6 +499,7 @@ SPACE - also shoots</p>
       rapidFire = false;
       rapidBoostTimer = 0;
       speedBoostTimer = 0;
+      shieldBoostTimer = 0;
       bonusSpawnTimer = 0;
       player = { x: W / 2, y: H - Math.max(80, H * 0.12), invul: 0 };
       bullets = [];
@@ -599,7 +602,9 @@ SPACE - also shoots</p>
         ? ["#ffe96b", "#ff9800"]
         : b.type === "speed"
           ? ["#6bffcb", "#1fa883"]
-          : ["#7ef8ff", "#c6ff54"];
+          : b.type === "shield"
+            ? ["#7ef8ff", "#2868ff"]
+            : ["#7ef8ff", "#c6ff54"];
       ctx.save();
       ctx.translate(b.x, b.y);
       const grad = ctx.createRadialGradient(-r * 0.25, -r * 0.3, 2, 0, 0, r);
@@ -638,6 +643,13 @@ SPACE - also shoots</p>
         ctx.lineTo(2, -2);
         ctx.lineTo(-8, -2);
         ctx.closePath();
+        ctx.fill();
+      } else if (b.type === "shield") {
+        ctx.beginPath();
+        ctx.arc(0, 0, 8, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, 4, 0, Math.PI * 2);
         ctx.fill();
       } else {
         ctx.beginPath();
@@ -679,6 +691,7 @@ SPACE - also shoots</p>
 
       if (rapidBoostTimer > 0) rapidBoostTimer--;
       if (speedBoostTimer > 0) speedBoostTimer--;
+      if (shieldBoostTimer > 0) shieldBoostTimer--;
       if (bonusSpawnTimer > 0) {
         bonusSpawnTimer--;
       } else if (state === "playing") {
@@ -717,11 +730,13 @@ SPACE - also shoots</p>
               rapidBoostTimer = BONUS_DURATION;
             } else if (b.type === "speed") {
               speedBoostTimer = BONUS_DURATION;
+            } else if (b.type === "shield") {
+              shieldBoostTimer = SHIELD_DURATION;
             } else {
               rapidBoostTimer = BONUS_DURATION;
               speedBoostTimer = BONUS_DURATION;
             }
-            spark(b.x, b.y, b.type === "speed" ? "#6bffcb" : b.type === "combo" ? "#c6ff54" : "#ffe96b", 12);
+            spark(b.x, b.y, b.type === "speed" ? "#6bffcb" : b.type === "combo" ? "#c6ff54" : b.type === "shield" ? "#7ef8ff" : "#ffe96b", 12);
             bonuses.splice(i, 1);
             bonusSpawnTimer = 320;
           }
@@ -770,6 +785,10 @@ SPACE - also shoots</p>
           const hit = 16 * playerSize();
           if (Math.abs(b.x - player.x) < hit && Math.abs(b.y - player.y) < hit) {
             bullets.splice(i, 1);
+            if (shieldBoostTimer > 0) {
+              spark(b.x, b.y, "#7ef8ff", 8);
+              continue;
+            }
             if (!godMode) {
               lives--;
               player.invul = 100;
@@ -860,6 +879,18 @@ SPACE - also shoots</p>
       enemies.forEach((e) => drawEnemy(e));
       drawShip(player.x, player.y, player.invul);
 
+      if (shieldBoostTimer > 0) {
+        const shieldR = 24 * playerSize() + Math.sin(frame * 0.18) * 3;
+        ctx.strokeStyle = "rgba(126,248,255,0.85)";
+        ctx.lineWidth = Math.max(2, 2.2 * viewScale());
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = "#7ef8ff";
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, shieldR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+
       if (rapidFire || rapidBoostTimer > 0) {
         ctx.fillStyle = "rgba(255,238,68,0.18)";
         ctx.font = "bold " + Math.max(14, Math.round(14 * viewScale())) + "px Courier New";
@@ -873,6 +904,13 @@ SPACE - also shoots</p>
         ctx.font = "bold " + Math.max(14, Math.round(14 * viewScale())) + "px Courier New";
         ctx.textAlign = "left";
         ctx.fillText("* SPEED: " + Math.ceil(speedBoostTimer / 60) + "S", 14, H - 42);
+      }
+
+      if (shieldBoostTimer > 0) {
+        ctx.fillStyle = "rgba(126,248,255,0.22)";
+        ctx.font = "bold " + Math.max(14, Math.round(14 * viewScale())) + "px Courier New";
+        ctx.textAlign = "left";
+        ctx.fillText("* SHIELD: " + Math.ceil(shieldBoostTimer / 60) + "S", 14, H - 68);
       }
 
       if (godMode) {
