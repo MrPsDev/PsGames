@@ -585,13 +585,13 @@ SPACE - also shoots</p>
         ctx.closePath();
         ctx.fill();
         ctx.fillStyle = "#050505";
-        ctx.lineWidth = Math.max(1.5, 1.8 * s);
-        ctx.strokeStyle = "rgba(255,255,255,0.18)";
-        ctx.font = "628 " + Math.max(14, Math.round(12 * s)) + "px 'Doto', monospace";
+        ctx.lineWidth = Math.max(1.8, 2.2 * s);
+        ctx.strokeStyle = "rgba(255,255,255,0.28)";
+        ctx.font = "700 " + Math.max(11, Math.round(9.5 * s)) + "px 'Doto', monospace";
         ctx.fontVariationSettings = "'ROND' 100";
         ctx.textAlign = "center";
-        ctx.strokeText(e.hp, 0, 3 * s);
-        ctx.fillText(e.hp, 0, 3 * s);
+        ctx.strokeText(e.hp, 0, 2.5 * s);
+        ctx.fillText(e.hp, 0, 2.5 * s);
       } else if (e.type === "fast") {
         ctx.fillStyle = "#ffaa22";
         ctx.beginPath();
