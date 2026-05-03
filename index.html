@@ -187,6 +187,77 @@
       z-index: 19;
     }
 
+    .login-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(4, 9, 14, 0.72);
+      backdrop-filter: blur(8px);
+      z-index: 30;
+    }
+
+    .login-modal.open {
+      display: flex;
+    }
+
+    .login-card {
+      width: min(360px, calc(100vw - 28px));
+      padding: 22px 20px;
+      border: 1px solid rgba(151, 194, 220, 0.24);
+      border-radius: 18px;
+      background: rgba(8, 16, 24, 0.96);
+      box-shadow: 0 26px 70px rgba(0, 0, 0, 0.42);
+      display: grid;
+      gap: 12px;
+    }
+
+    .login-title {
+      color: var(--text);
+      font-size: 28px;
+      font-weight: 900;
+      text-align: center;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .login-label {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(151, 194, 220, 0.18);
+      background: rgba(5, 10, 15, 0.88);
+      color: var(--text);
+      font: inherit;
+      outline: none;
+    }
+
+    .login-input:focus {
+      border-color: rgba(121, 240, 200, 0.52);
+      box-shadow: 0 0 0 3px rgba(121, 240, 200, 0.14);
+    }
+
+    .login-error {
+      min-height: 18px;
+      color: #ff8d98;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .login-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
     .deploy-banner {
       position: fixed;
       left: 50%;
@@ -2248,7 +2319,22 @@
     </div>
   </div>
 
-  <button class="secondary admin-launch" id="admin-launch" type="button">Cheats</button>
+  <button class="secondary admin-launch" id="admin-launch" type="button">Login</button>
+
+  <div class="login-modal" id="login-modal" aria-hidden="true">
+    <div class="login-card">
+      <div class="login-title">Login</div>
+      <div class="login-label">Login</div>
+      <input class="login-input" id="login-name" type="text" autocomplete="username" />
+      <div class="login-label">Password</div>
+      <input class="login-input" id="login-password" type="password" autocomplete="current-password" />
+      <div class="login-error" id="login-error"></div>
+      <div class="login-actions">
+        <button class="secondary" id="login-cancel" type="button">Close</button>
+        <button class="primary" id="login-submit" type="button">Login</button>
+      </div>
+    </div>
+  </div>
 
   <div class="deploy-banner" id="deploy-banner" aria-live="polite">
     <div>
@@ -2283,14 +2369,16 @@
     const adminPanel = document.getElementById("admin-panel");
     const adminClose = document.getElementById("admin-close");
     const adminLaunch = document.getElementById("admin-launch");
+    const loginModal = document.getElementById("login-modal");
+    const loginName = document.getElementById("login-name");
+    const loginPassword = document.getElementById("login-password");
+    const loginError = document.getElementById("login-error");
+    const loginCancel = document.getElementById("login-cancel");
+    const loginSubmit = document.getElementById("login-submit");
     const deployBanner = document.getElementById("deploy-banner");
     const deployMeta = document.getElementById("deploy-meta");
     const deployRefreshButton = document.getElementById("deploy-refresh-btn");
-    const adminSecrets = ["pscheat"];
-    const adminSecretMax = Math.max(...adminSecrets.map((code) => code.length));
     const ADMIN_AUTH_KEY = "psgames-admin-auth";
-    const ADMIN_PASSWORD_HASH = "095d42bf22546757a4db0283e42e7c1aecc9c3d28a56994d66dd91e82c17aa04";
-    let adminBuffer = "";
     let deployBaseline = null;
     let deployPollId = null;
     const cheatState = {
@@ -2305,23 +2393,18 @@
       adminPanel.setAttribute("aria-hidden", open ? "false" : "true");
     }
 
-    async function sha256(text) {
-      const bytes = new TextEncoder().encode(text);
-      const hashBuffer = await crypto.subtle.digest("SHA-256", bytes);
-      return Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    function isAdminAuthenticated() {
+      return sessionStorage.getItem(ADMIN_AUTH_KEY) === "1";
     }
 
-    async function ensureAdminAccess() {
-      if (sessionStorage.getItem(ADMIN_AUTH_KEY) === "1") return true;
-      const password = window.prompt("Enter admin password");
-      if (!password) return false;
-      const hash = await sha256(password.trim());
-      if (hash === ADMIN_PASSWORD_HASH) {
-        sessionStorage.setItem(ADMIN_AUTH_KEY, "1");
-        return true;
+    function setLoginOpen(open) {
+      loginModal.classList.toggle("open", open);
+      loginModal.setAttribute("aria-hidden", open ? "false" : "true");
+      if (open) {
+        loginError.textContent = "";
+        loginPassword.value = "";
+        setTimeout(() => loginName.focus(), 0);
       }
-      window.alert("Wrong password");
-      return false;
     }
 
     function refreshAdminButtons() {
@@ -2379,25 +2462,30 @@
     }
 
     adminClose.addEventListener("click", () => setAdminOpen(false));
-    adminLaunch.addEventListener("click", async () => {
-      if (!(await ensureAdminAccess())) return;
-      setAdminOpen(!adminPanel.classList.contains("open"));
+    adminLaunch.addEventListener("click", () => {
+      if (isAdminAuthenticated()) {
+        setAdminOpen(!adminPanel.classList.contains("open"));
+        return;
+      }
+      setLoginOpen(true);
+    });
+    loginCancel.addEventListener("click", () => setLoginOpen(false));
+    loginSubmit.addEventListener("click", () => {
+      const user = loginName.value.trim().toLowerCase();
+      const pass = loginPassword.value.trim();
+      if (user === "arma" && pass === "owner") {
+        sessionStorage.setItem(ADMIN_AUTH_KEY, "1");
+        setLoginOpen(false);
+        setAdminOpen(true);
+        return;
+      }
+      loginError.textContent = "Wrong login or password";
+    });
+    loginPassword.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") loginSubmit.click();
     });
     deployRefreshButton.addEventListener("click", () => {
       window.location.reload();
-    });
-
-    document.addEventListener("keydown", async (e) => {
-      if (e.ctrlKey || e.altKey || e.metaKey || e.key.length !== 1) return;
-      adminBuffer = (adminBuffer + e.key.toLowerCase()).slice(-adminSecretMax);
-      if (adminSecrets.some((code) => adminBuffer.endsWith(code))) {
-        if (!(await ensureAdminAccess())) {
-          adminBuffer = "";
-          return;
-        }
-        setAdminOpen(!adminPanel.classList.contains("open"));
-        adminBuffer = "";
-      }
     });
 
     function showScreen(name) {
