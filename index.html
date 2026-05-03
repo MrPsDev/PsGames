@@ -733,10 +733,9 @@
       position: absolute;
       top: 12px;
       left: 12px;
-      right: 12px;
       z-index: 6;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       pointer-events: none;
     }
 
@@ -789,6 +788,13 @@
     .space-overlay-btn.reload-btn,
     .space-overlay-btn.fullscreen-btn-mini {
       position: relative;
+    }
+
+    .space-corner-fullscreen {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      z-index: 7;
     }
 
     .space-overlay-btn.menu-btn::before,
@@ -879,6 +885,12 @@
       border-top-width: 10px;
       border-bottom-width: 10px;
       border-left-width: 13px;
+    }
+
+    #space-screen:fullscreen .space-corner-fullscreen,
+    #space-screen:-webkit-full-screen .space-corner-fullscreen {
+      right: 18px;
+      bottom: 18px;
     }
 
     .space-frame {
@@ -2181,10 +2193,8 @@
               <button class="space-overlay-btn menu-btn" id="back-from-space" type="button" aria-label="Menu" title="Menu"></button>
               <button class="space-overlay-btn reload-btn" id="space-start-btn" type="button" aria-label="Reload Game" title="Reload Game"></button>
             </div>
-            <div class="space-overlay-group">
-              <button class="space-overlay-btn fullscreen-btn-mini" id="space-overlay-fullscreen" type="button" aria-label="Fullscreen" title="Fullscreen"></button>
-            </div>
           </div>
+          <button class="space-overlay-btn fullscreen-btn-mini space-corner-fullscreen" id="space-overlay-fullscreen" type="button" aria-label="Fullscreen" title="Fullscreen"></button>
           <iframe
             id="space-frame"
             class="space-frame"
