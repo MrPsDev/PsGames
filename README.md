@@ -14,16 +14,8 @@ Powered by JavaScript game logic.
 ## 🎮 Games
 
 - 🧱 **Tetris** – stack blocks, clear lines  
-- 🎯 **Thang Game** – test your reaction  
+- 🎯 **Mini Tank** – kill enemy tank  
 - 🚀 **Space Shooter** – shoot enemies, survive  
-
----
-
-## 📸 Preview
-
-![Tetris](images/tetris.png)  
-![Thang Game](images/thang.png)  
-![Space Shooter](images/space.png)
 
 ---
 
