@@ -1243,7 +1243,11 @@ SPACE - also shoots</p>
       if (e.button === 0) mouseDown = false;
     });
 
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) syncCheatVisibility();
+    });
     window.addEventListener("focus", syncCheatVisibility);
+    window.addEventListener("storage", syncCheatVisibility);
     window.addEventListener("resize", resizeGame);
     syncCheatVisibility();
     syncAdminButtons();
