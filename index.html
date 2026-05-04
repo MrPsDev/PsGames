@@ -922,11 +922,8 @@
 
     .space-overlay-controls {
       position: absolute;
-      top: 12px;
-      left: 12px;
-      z-index: 6;
-      width: auto;
-      height: auto;
+      inset: 0;
+      z-index: 8;
       pointer-events: none;
       background: transparent;
       box-shadow: none;
@@ -947,7 +944,7 @@
     }
 
     .space-overlay-btn {
-      position: absolute;
+      position: relative;
       z-index: 5;
       width: 48px;
       height: 48px;
@@ -993,7 +990,7 @@
 
     .space-corner-fullscreen {
       position: absolute;
-      right: 138px;
+      right: 128px;
       bottom: 18px;
       z-index: 7;
     }
@@ -1103,7 +1100,7 @@
       }
 
       .space-corner-fullscreen {
-        right: 94px;
+        right: 88px;
         bottom: 12px;
       }
 
@@ -1146,6 +1143,7 @@
       height: 100%;
       border: 0;
       background: #07111a;
+      z-index: 1;
     }
 
     .gunshop-title {
