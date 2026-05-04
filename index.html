@@ -943,6 +943,15 @@
       gap: 8px;
     }
 
+    .space-overlay-group.bottom-right-menu {
+      position: absolute;
+      right: 18px;
+      bottom: 18px;
+      gap: 8px;
+      pointer-events: auto;
+      z-index: 9;
+    }
+
     .space-overlay-btn {
       position: relative;
       z-index: 5;
@@ -990,7 +999,7 @@
 
     .space-corner-fullscreen {
       position: absolute;
-      right: 18px;
+      right: 74px;
       bottom: 18px;
       z-index: 9;
     }
@@ -1088,7 +1097,7 @@
 
     #space-screen:fullscreen .space-corner-fullscreen,
     #space-screen:-webkit-full-screen .space-corner-fullscreen {
-      right: 24px;
+      right: 86px;
       bottom: 24px;
     }
 
@@ -1105,8 +1114,13 @@
         gap: 6px;
       }
 
-      .space-corner-fullscreen {
+      .space-overlay-group.bottom-right-menu {
         right: 12px;
+        bottom: 12px;
+      }
+
+      .space-corner-fullscreen {
+        right: 56px;
         bottom: 12px;
       }
 
@@ -2444,8 +2458,10 @@
         <div class="space-wrap">
           <div class="space-overlay-controls">
             <div class="space-overlay-group top-left">
-              <button class="space-overlay-btn menu-btn" id="back-from-space" type="button" aria-label="Menu" title="Menu"></button>
               <button class="space-overlay-btn reload-btn" id="space-start-btn" type="button" aria-label="Reload Game" title="Reload Game"></button>
+            </div>
+            <div class="space-overlay-group bottom-right-menu">
+              <button class="space-overlay-btn menu-btn" id="back-from-space" type="button" aria-label="Menu" title="Menu"></button>
             </div>
           </div>
           <button class="space-overlay-btn fullscreen-btn-mini space-corner-fullscreen" id="space-overlay-fullscreen" type="button" aria-label="Fullscreen" title="Fullscreen"></button>
