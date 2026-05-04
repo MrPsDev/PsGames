@@ -1154,6 +1154,41 @@
         border-bottom-width: 6px;
         border-left-width: 9px;
       }
+
+      #space-screen:fullscreen .space-overlay-btn.menu-btn,
+      #space-screen:fullscreen .space-overlay-btn.reload-btn,
+      #space-screen:-webkit-full-screen .space-overlay-btn.menu-btn,
+      #space-screen:-webkit-full-screen .space-overlay-btn.reload-btn {
+        width: 34px;
+        height: 34px;
+      }
+
+      #space-screen:fullscreen .space-overlay-btn.menu-btn::before,
+      #space-screen:-webkit-full-screen .space-overlay-btn.menu-btn::before {
+        left: 8px;
+        width: 18px;
+        height: 3px;
+        top: 8px;
+        box-shadow: 0 6px 0 #7ef8ff, 0 12px 0 #7ef8ff;
+      }
+
+      #space-screen:fullscreen .space-overlay-btn.reload-btn::before,
+      #space-screen:-webkit-full-screen .space-overlay-btn.reload-btn::before {
+        left: 8px;
+        top: 8px;
+        width: 13px;
+        height: 13px;
+        border-width: 4px;
+      }
+
+      #space-screen:fullscreen .space-overlay-btn.reload-btn::after,
+      #space-screen:-webkit-full-screen .space-overlay-btn.reload-btn::after {
+        right: 6px;
+        top: 6px;
+        border-top-width: 5px;
+        border-bottom-width: 5px;
+        border-left-width: 8px;
+      }
     }
 
     .space-frame {
