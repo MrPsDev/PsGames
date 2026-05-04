@@ -489,7 +489,7 @@ SPACE - also shoots</p>
       return {
         swayAmp: w <= 2 ? 0 : 4 + t * 40,
         swaySpd: w <= 2 ? 0 : 0.005 + t * 0.028,
-        shootRate: w <= 2 ? 400 : Math.max(35, 380 - t * 345),
+        shootRate: w <= 2 ? 220 : w <= 5 ? 180 : Math.max(35, 380 - t * 345),
         bulletSpd: 1.2 + t * 4
       };
     }
@@ -549,7 +549,8 @@ SPACE - also shoots</p>
         const type = wave <= 2 ? "basic" : i % 6 === 0 && wave > 5 ? "boss" : i % 3 === 0 && wave > 3 ? "fast" : "basic";
         const baseX = Math.max(40, Math.min(W - 40, cx + dx * scale));
         const y = Math.max(72, Math.min(H * 0.68, cy + dy * scale));
-        enemies.push({ x: baseX, y, baseX, dx, dy, type, hp: type === "boss" ? 2 : 1, shootTimer: 80 + Math.random() * cfg.shootRate, cfg });
+        const earlyWaveTimer = wave <= 5 ? 36 + i * 14 + Math.random() * 18 : 80 + Math.random() * cfg.shootRate;
+        enemies.push({ x: baseX, y, baseX, dx, dy, type, hp: type === "boss" ? 2 : 1, shootTimer: earlyWaveTimer, cfg });
       });
       if (Math.random() < 0.7) maybeSpawnBonus(true);
       if (Math.random() < 0.3) spawnBonus("medkit");
