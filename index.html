@@ -463,6 +463,25 @@
       color: #dffdf4;
     }
 
+    .game-cheat-btn {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+      z-index: 9;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 230, 0, 0.5);
+      background: rgba(24, 22, 0, 0.82);
+      color: rgba(255, 230, 0, 0.88);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+    }
+
+    .game-cheat-btn.hidden {
+      display: none !important;
+    }
+
     .menu-grid {
       position: relative;
       display: grid;
@@ -2368,6 +2387,7 @@
             </div>
           </div>
         </div>
+        <button class="game-cheat-btn hidden" id="tetris-cheat-btn" type="button">Cheats</button>
       </div>
 
       <div id="tank-screen" class="hidden">
@@ -2431,6 +2451,7 @@
             <p class="mobile-copy">Drag inside the pad to aim. Keep touching to keep shooting.</p>
           </div>
         </div>
+        <button class="game-cheat-btn hidden" id="tank-cheat-btn" type="button">Cheats</button>
 
         <!-- Gamepad overlay — inside tank-screen so it works in fullscreen -->
         <div id="tank-gamepad" aria-hidden="true">
@@ -2642,6 +2663,8 @@
     const ownerLogout = document.getElementById("owner-logout");
     const adminClose = document.getElementById("admin-close");
     const adminLaunch = document.getElementById("admin-launch");
+    const tetrisCheatButton = document.getElementById("tetris-cheat-btn");
+    const tankCheatButton = document.getElementById("tank-cheat-btn");
     const profilePop = document.getElementById("profile-pop");
     const profileText = document.getElementById("profile-text");
     const profileLogout = document.getElementById("profile-logout");
@@ -2715,6 +2738,12 @@
       profileText.textContent = label;
     }
 
+    function syncGameCheatButtons() {
+      const show = isAdminAuthenticated();
+      tetrisCheatButton.classList.toggle("hidden", !show);
+      tankCheatButton.classList.toggle("hidden", !show);
+    }
+
     function refreshAdminButtons() {
       document.querySelectorAll("[data-admin-toggle]").forEach((button) => {
         button.classList.toggle("active", Boolean(cheatState[button.dataset.adminToggle]));
@@ -2770,6 +2799,7 @@
     }
 
     syncAdminLaunchLabel();
+    syncGameCheatButtons();
     adminClose.addEventListener("click", () => setAdminOpen(false));
     adminBackdrop.addEventListener("click", () => {
       setAdminOpen(false);
@@ -2803,6 +2833,7 @@
         sessionStorage.setItem(ADMIN_OWNER_KEY, "1");
         sessionStorage.setItem(ADMIN_LABEL_KEY, "owner");
         syncAdminLaunchLabel();
+        syncGameCheatButtons();
         setProfileOpen(false);
         setLoginOpen(false);
         setOwnerPanelOpen(true);
@@ -2812,6 +2843,7 @@
       sessionStorage.removeItem(ADMIN_OWNER_KEY);
       sessionStorage.setItem(ADMIN_LABEL_KEY, rawUser);
       syncAdminLaunchLabel();
+      syncGameCheatButtons();
       setLoginOpen(false);
       setProfileOpen(false);
       setSuccessOpen(true);
@@ -2829,6 +2861,7 @@
       sessionStorage.removeItem(ADMIN_OWNER_KEY);
       sessionStorage.removeItem(ADMIN_LABEL_KEY);
       syncAdminLaunchLabel();
+      syncGameCheatButtons();
       setAdminOpen(false);
       setOwnerPanelOpen(false);
       setProfileOpen(false);
@@ -2838,9 +2871,20 @@
       sessionStorage.removeItem(ADMIN_OWNER_KEY);
       sessionStorage.removeItem(ADMIN_LABEL_KEY);
       syncAdminLaunchLabel();
+      syncGameCheatButtons();
       setProfileOpen(false);
       setAdminOpen(false);
       setOwnerPanelOpen(false);
+    });
+    tetrisCheatButton.addEventListener("click", () => {
+      if (!isAdminAuthenticated()) return;
+      setOwnerPanelOpen(false);
+      setAdminOpen(true);
+    });
+    tankCheatButton.addEventListener("click", () => {
+      if (!isAdminAuthenticated()) return;
+      setOwnerPanelOpen(false);
+      setAdminOpen(true);
     });
     document.addEventListener("click", (e) => {
       if (!profilePop.classList.contains("open")) return;
