@@ -936,10 +936,10 @@
       pointer-events: auto;
     }
 
-    .space-overlay-group.bottom-right {
+    .space-overlay-group.top-left {
       position: absolute;
-      right: 18px;
-      bottom: 18px;
+      top: 12px;
+      left: 12px;
       gap: 8px;
     }
 
@@ -1099,9 +1099,9 @@
         margin-top: 12px;
       }
 
-      .space-overlay-group.bottom-right {
-        right: 12px;
-        bottom: 12px;
+      .space-overlay-group.top-left {
+        top: 12px;
+        left: 12px;
         gap: 6px;
       }
 
@@ -2442,9 +2442,9 @@
 
         <div class="space-wrap">
           <div class="space-overlay-controls">
-            <div class="space-overlay-group bottom-right">
-              <button class="space-overlay-btn reload-btn" id="space-start-btn" type="button" aria-label="Reload Game" title="Reload Game"></button>
+            <div class="space-overlay-group top-left">
               <button class="space-overlay-btn menu-btn" id="back-from-space" type="button" aria-label="Menu" title="Menu"></button>
+              <button class="space-overlay-btn reload-btn" id="space-start-btn" type="button" aria-label="Reload Game" title="Reload Game"></button>
             </div>
           </div>
           <button class="space-overlay-btn fullscreen-btn-mini space-corner-fullscreen" id="space-overlay-fullscreen" type="button" aria-label="Fullscreen" title="Fullscreen"></button>
