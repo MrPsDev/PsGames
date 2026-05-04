@@ -190,7 +190,7 @@
     }
 
     #mobile-ui {
-      display: none;
+      display: none !important;
     }
 
     @media (max-width: 760px) {
@@ -218,67 +218,8 @@
     }
 
     @media (max-width: 840px), (pointer: coarse) {
-      #mobile-ui {
-        display: flex;
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 16px;
-        z-index: 12;
-        justify-content: space-between;
-        align-items: flex-end;
-        padding: 0 14px;
-        pointer-events: none;
-      }
-
-      .mobile-pad,
-      .mobile-fire-wrap {
-        pointer-events: auto;
-      }
-
-      .mobile-pad {
-        display: grid;
-        grid-template-columns: 58px 58px 58px;
-        grid-template-rows: 58px 58px;
-        gap: 8px;
-      }
-
-      .mobile-gap {
-        visibility: hidden;
-      }
-
-      .mobile-fire-wrap {
-        display: flex;
-        align-items: center;
-      }
-
-      .mobile-btn {
-        border: 1px solid rgba(126, 248, 255, 0.38);
-        border-radius: 16px;
-        background: rgba(6, 14, 22, 0.82);
-        color: #7ef8ff;
-        font: 700 14px "Courier New", monospace;
-        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+      #c {
         touch-action: none;
-        user-select: none;
-      }
-
-      .mobile-move {
-        width: 58px;
-        height: 58px;
-      }
-
-      .mobile-fire {
-        width: 86px;
-        height: 86px;
-        border-radius: 50%;
-        font-size: 16px;
-      }
-
-      .mobile-btn:active,
-      .mobile-btn.active {
-        background: rgba(20, 48, 66, 0.96);
-        border-color: rgba(126, 248, 255, 0.76);
       }
     }
 
@@ -368,8 +309,6 @@ SPACE - also shoots</p>
     const root = document.getElementById("gc");
     const canvas = document.getElementById("c");
     const ctx = canvas.getContext("2d");
-    const mobileMoveButtons = Array.from(document.querySelectorAll("[data-move]"));
-    const mobileFireButton = document.getElementById("mobile-fire");
     let W = 0;
     let H = 0;
     let state = "menu";
@@ -395,6 +334,9 @@ SPACE - also shoots</p>
     let shieldBoostTimer = 0;
     let bonusSpawnTimer = 0;
     let waveScale = 1;
+    let touchActive = false;
+    let touchX = 0;
+    let touchY = 0;
     let cheatBuf = "";
     let waveQueued = false;
     let godMode = false;
@@ -892,10 +834,15 @@ SPACE - also shoots</p>
       const speedBoostOn = speedMode || speedBoostTimer > 0;
       const rapidOn = rapidFire || rapidBoostTimer > 0;
       const spd = (speedBoostOn ? 7.2 : 5) * Math.min(1.6, viewScale());
-      if (keys.ArrowLeft || keys.a || keys.A) player.x -= spd;
-      if (keys.ArrowRight || keys.d || keys.D) player.x += spd;
-      if (keys.ArrowUp || keys.w || keys.W) player.y -= spd;
-      if (keys.ArrowDown || keys.s || keys.S) player.y += spd;
+      if (touchActive) {
+        player.x = touchX;
+        player.y = touchY;
+      } else {
+        if (keys.ArrowLeft || keys.a || keys.A) player.x -= spd;
+        if (keys.ArrowRight || keys.d || keys.D) player.x += spd;
+        if (keys.ArrowUp || keys.w || keys.W) player.y -= spd;
+        if (keys.ArrowDown || keys.s || keys.S) player.y += spd;
+      }
       player.x = Math.max(shipRadius, Math.min(W - shipRadius, player.x));
       player.y = Math.max(shipRadius, Math.min(H - shipRadius, player.y));
 
@@ -1326,51 +1273,36 @@ SPACE - also shoots</p>
       if (e.button === 0) mouseDown = false;
     });
 
-    function setMoveKey(dir, pressed) {
-      if (dir === "up") keys.ArrowUp = pressed;
-      if (dir === "left") keys.ArrowLeft = pressed;
-      if (dir === "down") keys.ArrowDown = pressed;
-      if (dir === "right") keys.ArrowRight = pressed;
-      const button = mobileMoveButtons.find((item) => item.dataset.move === dir);
-      if (button) button.classList.toggle("active", pressed);
+    function updateTouchPoint(clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      touchX = ((clientX - rect.left) / rect.width) * W;
+      touchY = ((clientY - rect.top) / rect.height) * H;
     }
 
-    mobileMoveButtons.forEach((button) => {
-      const dir = button.dataset.move;
-      const press = (e) => {
-        e.preventDefault();
-        setMoveKey(dir, true);
-      };
-      const release = (e) => {
-        e.preventDefault();
-        setMoveKey(dir, false);
-      };
-      button.addEventListener("touchstart", press, { passive: false });
-      button.addEventListener("touchend", release, { passive: false });
-      button.addEventListener("touchcancel", release, { passive: false });
-      button.addEventListener("mousedown", press);
-      button.addEventListener("mouseup", release);
-      button.addEventListener("mouseleave", release);
-    });
+    canvas.addEventListener("touchstart", (e) => {
+      if (!e.touches.length) return;
+      e.preventDefault();
+      if (state === "playing" && wt > 0) wt = 0;
+      updateTouchPoint(e.touches[0].clientX, e.touches[0].clientY);
+      touchActive = true;
+      mouseDown = true;
+    }, { passive: false });
 
-    if (mobileFireButton) {
-      const fireOn = (e) => {
-        e.preventDefault();
-        mouseDown = true;
-        mobileFireButton.classList.add("active");
-      };
-      const fireOff = (e) => {
-        e.preventDefault();
-        mouseDown = false;
-        mobileFireButton.classList.remove("active");
-      };
-      mobileFireButton.addEventListener("touchstart", fireOn, { passive: false });
-      mobileFireButton.addEventListener("touchend", fireOff, { passive: false });
-      mobileFireButton.addEventListener("touchcancel", fireOff, { passive: false });
-      mobileFireButton.addEventListener("mousedown", fireOn);
-      mobileFireButton.addEventListener("mouseup", fireOff);
-      mobileFireButton.addEventListener("mouseleave", fireOff);
-    }
+    canvas.addEventListener("touchmove", (e) => {
+      if (!e.touches.length) return;
+      e.preventDefault();
+      updateTouchPoint(e.touches[0].clientX, e.touches[0].clientY);
+      touchActive = true;
+      mouseDown = true;
+    }, { passive: false });
+
+    const endTouch = () => {
+      touchActive = false;
+      mouseDown = false;
+    };
+
+    canvas.addEventListener("touchend", endTouch, { passive: false });
+    canvas.addEventListener("touchcancel", endTouch, { passive: false });
 
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) syncCheatVisibility();
