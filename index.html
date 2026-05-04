@@ -121,6 +121,54 @@
       backdrop-filter: blur(16px);
     }
 
+    body.space-mode {
+      background:
+        radial-gradient(circle at 50% 0%, rgba(126, 248, 255, 0.10), transparent 28%),
+        linear-gradient(180deg, #050712 0%, #08081a 52%, #050712 100%);
+    }
+
+    body.space-mode::before,
+    body.space-mode::after {
+      display: none;
+    }
+
+    body.space-mode .title {
+      color: #7ef8ff;
+      text-shadow: 0 0 18px rgba(126, 248, 255, 0.22);
+    }
+
+    body.space-mode .subtitle,
+    body.space-mode #space-screen .hint {
+      color: rgba(126, 248, 255, 0.58);
+    }
+
+    body.space-mode #main-panel {
+      background: transparent;
+      border-color: rgba(126, 248, 255, 0.18);
+      box-shadow: 0 0 0 1px rgba(126, 248, 255, 0.05), 0 22px 80px rgba(0, 0, 0, 0.32);
+      backdrop-filter: none;
+    }
+
+    body.space-mode #main-panel::before {
+      opacity: 0;
+    }
+
+    body.space-mode #space-screen .screen-title {
+      color: #ffe96b;
+      font-family: "Courier New", monospace;
+      text-shadow: 0 0 10px rgba(255, 233, 107, 0.24);
+    }
+
+    body.space-mode .space-wrap {
+      width: min(1040px, 96%);
+      border-color: rgba(126, 248, 255, 0.24);
+      background: #0a0a1a;
+      box-shadow:
+        0 0 0 1px rgba(126, 248, 255, 0.08),
+        0 20px 60px rgba(0, 0, 0, 0.34),
+        inset 0 0 28px rgba(126, 248, 255, 0.04);
+    }
+
     #main-panel {
       padding: 22px;
       display: flex;
@@ -2901,6 +2949,7 @@
       tankScreen.classList.toggle("hidden", name !== "tank");
       fpsScreen.classList.toggle("hidden", name !== "fps");
       spaceScreen.classList.toggle("hidden", name !== "space");
+      document.body.classList.toggle("space-mode", name === "space");
       if (name !== "tetris") stopTetris();
       if (name !== "tank") stopTank();
       if (name !== "fps") stopFps();
