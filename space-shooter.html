@@ -340,6 +340,7 @@ SPACE - also shoots</p>
     let cheatBuf = "";
     let waveQueued = false;
     let godMode = false;
+    let autoAimUnlocked = false;
     const WAVE_INTRO_FRAMES = 72;
     const ADMIN_CODES = ["pscheat"];
     const ADMIN_CODE_MAX = Math.max(...ADMIN_CODES.map((code) => code.length));
@@ -593,6 +594,7 @@ SPACE - also shoots</p>
       mouseDown = false;
       rapidFire = false;
       speedMode = false;
+      autoAimUnlocked = false;
       rapidBoostTimer = 0;
       speedBoostTimer = 0;
       shieldBoostTimer = 0;
@@ -805,9 +807,36 @@ SPACE - also shoots</p>
         showOv("YOU WIN!", "All 20 waves cleared.\nScore: " + score, "PLAY AGAIN");
         return;
       }
+      if (wave === 19) {
+        autoAimUnlocked = true;
+      }
       wave++;
       wt = WAVE_INTRO_FRAMES;
       spawnWave();
+    }
+
+    function firePlayerShot(autoAimBoss) {
+      const baseSpeed = 13 * Math.min(1.5, viewScale());
+      const rapidOn = rapidFire || rapidBoostTimer > 0;
+      const offsets = rapidOn ? [0, -10 * playerSize(), 10 * playerSize()] : [0];
+      const boss = autoAimBoss ? enemies.find((e) => e.type === "finalBoss") : null;
+      offsets.forEach((offsetX) => {
+        const shot = {
+          x: player.x + offsetX,
+          y: player.y - (offsetX === 0 ? 18 : 12) * playerSize(),
+          own: "p"
+        };
+        if (boss) {
+          const dx = boss.x - shot.x;
+          const dy = boss.y - shot.y;
+          const len = Math.max(1, Math.hypot(dx, dy));
+          shot.vx = (dx / len) * baseSpeed;
+          shot.vy = (dy / len) * baseSpeed;
+        } else {
+          shot.spd = baseSpeed;
+        }
+        bullets.push(shot);
+      });
     }
 
     function update() {
@@ -850,12 +879,11 @@ SPACE - also shoots</p>
       if (player.invul > 0) player.invul--;
       if (cooldown > 0) cooldown--;
       const fireRate = rapidOn ? 2 : 10;
-      if ((keys[" "] || keys.z || mouseDown) && cooldown <= 0) {
-        bullets.push({ x: player.x, y: player.y - 18 * playerSize(), spd: 13 * Math.min(1.5, viewScale()), own: "p" });
-        if (rapidOn) {
-          bullets.push({ x: player.x - 10 * playerSize(), y: player.y - 12 * playerSize(), spd: 13 * Math.min(1.5, viewScale()), own: "p" });
-          bullets.push({ x: player.x + 10 * playerSize(), y: player.y - 12 * playerSize(), spd: 13 * Math.min(1.5, viewScale()), own: "p" });
-        }
+      const bossAutoAim = autoAimUnlocked && wave === 20 && enemies.some((e) => e.type === "finalBoss");
+      const touchDevice = window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
+      const wantsFire = bossAutoAim ? (touchDevice ? touchActive : true) : (keys[" "] || keys.z || mouseDown);
+      if (wantsFire && cooldown <= 0) {
+        firePlayerShot(bossAutoAim);
         cooldown = fireRate;
       }
 
@@ -1031,6 +1059,11 @@ SPACE - also shoots</p>
         ctx.font = "18px Courier New";
         ctx.fillStyle = "rgba(170,170,170," + a + ")";
         ctx.fillText("Get ready", W / 2, H / 2 + 20);
+        if (wave === 20 && autoAimUnlocked) {
+          ctx.fillStyle = "rgba(255,238,68," + a + ")";
+          ctx.font = "bold 20px Courier New";
+          ctx.fillText("NEW ITEM: AUTO AIM", W / 2, H / 2 + 52);
+        }
         return;
       }
 
@@ -1124,6 +1157,13 @@ SPACE - also shoots</p>
         ctx.textAlign = "left";
         const rapidLabel = rapidFire ? "* RAPID FIRE: ON" : "* RAPID FIRE: " + Math.ceil(rapidBoostTimer / 60) + "S";
         ctx.fillText(rapidLabel, 14, H - 16);
+      }
+
+      if (autoAimUnlocked && wave === 20 && enemies.some((e) => e.type === "finalBoss")) {
+        ctx.fillStyle = "rgba(255,238,68,0.22)";
+        ctx.font = "bold " + Math.max(14, Math.round(14 * viewScale())) + "px Courier New";
+        ctx.textAlign = "center";
+        ctx.fillText("AUTO AIM ACTIVE", W / 2, H - 16);
       }
 
       if (speedBoostTimer > 0) {
