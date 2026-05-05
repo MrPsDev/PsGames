@@ -18,6 +18,8 @@
   <link rel="canonical" href="https://armapsgames.online/" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <style>
+    @import url("https://fonts.googleapis.com/css2?family=Audiowide&display=swap");
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -43,7 +45,7 @@
 
     body {
       min-height: 100vh;
-      padding: 24px 16px 40px;
+      padding: 88px 16px 40px;
       background:
         radial-gradient(circle at top, rgba(123, 199, 255, 0.16), transparent 28%),
         radial-gradient(circle at 20% 20%, rgba(121, 240, 200, 0.08), transparent 24%),
@@ -55,6 +57,143 @@
       align-items: center;
       overflow-x: hidden;
       position: relative;
+    }
+
+    .site-topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      background: #020305;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .nav-menu-btn {
+      width: 34px;
+      height: 28px;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .nav-menu-btn::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 1px;
+      width: 34px;
+      height: 4px;
+      border-radius: 999px;
+      background: #f5f7fb;
+      box-shadow: 0 11px 0 #f5f7fb, 0 22px 0 #f5f7fb;
+    }
+
+    .brand-title {
+      color: #f5f7fb;
+      font-family: "Audiowide", "Segoe UI", sans-serif;
+      font-size: clamp(20px, 2.4vw, 32px);
+      letter-spacing: 0;
+      white-space: nowrap;
+      text-shadow: 0 0 18px rgba(126, 248, 255, 0.16);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .nav-auth-btn {
+      border: 0;
+      background: transparent;
+      color: #f5f7fb;
+      font: 600 16px "Segoe UI", sans-serif;
+      cursor: pointer;
+      padding: 8px 0;
+    }
+
+    .nav-auth-btn:hover {
+      color: var(--mint);
+    }
+
+    .side-drawer {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      bottom: 0;
+      width: min(300px, 82vw);
+      z-index: 35;
+      transform: translateX(-104%);
+      transition: transform 0.22s ease;
+      background: rgba(3, 6, 10, 0.96);
+      border-right: 1px solid rgba(126, 248, 255, 0.20);
+      box-shadow: 18px 0 50px rgba(0, 0, 0, 0.42);
+      padding: 18px;
+    }
+
+    .side-drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-title {
+      color: var(--mint);
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .drawer-empty {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 520px) {
+      .site-topbar {
+        padding: 0 10px;
+      }
+
+      .topbar-left {
+        gap: 10px;
+      }
+
+      .nav-menu-btn {
+        width: 30px;
+      }
+
+      .nav-menu-btn::before {
+        width: 30px;
+      }
+
+      .brand-title {
+        font-size: 17px;
+      }
+
+      .topbar-actions {
+        gap: 10px;
+      }
+
+      .nav-auth-btn {
+        font-size: 13px;
+      }
     }
 
     body::before,
@@ -233,18 +372,11 @@
       display: grid;
     }
 
-    .admin-launch {
-      position: fixed;
-      top: 14px;
-      right: 14px;
-      z-index: 19;
-    }
-
     .profile-pop {
       position: fixed;
-      top: 64px;
-      right: 14px;
-      z-index: 21;
+      top: 72px;
+      right: 18px;
+      z-index: 41;
       display: none;
       align-items: center;
       gap: 12px;
@@ -2290,8 +2422,21 @@
   </style>
 </head>
 <body>
-  <h1 class="title">RETRO ARCADE</h1>
-  <p class="subtitle">pick a game and jump in</p>
+  <header class="site-topbar">
+    <div class="topbar-left">
+      <button class="nav-menu-btn" id="site-menu-btn" type="button" aria-label="Menu"></button>
+      <div class="brand-title">Retro Games</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="nav-auth-btn" id="admin-launch" type="button">Login</button>
+      <button class="nav-auth-btn" id="register-open" type="button">Register</button>
+    </div>
+  </header>
+
+  <aside class="side-drawer" id="side-drawer" aria-hidden="true">
+    <div class="drawer-title">Menu</div>
+    <div class="drawer-empty">Cia veliau pridesim daugiau pasirinkimu.</div>
+  </aside>
 
   <div id="shell">
     <section id="main-panel" class="panel">
@@ -2636,7 +2781,6 @@
     </div>
   </div>
 
-  <button class="secondary admin-launch" id="admin-launch" type="button">Login</button>
   <div class="profile-pop" id="profile-pop" aria-hidden="true">
     <img class="profile-avatar" src="./avatar.png" alt="Avatar" />
     <div class="profile-meta">
@@ -2665,6 +2809,21 @@
       <div class="login-actions">
         <button class="secondary" id="login-cancel" type="button">Close</button>
         <button class="primary" id="login-submit" type="button">Login</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-modal" id="register-modal" aria-hidden="true">
+    <div class="login-card">
+      <div class="login-title">Register</div>
+      <div class="login-label">Login</div>
+      <input class="login-input" id="register-name" type="text" autocomplete="username" />
+      <div class="login-label">Password</div>
+      <input class="login-input" id="register-password" type="password" autocomplete="new-password" />
+      <div class="login-error" id="register-error"></div>
+      <div class="login-actions">
+        <button class="secondary" id="register-cancel" type="button">Close</button>
+        <button class="primary" id="register-submit" type="button">Register</button>
       </div>
     </div>
   </div>
@@ -2707,8 +2866,8 @@
     const tetrisLayout = document.getElementById("tetris-layout");
     const tetrisSide = document.getElementById("tetris-side");
     const tetrisMobileControls = document.getElementById("tetris-mobile-controls");
-    const pageTitle = document.querySelector(".title");
-    const pageSubtitle = document.querySelector(".subtitle");
+    const pageTitle = document.querySelector(".brand-title");
+    const pageSubtitle = null;
     const adminPanel = document.getElementById("admin-panel");
     const adminBackdrop = document.getElementById("admin-backdrop");
     const ownerPanel = document.getElementById("owner-panel");
@@ -2716,6 +2875,9 @@
     const ownerLogout = document.getElementById("owner-logout");
     const adminClose = document.getElementById("admin-close");
     const adminLaunch = document.getElementById("admin-launch");
+    const registerOpen = document.getElementById("register-open");
+    const sideDrawer = document.getElementById("side-drawer");
+    const siteMenuButton = document.getElementById("site-menu-btn");
     const tetrisCheatButton = document.getElementById("tetris-cheat-btn");
     const tankCheatButton = document.getElementById("tank-cheat-btn");
     const profilePop = document.getElementById("profile-pop");
@@ -2727,6 +2889,12 @@
     const loginError = document.getElementById("login-error");
     const loginCancel = document.getElementById("login-cancel");
     const loginSubmit = document.getElementById("login-submit");
+    const registerModal = document.getElementById("register-modal");
+    const registerName = document.getElementById("register-name");
+    const registerPassword = document.getElementById("register-password");
+    const registerError = document.getElementById("register-error");
+    const registerCancel = document.getElementById("register-cancel");
+    const registerSubmit = document.getElementById("register-submit");
     const successModal = document.getElementById("success-modal");
     const successClose = document.getElementById("success-close");
     const deployBanner = document.getElementById("deploy-banner");
@@ -2735,6 +2903,7 @@
     const ADMIN_AUTH_KEY = "psgames-admin-auth";
     const ADMIN_OWNER_KEY = "psgames-owner-auth";
     const ADMIN_LABEL_KEY = "psgames-login-label";
+    const REGISTERED_USERS_KEY = "psgames-users";
     let deployBaseline = null;
     let deployPollId = null;
     const cheatState = {
@@ -2761,6 +2930,11 @@
       adminBackdrop.classList.toggle("open", open && isOwnerAuthenticated());
     }
 
+    function setDrawerOpen(open) {
+      sideDrawer.classList.toggle("open", open);
+      sideDrawer.setAttribute("aria-hidden", open ? "false" : "true");
+    }
+
     function isAdminAuthenticated() {
       return sessionStorage.getItem(ADMIN_AUTH_KEY) === "1";
     }
@@ -2778,6 +2952,30 @@
         loginPassword.value = "";
         setTimeout(() => loginName.focus(), 0);
       }
+    }
+
+    function setRegisterOpen(open) {
+      registerModal.classList.toggle("open", open);
+      registerModal.setAttribute("aria-hidden", open ? "false" : "true");
+      if (open) {
+        registerError.textContent = "";
+        registerName.value = "";
+        registerPassword.value = "";
+        setTimeout(() => registerName.focus(), 0);
+      }
+    }
+
+    function getRegisteredUsers() {
+      try {
+        const users = JSON.parse(localStorage.getItem(REGISTERED_USERS_KEY) || "{}");
+        return users && typeof users === "object" ? users : {};
+      } catch (err) {
+        return {};
+      }
+    }
+
+    function setRegisteredUsers(users) {
+      localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users));
     }
 
     function setSuccessOpen(open) {
@@ -2853,6 +3051,9 @@
 
     syncAdminLaunchLabel();
     syncGameCheatButtons();
+    siteMenuButton.addEventListener("click", () => {
+      setDrawerOpen(!sideDrawer.classList.contains("open"));
+    });
     adminClose.addEventListener("click", () => setAdminOpen(false));
     adminBackdrop.addEventListener("click", () => {
       setAdminOpen(false);
@@ -2871,6 +3072,12 @@
         return;
       }
       setLoginOpen(true);
+    });
+    registerOpen.addEventListener("click", () => {
+      setProfileOpen(false);
+      setOwnerPanelOpen(false);
+      setLoginOpen(false);
+      setRegisterOpen(true);
     });
     loginCancel.addEventListener("click", () => setLoginOpen(false));
     loginSubmit.addEventListener("click", () => {
@@ -2892,9 +3099,18 @@
         setOwnerPanelOpen(true);
         return;
       }
+      const users = getRegisteredUsers();
+      if (!users[user]) {
+        loginError.textContent = "Account not found. Register first.";
+        return;
+      }
+      if (users[user].password !== pass) {
+        loginError.textContent = "Wrong password";
+        return;
+      }
       sessionStorage.removeItem(ADMIN_AUTH_KEY);
       sessionStorage.removeItem(ADMIN_OWNER_KEY);
-      sessionStorage.setItem(ADMIN_LABEL_KEY, rawUser);
+      sessionStorage.setItem(ADMIN_LABEL_KEY, users[user].displayName);
       syncAdminLaunchLabel();
       syncGameCheatButtons();
       setLoginOpen(false);
@@ -2903,6 +3119,37 @@
     });
     loginPassword.addEventListener("keydown", (e) => {
       if (e.key === "Enter") loginSubmit.click();
+    });
+    registerCancel.addEventListener("click", () => setRegisterOpen(false));
+    registerSubmit.addEventListener("click", () => {
+      const rawUser = registerName.value.trim();
+      const user = rawUser.toLowerCase();
+      const pass = registerPassword.value.trim();
+      if (!user || !pass) {
+        registerError.textContent = "Enter login and password";
+        return;
+      }
+      if (user === "arma") {
+        registerError.textContent = "This login is reserved";
+        return;
+      }
+      const users = getRegisteredUsers();
+      if (users[user]) {
+        registerError.textContent = "This login already exists";
+        return;
+      }
+      users[user] = { displayName: rawUser, password: pass };
+      setRegisteredUsers(users);
+      sessionStorage.removeItem(ADMIN_AUTH_KEY);
+      sessionStorage.removeItem(ADMIN_OWNER_KEY);
+      sessionStorage.setItem(ADMIN_LABEL_KEY, rawUser);
+      syncAdminLaunchLabel();
+      syncGameCheatButtons();
+      setRegisterOpen(false);
+      setSuccessOpen(true);
+    });
+    registerPassword.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") registerSubmit.click();
     });
     successClose.addEventListener("click", () => setSuccessOpen(false));
     ownerCheat.addEventListener("click", () => {
@@ -2943,6 +3190,11 @@
       if (!profilePop.classList.contains("open")) return;
       if (profilePop.contains(e.target) || adminLaunch.contains(e.target)) return;
       setProfileOpen(false);
+    });
+    document.addEventListener("click", (e) => {
+      if (!sideDrawer.classList.contains("open")) return;
+      if (sideDrawer.contains(e.target) || siteMenuButton.contains(e.target)) return;
+      setDrawerOpen(false);
     });
     deployRefreshButton.addEventListener("click", () => {
       window.location.reload();
