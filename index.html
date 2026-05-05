@@ -78,13 +78,13 @@
     .topbar-left {
       display: flex;
       align-items: center;
-      gap: 18px;
+      gap: 12px;
       min-width: 0;
     }
 
     .nav-menu-btn {
-      width: 34px;
-      height: 28px;
+      width: 28px;
+      height: 24px;
       border: 0;
       background: transparent;
       cursor: pointer;
@@ -97,17 +97,17 @@
       position: absolute;
       left: 0;
       top: 1px;
-      width: 34px;
-      height: 4px;
+      width: 28px;
+      height: 3px;
       border-radius: 999px;
       background: #f5f7fb;
-      box-shadow: 0 11px 0 #f5f7fb, 0 22px 0 #f5f7fb;
+      box-shadow: 0 9px 0 #f5f7fb, 0 18px 0 #f5f7fb;
     }
 
     .brand-title {
       color: #f5f7fb;
       font-family: "Audiowide", "Segoe UI", sans-serif;
-      font-size: clamp(20px, 2.4vw, 32px);
+      font-size: clamp(17px, 2vw, 26px);
       letter-spacing: 0;
       white-space: nowrap;
       text-shadow: 0 0 18px rgba(126, 248, 255, 0.16);
@@ -130,6 +130,10 @@
 
     .nav-auth-btn:hover {
       color: var(--mint);
+    }
+
+    .nav-auth-btn.hidden {
+      display: none;
     }
 
     .side-drawer {
@@ -176,15 +180,15 @@
       }
 
       .nav-menu-btn {
-        width: 30px;
+        width: 24px;
       }
 
       .nav-menu-btn::before {
-        width: 30px;
+        width: 24px;
       }
 
       .brand-title {
-        font-size: 17px;
+        font-size: 15px;
       }
 
       .topbar-actions {
@@ -2944,6 +2948,7 @@
     }
 
     function setLoginOpen(open) {
+      if (open) setRegisterOpen(false);
       loginModal.classList.toggle("open", open);
       loginModal.setAttribute("aria-hidden", open ? "false" : "true");
       if (open) {
@@ -2955,6 +2960,7 @@
     }
 
     function setRegisterOpen(open) {
+      if (open) setLoginOpen(false);
       registerModal.classList.toggle("open", open);
       registerModal.setAttribute("aria-hidden", open ? "false" : "true");
       if (open) {
@@ -2987,6 +2993,7 @@
       const label = sessionStorage.getItem(ADMIN_LABEL_KEY) || "Login";
       adminLaunch.textContent = label;
       profileText.textContent = label;
+      registerOpen.classList.toggle("hidden", Boolean(sessionStorage.getItem(ADMIN_LABEL_KEY)));
     }
 
     function syncGameCheatButtons() {
