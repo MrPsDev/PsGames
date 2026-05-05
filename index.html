@@ -332,6 +332,7 @@
     body.space-mode .space-wrap {
       width: min(1040px, 96vw, calc((100vh - 150px) * 1.4167));
       min-width: min(96vw, 720px);
+      aspect-ratio: 680 / 480;
       border-color: rgba(126, 248, 255, 0.24);
       background: #0a0a1a;
       box-shadow:
@@ -342,6 +343,12 @@
 
     body.space-mode #space-screen {
       min-height: unset;
+    }
+
+    body.space-mode:not(.touch-device) #space-screen .space-wrap {
+      width: min(1040px, 96vw, calc((100vh - 150px) * 1.4167));
+      min-width: min(96vw, 720px);
+      aspect-ratio: 680 / 480 !important;
     }
 
     body.game-mode #main-panel {
@@ -788,6 +795,97 @@
       color: #dffdf4;
     }
 
+    body.tetris-mode .admin-panel,
+    body.tank-mode .admin-panel {
+      top: auto;
+      right: auto;
+      bottom: 22px;
+      left: 50%;
+      z-index: 30;
+      width: min(520px, calc(100vw - 32px));
+      padding: 12px;
+      border: 2px solid rgba(255, 230, 0, 0.9);
+      border-radius: 10px;
+      background: rgba(5, 7, 12, 0.94);
+      box-shadow:
+        0 0 22px rgba(255, 230, 0, 0.18),
+        inset 0 0 18px rgba(255, 230, 0, 0.06);
+      transform: translateX(-50%);
+      backdrop-filter: none;
+    }
+
+    body.tetris-mode .admin-panel {
+      top: 50%;
+      bottom: auto;
+      left: calc(50% + var(--tetris-live-board-width) / 2 + 26px);
+      width: 270px;
+      transform: translateY(-50%);
+    }
+
+    body.tetris-mode .admin-title,
+    body.tank-mode .admin-title {
+      color: rgba(255, 230, 0, 0.95);
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      text-align: center;
+    }
+
+    body.tetris-mode .admin-panel button,
+    body.tank-mode .admin-panel button,
+    body.tetris-mode .admin-panel input,
+    body.tank-mode .admin-panel input {
+      min-height: 30px;
+      padding: 6px 10px;
+      border-color: rgba(255, 230, 0, 0.75);
+      color: rgba(255, 245, 120, 0.96);
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      background: rgba(14, 12, 0, 0.78);
+    }
+
+    body.tetris-mode .admin-panel input,
+    body.tank-mode .admin-panel input {
+      width: 100%;
+      border: 1px solid rgba(255, 230, 0, 0.75);
+      border-radius: 8px;
+      outline: none;
+    }
+
+    body.tetris-mode .admin-panel [data-admin-toggle]::after,
+    body.tank-mode .admin-panel [data-admin-toggle]::after {
+      content: " OFF";
+      color: rgba(255, 110, 110, 0.95);
+      font-weight: 900;
+    }
+
+    body.tetris-mode .admin-panel [data-admin-toggle].active::after,
+    body.tank-mode .admin-panel [data-admin-toggle].active::after {
+      content: " ON";
+      color: rgba(121, 255, 180, 0.98);
+    }
+
+    .admin-level-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+
+    body.tetris-mode .admin-panel .admin-section[data-game="tank"],
+    body.tank-mode .admin-panel .admin-section[data-game="tetris"] {
+      display: none;
+    }
+
+    @media (max-width: 920px) {
+      body.tetris-mode .admin-panel {
+        top: auto;
+        bottom: 22px;
+        left: 50%;
+        width: min(520px, calc(100vw - 32px));
+        transform: translateX(-50%);
+      }
+    }
+
     .game-cheat-btn {
       position: absolute;
       left: 18px;
@@ -937,7 +1035,7 @@
     }
 
     #tetris-screen .game-card-strip {
-      --game-strip-width: clamp(240px, calc((100vh - 170px) / 2.23), 360px);
+      --game-strip-width: var(--tetris-live-board-width);
     }
 
     #tetris-screen #board {
@@ -953,7 +1051,7 @@
     }
 
     #space-screen .game-card-strip {
-      --game-strip-width: min(1040px, 96vw, calc((100vh - 150px) * 1.4167));
+      --game-strip-width: min(920px, 92%);
     }
 
     #space-screen .space-wrap {
@@ -974,6 +1072,12 @@
       font-size: 13px;
       font-weight: 900;
       letter-spacing: 0.04em;
+    }
+
+    #tank-screen .game-card-strip-name,
+    #space-screen .game-card-strip-name {
+      font-size: 18px;
+      letter-spacing: 0.03em;
     }
 
     .game-card-strip button {
@@ -1404,7 +1508,8 @@
 
     .tetris-cabinet {
       position: relative;
-      width: min(100%, clamp(240px, calc((100vh - 170px) / 2.23), 360px));
+      width: min(100%, var(--tetris-live-board-width));
+      min-width: 280px;
       border: 3px solid rgba(126, 248, 255, 0.72);
       border-radius: 10px;
       background: #050712;
@@ -1435,6 +1540,88 @@
 
     .tetris-start-panel.hidden {
       display: none;
+    }
+
+    .tetris-level-panel {
+      position: absolute;
+      left: 50%;
+      top: 42%;
+      z-index: 4;
+      width: min(78%, 260px);
+      padding: 16px 14px;
+      border: 3px solid rgba(126, 248, 255, 0.9);
+      border-radius: 12px;
+      background: rgba(3, 9, 18, 0.94);
+      color: #f5fbff;
+      text-align: center;
+      transform: translate(-50%, -50%);
+      box-shadow:
+        0 0 24px rgba(126, 248, 255, 0.25),
+        inset 0 0 18px rgba(126, 248, 255, 0.06);
+      pointer-events: none;
+    }
+
+    .tetris-level-panel.hidden {
+      display: none;
+    }
+
+    .tetris-gameover-panel {
+      position: absolute;
+      left: 50%;
+      top: 43%;
+      z-index: 5;
+      width: min(84%, 280px);
+      padding: 18px 16px;
+      border: 3px solid rgba(255, 92, 120, 0.9);
+      border-radius: 14px;
+      background: rgba(7, 8, 18, 0.96);
+      color: #f5fbff;
+      text-align: center;
+      transform: translate(-50%, -50%);
+      box-shadow:
+        0 0 28px rgba(255, 92, 120, 0.24),
+        inset 0 0 18px rgba(126, 248, 255, 0.05);
+    }
+
+    .tetris-gameover-panel.hidden {
+      display: none;
+    }
+
+    .tetris-gameover-title {
+      color: #ff6f8c;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .tetris-gameover-stats {
+      margin: 12px 0 16px;
+      display: grid;
+      gap: 6px;
+      color: rgba(245, 251, 255, 0.9);
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .tetris-gameover-stats span {
+      color: var(--mint);
+    }
+
+    .tetris-level-panel-title {
+      color: var(--mint);
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .tetris-level-panel-sub {
+      margin-top: 8px;
+      color: rgba(245, 251, 255, 0.82);
+      font-size: 13px;
+      font-weight: 800;
     }
 
     .tetris-play-btn,
@@ -1470,17 +1657,37 @@
     .tetris-bottom-bar {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-      padding: 9px 8px;
-      border-top: 3px solid rgba(126, 248, 255, 0.72);
+      gap: 10px;
+      min-height: 88px;
+      padding: 16px 12px 14px;
+      border-top: 4px solid rgba(126, 248, 255, 0.82);
       background: rgba(3, 9, 14, 0.96);
       color: #f5fbff;
-      font-size: 12px;
-      font-weight: 800;
+      font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      line-height: 1.35;
+      align-items: center;
+      text-align: center;
+      overflow: visible;
+      text-shadow: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tetris-bottom-bar > div {
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      min-height: 52px;
+      overflow: visible;
     }
 
     .tetris-bottom-bar span {
+      display: block;
       color: var(--mint);
+      font-size: 18px;
+      line-height: 1.2;
     }
 
     .space-overlay-controls {
@@ -1706,9 +1913,14 @@
 
     #space-screen:fullscreen .space-wrap,
     #space-screen:-webkit-full-screen .space-wrap {
-      width: min(1400px, 100%, calc((100vh - 70px) * 1.4167));
-      min-width: min(100%, 780px);
-      aspect-ratio: auto;
+      width: min(100%, calc((100vh - 42px) * 1.4167));
+      max-width: 1400px;
+      min-width: 0;
+      height: auto;
+      max-height: calc(100vh - 42px);
+      aspect-ratio: 680 / 480;
+      flex: 0 0 auto;
+      align-self: center;
     }
 
     #space-screen:fullscreen .space-overlay-btn,
@@ -1760,7 +1972,7 @@
     }
 
     @media (max-width: 840px), (pointer: coarse) {
-      .space-wrap {
+      body.touch-device .space-wrap {
         width: 100%;
         aspect-ratio: 9 / 16;
         margin-top: 12px;
@@ -2285,11 +2497,22 @@
     }
 
     #fps-screen:fullscreen .fps-wrap,
-    #fps-screen:-webkit-full-screen .fps-wrap,
-    #space-screen:fullscreen .space-wrap,
-    #space-screen:-webkit-full-screen .space-wrap {
+    #fps-screen:-webkit-full-screen .fps-wrap {
       flex: 1;
       min-height: 0;
+      margin-top: 0;
+    }
+
+    body.space-mode:not(.touch-device) #space-screen:fullscreen .space-wrap,
+    body.space-mode:not(.touch-device) #space-screen:-webkit-full-screen .space-wrap {
+      width: min(100%, calc((100vh - 42px) * 1.4167)) !important;
+      max-width: 1400px;
+      min-width: 0;
+      height: auto !important;
+      max-height: calc(100vh - 42px);
+      aspect-ratio: 680 / 480 !important;
+      flex: 0 0 auto !important;
+      align-self: center;
       margin-top: 0;
     }
 
@@ -2619,7 +2842,7 @@
       }
 
       #board {
-        width: min(var(--tetris-live-board-width), 220px);
+        width: min(var(--tetris-live-board-width), 360px);
       }
 
       #tetris-side {
@@ -2992,7 +3215,7 @@
         <div id="tetris-layout">
           <div id="tetris-left">
             <div class="tetris-cabinet">
-              <canvas id="board" width="200" height="400"></canvas>
+              <canvas id="board" width="400" height="800"></canvas>
               <div class="tetris-start-panel" id="tetris-start-panel">
                 <button class="tetris-play-btn" id="tetris-play-btn" type="button">Play</button>
                 <div class="tetris-controls-card">
@@ -3002,6 +3225,15 @@
                   <div>Soft drop: S or Down</div>
                   <div>Hard drop: Space</div>
                 </div>
+              </div>
+              <div class="tetris-level-panel hidden" id="tetris-level-panel">
+                <div class="tetris-level-panel-title" id="tetris-level-panel-title">Level 2</div>
+                <div class="tetris-level-panel-sub">Board reset. Speed increased.</div>
+              </div>
+              <div class="tetris-gameover-panel hidden" id="tetris-gameover-panel">
+                <div class="tetris-gameover-title">Game Over</div>
+                <div class="tetris-gameover-stats" id="tetris-gameover-stats"></div>
+                <button class="tetris-play-btn" id="tetris-play-again-btn" type="button">Play Again</button>
               </div>
               <div class="tetris-bottom-bar">
                 <div>Score: <span id="tetris-score-bottom">0</span></div>
@@ -3237,7 +3469,7 @@
       <span>Admin Cheats</span>
       <button class="secondary admin-close" id="admin-close" type="button">Hide</button>
     </div>
-    <div class="admin-section">
+    <div class="admin-section" data-game="tetris">
       <div class="admin-section-title">Tetris</div>
       <div class="admin-grid">
         <button class="secondary" type="button" data-admin-toggle="tetrisSafe">Safe Mode</button>
@@ -3245,8 +3477,12 @@
         <button class="secondary" type="button" data-admin-action="tetrisClear">Clear Board</button>
         <button class="secondary" type="button" data-admin-action="tetrisScore">+5000 Score</button>
       </div>
+      <div class="admin-level-row">
+        <input id="tetris-level-input" type="number" min="1" max="99" value="1" aria-label="Tetris level" />
+        <button class="secondary" type="button" data-admin-action="tetrisSetLevel">Set Level</button>
+      </div>
     </div>
-    <div class="admin-section">
+    <div class="admin-section" data-game="tank">
       <div class="admin-section-title">Mini Tank</div>
       <div class="admin-grid">
         <button class="secondary" type="button" data-admin-toggle="tankGod">God Mode</button>
@@ -3270,7 +3506,6 @@
   <div class="owner-panel" id="owner-panel" aria-hidden="true">
     <div class="owner-title">Owner</div>
     <div class="owner-actions">
-      <button class="primary" id="owner-cheat" type="button">Cheat</button>
       <button class="secondary" id="owner-logout" type="button">Log out</button>
     </div>
   </div>
@@ -3355,7 +3590,6 @@
     const adminPanel = document.getElementById("admin-panel");
     const adminBackdrop = document.getElementById("admin-backdrop");
     const ownerPanel = document.getElementById("owner-panel");
-    const ownerCheat = document.getElementById("owner-cheat");
     const ownerLogout = document.getElementById("owner-logout");
     const adminClose = document.getElementById("admin-close");
     const adminLaunch = document.getElementById("admin-launch");
@@ -3364,6 +3598,7 @@
     const siteMenuButton = document.getElementById("site-menu-btn");
     const tetrisCheatButton = document.getElementById("tetris-cheat-btn");
     const tankCheatButton = document.getElementById("tank-cheat-btn");
+    const tetrisLevelInput = document.getElementById("tetris-level-input");
     const profilePop = document.getElementById("profile-pop");
     const profileText = document.getElementById("profile-text");
     const profileLogout = document.getElementById("profile-logout");
@@ -3403,6 +3638,14 @@
       adminPanel.classList.toggle("open", open);
       adminBackdrop.classList.toggle("open", ownerPanel.classList.contains("open") && isOwnerAuthenticated());
       adminPanel.setAttribute("aria-hidden", open ? "false" : "true");
+    }
+
+    function openGameAdmin(screenElement) {
+      if (!screenElement || !isAdminAuthenticated()) return;
+      setOwnerPanelOpen(false);
+      setProfileOpen(false);
+      screenElement.appendChild(adminPanel);
+      setAdminOpen(true);
     }
 
     function setProfileOpen(open) {
@@ -3641,10 +3884,6 @@
       if (e.key === "Enter") registerSubmit.click();
     });
     successClose.addEventListener("click", () => setSuccessOpen(false));
-    ownerCheat.addEventListener("click", () => {
-      setOwnerPanelOpen(false);
-      setAdminOpen(true);
-    });
     ownerLogout.addEventListener("click", () => {
       sessionStorage.removeItem(ADMIN_AUTH_KEY);
       sessionStorage.removeItem(ADMIN_OWNER_KEY);
@@ -3667,13 +3906,11 @@
     });
     tetrisCheatButton.addEventListener("click", () => {
       if (!isAdminAuthenticated()) return;
-      setOwnerPanelOpen(false);
-      setAdminOpen(true);
+      openGameAdmin(tetrisScreen);
     });
     tankCheatButton.addEventListener("click", () => {
       if (!isAdminAuthenticated()) return;
-      setOwnerPanelOpen(false);
-      setAdminOpen(true);
+      openGameAdmin(tankScreen);
     });
     document.addEventListener("click", (e) => {
       if (!profilePop.classList.contains("open")) return;
@@ -3697,7 +3934,9 @@
       spaceScreen.classList.toggle("hidden", name !== "space");
       document.body.classList.toggle("game-mode", name !== "menu");
       document.body.classList.toggle("tetris-mode", name === "tetris");
+      document.body.classList.toggle("tank-mode", name === "tank");
       document.body.classList.toggle("space-mode", name === "space");
+      if (name !== "tetris" && name !== "tank") setAdminOpen(false);
       if (name !== "tetris") stopTetris();
       if (name !== "tank") stopTank();
       if (name !== "fps") stopFps();
@@ -3731,19 +3970,43 @@
     }
 
     function requestElementFullscreen(element) {
-      if (!element) return;
+      if (!element) return false;
       try {
+        if (document.fullscreenElement === element || document.webkitFullscreenElement === element) {
+          return true;
+        }
+        element.setAttribute("tabindex", "-1");
+        element.focus({ preventScroll: true });
         if (element.requestFullscreen) {
           const result = element.requestFullscreen();
           if (result && result.catch) result.catch((err) => console.error("Fullscreen failed", err));
         } else if (element.webkitRequestFullscreen) {
           element.webkitRequestFullscreen();
+        } else if (element.msRequestFullscreen) {
+          element.msRequestFullscreen();
+        } else {
+          return false;
         }
         showFullscreenToast();
       } catch (err) {
         console.error("Fullscreen failed", err);
+        return false;
       }
       setTimeout(syncGamepad, 100);
+      return true;
+    }
+
+    function bindGameStripFullscreen(buttonId, screenElement, openScreen) {
+      const button = document.getElementById(buttonId);
+      if (!button || !screenElement) return;
+
+      const enter = (event) => {
+        event.stopPropagation();
+        if (screenElement.classList.contains("hidden")) openScreen();
+        requestElementFullscreen(screenElement);
+      };
+
+      button.addEventListener("click", enter);
     }
 
     async function toggleFullscreen(element) {
@@ -3805,6 +4068,8 @@
       const viewportWidth = Math.max(window.innerWidth, window.visualViewport ? Math.round(window.visualViewport.width) : 0);
       const fullscreenTetris = document.fullscreenElement === tetrisScreen || document.webkitFullscreenElement === tetrisScreen;
       const mobileFullscreenTetris = fullscreenTetris && isTouchDevice();
+      const tetrisBottomBar = tetrisScreen.querySelector(".tetris-bottom-bar");
+      const bottomBarHeight = tetrisBottomBar ? tetrisBottomBar.offsetHeight : 0;
 
       if (mobileFullscreenTetris) {
         const screenHead = tetrisScreen.querySelector(".screen-head");
@@ -3812,7 +4077,7 @@
         const hudHeight = tetrisHud ? tetrisHud.offsetHeight : 0;
         const sideHeight = tetrisSide ? tetrisSide.offsetHeight : 0;
         const controlsHeight = tetrisMobileControls ? tetrisMobileControls.offsetHeight : 0;
-        const reservedHeight = headHeight + hudHeight + sideHeight + controlsHeight + 24;
+        const reservedHeight = headHeight + hudHeight + sideHeight + controlsHeight + bottomBarHeight + 24;
         const availableBoardHeight = Math.max(180, viewportHeight - reservedHeight);
         const maxBoardFromHeight = Math.floor(availableBoardHeight / 2);
         const maxBoardFromWidth = Math.max(180, Math.floor(Math.min(viewportWidth - 20, 340)));
@@ -3827,7 +4092,7 @@
       let availableBoardHeight;
       if (fullscreenTetris) {
         const layoutTop = tetrisLayout.getBoundingClientRect().top;
-        availableBoardHeight = Math.max(340, viewportHeight - layoutTop - 8);
+        availableBoardHeight = Math.max(340, viewportHeight - layoutTop - bottomBarHeight - 18);
       } else {
         let reservedHeight = 120;
         reservedHeight += pageTitle ? pageTitle.offsetHeight : 0;
@@ -3844,8 +4109,8 @@
       const maxBoardFromWidth = Math.max(180, layoutWidth - sideWidth - layoutGap);
       const maxBoardFromHeight = Math.max(180, Math.floor(availableBoardHeight / 2));
       const finalWidth = fullscreenTetris
-        ? Math.max(220, Math.min(maxBoardFromWidth, maxBoardFromHeight, 440))
-        : Math.max(180, Math.min(maxBoardFromWidth, maxBoardFromHeight, 240));
+        ? Math.max(220, Math.min(maxBoardFromWidth, maxBoardFromHeight, 520))
+        : Math.max(280, Math.min(maxBoardFromWidth, maxBoardFromHeight, 380));
 
       document.documentElement.style.setProperty("--tetris-live-board-width", finalWidth + "px");
     }
@@ -3861,6 +4126,8 @@
       tetrisLevel = 1;
       tetrisGoal = getTetrisGoal(tetrisLevel);
       document.getElementById("tetris-start-panel").classList.remove("hidden");
+      document.getElementById("tetris-level-panel")?.classList.add("hidden");
+      document.getElementById("tetris-gameover-panel")?.classList.add("hidden");
       setMsg("");
       drawBoard();
       drawNext();
@@ -3881,20 +4148,9 @@
     document.getElementById("open-tank").addEventListener("click", openTankScreen);
     document.getElementById("open-space").addEventListener("click", openSpaceScreen);
 
-    document.getElementById("menu-tetris-fullscreen").addEventListener("click", () => {
-      openTetrisScreen();
-      requestElementFullscreen(tetrisScreen);
-    });
-
-    document.getElementById("menu-tank-fullscreen").addEventListener("click", () => {
-      openTankScreen();
-      requestElementFullscreen(tankScreen);
-    });
-
-    document.getElementById("menu-space-fullscreen").addEventListener("click", () => {
-      openSpaceScreen();
-      requestElementFullscreen(spaceScreen);
-    });
+    bindGameStripFullscreen("menu-tetris-fullscreen", tetrisScreen, openTetrisScreen);
+    bindGameStripFullscreen("menu-tank-fullscreen", tankScreen, openTankScreen);
+    bindGameStripFullscreen("menu-space-fullscreen", spaceScreen, openSpaceScreen);
 
     document.getElementById("back-from-tetris").addEventListener("click", returnToMenu);
     document.getElementById("back-from-tank").addEventListener("click", returnToMenu);
@@ -4075,11 +4331,11 @@
     const canvas = document.getElementById("board");
     const ctx = canvas.getContext("2d");
     const nextCanvas = document.getElementById("next-canvas");
-    const nctx = nextCanvas.getContext("2d");
+    const nctx = nextCanvas ? nextCanvas.getContext("2d") : null;
 
     const COLS = 10;
     const ROWS = 20;
-    const BLOCK = 20;
+    const BLOCK = 40;
 
     const COLORS = [
       "#5DCAA5",
@@ -4246,6 +4502,7 @@
     }
 
     function drawNext() {
+      if (!nctx) return;
       nctx.clearRect(0, 0, 80, 80);
       if (!next) return;
       const bs = 14;
@@ -4272,9 +4529,70 @@
         changed = true;
       }
       if (changed) {
-        setMsg("Level " + tetrisLevel + "!", 1400);
+        board = newBoard();
+        piece = randomPiece();
+        next = randomPiece();
+        drawNext();
+        showTetrisLevelPanel(tetrisLevel);
         restartTetrisTimer();
       }
+    }
+
+    function showTetrisLevelPanel(level) {
+      const panel = document.getElementById("tetris-level-panel");
+      const title = document.getElementById("tetris-level-panel-title");
+      if (!panel || !title) return;
+      title.textContent = "Level " + level;
+      panel.classList.remove("hidden");
+      clearTimeout(showTetrisLevelPanel.timer);
+      showTetrisLevelPanel.timer = setTimeout(() => {
+        panel.classList.add("hidden");
+      }, 1800);
+    }
+
+    function showTetrisGameOver(finalScore, finalLines, finalLevel) {
+      const panel = document.getElementById("tetris-gameover-panel");
+      const stats = document.getElementById("tetris-gameover-stats");
+      if (!panel || !stats) return;
+      stats.innerHTML =
+        "<div>Score: <span>" + finalScore + "</span></div>" +
+        "<div>Lines: <span>" + finalLines + "</span></div>" +
+        "<div>Level: <span>" + finalLevel + "</span></div>";
+      panel.classList.remove("hidden");
+    }
+
+    function resetTetrisAfterGameOver() {
+      board = newBoard();
+      piece = null;
+      next = null;
+      score = 0;
+      lines = 0;
+      tetrisLevel = 1;
+      tetrisGoal = getTetrisGoal(tetrisLevel);
+      updateUI();
+      drawBoard();
+      drawNext();
+    }
+
+    function setTetrisLevelFromAdmin() {
+      const target = Math.max(1, Math.min(99, Number(tetrisLevelInput?.value) || 1));
+      if (tetrisLevelInput) tetrisLevelInput.value = target;
+      board = newBoard();
+      piece = randomPiece();
+      next = randomPiece();
+      score = target > 1 ? getTetrisGoal(target - 1) : 0;
+      lines = 0;
+      tetrisLevel = target;
+      tetrisGoal = getTetrisGoal(tetrisLevel);
+      running = true;
+      document.getElementById("tetris-start-panel").classList.add("hidden");
+      document.getElementById("tetris-level-panel")?.classList.add("hidden");
+      document.getElementById("tetris-gameover-panel")?.classList.add("hidden");
+      restartTetrisTimer();
+      updateUI();
+      drawNext();
+      drawBoard();
+      setMsg("Admin: level " + target + ".", 1200);
     }
 
     function updateUI() {
@@ -4340,9 +4658,15 @@
           }
           running = false;
           clearInterval(gameLoop);
-          setMsg("Game over! Score: " + score);
+          const finalScore = score;
+          const finalLines = lines;
+          const finalLevel = tetrisLevel;
+          setMsg("");
           document.getElementById("start-btn").textContent = "Restart";
-          document.getElementById("tetris-start-panel").classList.remove("hidden");
+          document.getElementById("tetris-start-panel").classList.add("hidden");
+          document.getElementById("tetris-level-panel")?.classList.add("hidden");
+          resetTetrisAfterGameOver();
+          showTetrisGameOver(finalScore, finalLines, finalLevel);
           return;
         }
       }
@@ -4364,6 +4688,8 @@
       gameLoop = setInterval(tick, getTetrisDelay());
       document.getElementById("start-btn").textContent = "Restart";
       document.getElementById("tetris-start-panel").classList.add("hidden");
+      document.getElementById("tetris-level-panel")?.classList.add("hidden");
+      document.getElementById("tetris-gameover-panel")?.classList.add("hidden");
       setMsg("");
       updateUI();
       drawNext();
@@ -4381,6 +4707,7 @@
       startGame();
     });
     document.getElementById("tetris-play-btn").addEventListener("click", startGame);
+    document.getElementById("tetris-play-again-btn").addEventListener("click", startGame);
 
     function runTetrisAction(action) {
       if (!running || !piece || tetrisScreen.classList.contains("hidden")) return;
@@ -4425,6 +4752,18 @@
 
     const tetrisRepeatableActions = new Set(["left", "right", "down"]);
     const tetrisHoldState = new Map();
+    const tetrisKeyActions = new Map([
+      ["ArrowLeft", "left"],
+      ["a", "left"],
+      ["A", "left"],
+      ["ArrowRight", "right"],
+      ["d", "right"],
+      ["D", "right"],
+      ["ArrowDown", "down"],
+      ["s", "down"],
+      ["S", "down"]
+    ]);
+    const tetrisHeldKeys = new Map();
 
     function stopTetrisActionHold(action) {
       const hold = tetrisHoldState.get(action);
@@ -4441,8 +4780,8 @@
 
       const hold = {
         timeoutId: setTimeout(() => {
-          hold.intervalId = setInterval(() => runTetrisAction(action), action === "down" ? 70 : 110);
-        }, 170),
+          hold.intervalId = setInterval(() => runTetrisAction(action), action === "down" ? 60 : 45);
+        }, action === "down" ? 150 : 90),
         intervalId: null
       };
       tetrisHoldState.set(action, hold);
@@ -4451,25 +4790,17 @@
     document.addEventListener("keydown", (e) => {
       if (!running || menuScreen.classList.contains("hidden") === false || tetrisScreen.classList.contains("hidden")) return;
 
+      const heldAction = tetrisKeyActions.get(e.key);
+      if (heldAction) {
+        e.preventDefault();
+        if (!tetrisHeldKeys.has(e.key)) {
+          tetrisHeldKeys.set(e.key, heldAction);
+          startTetrisActionHold(heldAction);
+        }
+        return;
+      }
+
       switch (e.key) {
-        case "ArrowLeft":
-        case "a":
-        case "A":
-          runTetrisAction("left");
-          e.preventDefault();
-          break;
-        case "ArrowRight":
-        case "d":
-        case "D":
-          runTetrisAction("right");
-          e.preventDefault();
-          break;
-        case "ArrowDown":
-        case "s":
-        case "S":
-          runTetrisAction("down");
-          e.preventDefault();
-          break;
         case "ArrowUp":
         case "w":
         case "W": {
@@ -4481,6 +4812,15 @@
           runTetrisAction("drop");
           e.preventDefault();
           break;
+      }
+    });
+
+    document.addEventListener("keyup", (e) => {
+      const heldAction = tetrisHeldKeys.get(e.key);
+      if (!heldAction) return;
+      tetrisHeldKeys.delete(e.key);
+      if (![...tetrisHeldKeys.values()].includes(heldAction)) {
+        stopTetrisActionHold(heldAction);
       }
     });
 
@@ -6263,6 +6603,10 @@
         score = (score || 0) + 5000;
         updateUI();
         setMsg("Admin: +5000 score.", 1200);
+      }
+
+      if (action === "tetrisSetLevel") {
+        setTetrisLevelFromAdmin();
       }
 
       if (action === "tankClear") {
