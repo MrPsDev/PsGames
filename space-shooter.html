@@ -341,6 +341,14 @@ SPACE - also shoots</p>
     let waveQueued = false;
     let godMode = false;
     let autoAimUnlocked = false;
+    let bossShieldTimer = 0;
+    let bossShieldTriggered = false;
+    let autoShootEnabled = true;
+    let sfxVolume = 0.7;
+    let musicEnabled = true;
+    let audioCtx = null;
+    let musicOsc = null;
+    let musicGain = null;
     const WAVE_INTRO_FRAMES = 72;
     const ADMIN_CODES = ["pscheat"];
     const ADMIN_CODE_MAX = Math.max(...ADMIN_CODES.map((code) => code.length));
@@ -380,9 +388,65 @@ SPACE - also shoots</p>
     }
 
     function playerSize() {
-      const bossScale = wave === 20 ? 0.76 : 1;
+      const bossScale = wave === 20 ? 0.58 : 1;
       return 1.15 * viewScale() * Math.max(0.9, waveScale + 0.02) * bossScale;
     }
+
+    function ensureAudio() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        syncMusic();
+      } catch (err) {}
+    }
+
+    function playTone(freq, duration = 0.08, type = "square", gainValue = 0.08) {
+      if (!sfxVolume) return;
+      try {
+        ensureAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainValue * sfxVolume, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (err) {}
+    }
+
+    function syncMusic() {
+      if (!audioCtx) return;
+      if (!musicEnabled || !sfxVolume) {
+        if (musicOsc) {
+          musicOsc.stop();
+          musicOsc.disconnect();
+          musicGain.disconnect();
+          musicOsc = null;
+          musicGain = null;
+        }
+        return;
+      }
+      if (!musicOsc) {
+        musicOsc = audioCtx.createOscillator();
+        musicGain = audioCtx.createGain();
+        musicOsc.type = "sine";
+        musicOsc.frequency.value = 82;
+        musicGain.gain.value = 0.028 * sfxVolume;
+        musicOsc.connect(musicGain);
+        musicGain.connect(audioCtx.destination);
+        musicOsc.start();
+      } else if (musicGain) {
+        musicGain.gain.value = 0.028 * sfxVolume;
+      }
+    }
+
+    function playShootSound() { playTone(760, 0.045, "square", 0.045); }
+    function playHitSound() { playTone(220, 0.075, "sawtooth", 0.07); }
+    function playBonusSound() { playTone(980, 0.11, "triangle", 0.08); }
+    function playDamageSound() { playTone(110, 0.18, "sawtooth", 0.12); }
 
     function enemySize(type) {
       const base = type === "finalBoss" ? 3.2 : type === "boss" ? 1.5 : type === "fast" ? 1.2 : 1.3;
@@ -509,11 +573,13 @@ SPACE - also shoots</p>
         baseX: W / 2,
         dx: 0,
         dy: 0,
-        hp: 120,
-        maxHp: 120,
+        hp: 100,
+        maxHp: 100,
         shootTimer: 60,
         cfg,
-        attackCycle: 0
+        attackCycle: 0,
+        shieldTimer: 0,
+        shieldTriggered: false
       };
       enemies.push(boss);
     }
@@ -528,6 +594,8 @@ SPACE - also shoots</p>
       rapidBoostTimer = 0;
       speedBoostTimer = 0;
       shieldBoostTimer = 0;
+      bossShieldTimer = 0;
+      bossShieldTriggered = false;
       if (player) {
         player.x = W / 2;
         player.y = H - Math.max(80, H * 0.12);
@@ -598,6 +666,8 @@ SPACE - also shoots</p>
       rapidBoostTimer = 0;
       speedBoostTimer = 0;
       shieldBoostTimer = 0;
+      bossShieldTimer = 0;
+      bossShieldTriggered = false;
       bonusSpawnTimer = 0;
       player = { x: W / 2, y: H - Math.max(80, H * 0.12), invul: 0 };
       bullets = [];
@@ -820,6 +890,7 @@ SPACE - also shoots</p>
       const rapidOn = rapidFire || rapidBoostTimer > 0;
       const offsets = rapidOn ? [0, -10 * playerSize(), 10 * playerSize()] : [0];
       const boss = autoAimBoss ? enemies.find((e) => e.type === "finalBoss") : null;
+      playShootSound();
       offsets.forEach((offsetX) => {
         const shot = {
           x: player.x + offsetX,
@@ -879,9 +950,12 @@ SPACE - also shoots</p>
       if (player.invul > 0) player.invul--;
       if (cooldown > 0) cooldown--;
       const fireRate = rapidOn ? 2 : 10;
-      const bossAutoAim = autoAimUnlocked && wave === 20 && enemies.some((e) => e.type === "finalBoss");
+      const boss = enemies.find((e) => e.type === "finalBoss");
+      const bossShieldActive = boss && boss.shieldTimer > 0;
+      const bossAutoAim = autoAimUnlocked && wave === 20 && boss && !bossShieldActive;
       const touchDevice = window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
-      const wantsFire = bossAutoAim ? (touchDevice ? touchActive : true) : (keys[" "] || keys.z || mouseDown);
+      const manualFire = keys[" "] || keys.z || mouseDown;
+      const wantsFire = bossAutoAim ? (autoShootEnabled ? (touchDevice ? touchActive : true) : manualFire) : manualFire;
       if (wantsFire && cooldown <= 0) {
         firePlayerShot(bossAutoAim);
         cooldown = fireRate;
@@ -904,6 +978,7 @@ SPACE - also shoots</p>
               speedBoostTimer = MEGA_DURATION;
             }
             spark(b.x, b.y, b.type === "speed" ? "#6bffcb" : b.type === "mega" ? "#c6ff54" : b.type === "shield" ? "#7ef8ff" : b.type === "medkit" ? "#ff6b6b" : "#ffe96b", 12);
+            playBonusSound();
             bonuses.splice(i, 1);
             bonusSpawnTimer = 320;
           }
@@ -914,8 +989,21 @@ SPACE - also shoots</p>
         e.x = e.baseX + Math.sin(frame * e.cfg.swaySpd + e.baseX * 0.03) * e.cfg.swayAmp;
         e.shootTimer--;
         if (e.type === "finalBoss") {
+          if (e.shieldTimer > 0) e.shieldTimer--;
           if (e.shootTimer <= 0) {
-            if (e.attackCycle === 0) {
+            if (e.shieldTimer > 0) {
+              for (let k = 0; k < 14; k++) {
+                const a = (Math.PI * 2 * k) / 14 + frame * 0.03;
+                bullets.push({
+                  x: e.x + Math.cos(a) * 24,
+                  y: e.y + Math.sin(a) * 14,
+                  vx: Math.cos(a) * 1.65,
+                  vy: Math.sin(a) * 1.65 + 0.55,
+                  own: "e"
+                });
+              }
+              e.shootTimer = 42;
+            } else if (e.attackCycle === 0) {
               const dx = player.x - e.x;
               const dy = player.y - e.y;
               const len = Math.max(1, Math.hypot(dx, dy));
@@ -979,11 +1067,27 @@ SPACE - also shoots</p>
           const hit = 13.5 * enemySize(e.type);
           if (Math.abs(b.x - e.x) < hit && Math.abs(b.y - e.y) < hit) {
             bullets.splice(i, 1);
+            if (e.type === "finalBoss" && e.shieldTimer > 0) {
+              spark(b.x, b.y, "#7ef8ff", 8);
+              break;
+            }
             e.hp--;
             spark(e.x, e.y, e.type === "boss" ? "#ff4466" : e.type === "fast" ? "#ffaa22" : "#cc88ff", 5);
+            if (e.type === "finalBoss" && !e.shieldTriggered && e.hp <= 50) {
+              e.hp = 50;
+              e.shieldTriggered = true;
+              e.shieldTimer = 600;
+              bossShieldTimer = e.shieldTimer;
+              bossShieldTriggered = true;
+              bullets = bullets.filter((shot) => shot.own !== "p");
+              spark(e.x, e.y, "#7ef8ff", 28);
+              playTone(150, 0.35, "sawtooth", 0.13);
+              break;
+            }
             if (e.hp <= 0) {
               explosions.push({ x: e.x, y: e.y, r: 0, life: 1 });
               spark(e.x, e.y, "#fff", 12);
+              playHitSound();
               score += e.type === "finalBoss" ? 1000 : e.type === "boss" ? 30 : e.type === "fast" ? 15 : 10;
               enemies.splice(j, 1);
             }
@@ -1005,6 +1109,7 @@ SPACE - also shoots</p>
             }
             if (!godMode) {
               lives--;
+              playDamageSound();
               player.invul = 100;
               spark(player.x, player.y, "#7ef8ff", 14);
               if (lives <= 0) {
@@ -1106,6 +1211,23 @@ SPACE - also shoots</p>
 
       const boss = enemies.find((e) => e.type === "finalBoss");
       if (boss) {
+        if (boss.shieldTimer > 0) {
+          const shieldR = 68 * viewScale() + Math.sin(frame * 0.12) * 5;
+          ctx.strokeStyle = "rgba(126,248,255,0.9)";
+          ctx.lineWidth = Math.max(3, 3.2 * viewScale());
+          ctx.shadowBlur = 18;
+          ctx.shadowColor = "#7ef8ff";
+          ctx.beginPath();
+          ctx.arc(boss.x, boss.y, shieldR, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.strokeStyle = "rgba(126,248,255,0.28)";
+          ctx.lineWidth = Math.max(8, 9 * viewScale());
+          ctx.beginPath();
+          ctx.arc(boss.x, boss.y, shieldR + 8, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        }
+
         const barW = Math.min(W * 0.66, 560);
         const barH = Math.max(18, 20 * viewScale());
         const bx = (W - barW) / 2;
@@ -1159,7 +1281,13 @@ SPACE - also shoots</p>
         ctx.fillText(rapidLabel, 14, H - 16);
       }
 
-      if (autoAimUnlocked && wave === 20 && enemies.some((e) => e.type === "finalBoss")) {
+      const finalBoss = enemies.find((e) => e.type === "finalBoss");
+      if (finalBoss && finalBoss.shieldTimer > 0) {
+        ctx.fillStyle = "rgba(126,248,255,0.28)";
+        ctx.font = "bold " + Math.max(14, Math.round(15 * viewScale())) + "px Courier New";
+        ctx.textAlign = "center";
+        ctx.fillText("BOSS SHIELD: SURVIVE " + Math.ceil(finalBoss.shieldTimer / 60) + "S", W / 2, H - 16);
+      } else if (autoAimUnlocked && wave === 20 && enemies.some((e) => e.type === "finalBoss")) {
         ctx.fillStyle = "rgba(255,238,68,0.22)";
         ctx.font = "bold " + Math.max(14, Math.round(14 * viewScale())) + "px Courier New";
         ctx.textAlign = "center";
@@ -1233,6 +1361,7 @@ SPACE - also shoots</p>
     }
 
     document.getElementById("sb").addEventListener("click", () => {
+      ensureAudio();
       document.getElementById("ov").style.display = "none";
       init();
       state = "playing";
@@ -1288,6 +1417,7 @@ SPACE - also shoots</p>
     });
 
     document.addEventListener("keydown", async (e) => {
+      ensureAudio();
       keys[e.key] = true;
       if (e.key === " ") e.preventDefault();
       if (state === "playing" && wt > 0 && (e.key === " " || e.key === "Enter")) wt = 0;
@@ -1303,6 +1433,7 @@ SPACE - also shoots</p>
     });
 
     canvas.addEventListener("mousedown", (e) => {
+      ensureAudio();
       if (state === "playing" && wt > 0 && e.button === 0) {
         wt = 0;
         return;
@@ -1323,6 +1454,7 @@ SPACE - also shoots</p>
     canvas.addEventListener("touchstart", (e) => {
       if (!e.touches.length) return;
       e.preventDefault();
+      ensureAudio();
       if (state === "playing" && wt > 0) wt = 0;
       updateTouchPoint(e.touches[0].clientX, e.touches[0].clientY);
       touchActive = true;
@@ -1350,6 +1482,14 @@ SPACE - also shoots</p>
     });
     window.addEventListener("focus", syncCheatVisibility);
     window.addEventListener("storage", syncCheatVisibility);
+    window.addEventListener("message", (event) => {
+      const data = event.data || {};
+      if (data.type !== "space-settings") return;
+      autoShootEnabled = Boolean(data.autoShoot);
+      sfxVolume = Math.max(0, Math.min(1, Number(data.volume) || 0));
+      musicEnabled = Boolean(data.music);
+      syncMusic();
+    });
     window.addEventListener("resize", resizeGame);
     syncCheatVisibility();
     syncAdminButtons();

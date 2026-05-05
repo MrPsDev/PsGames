@@ -105,12 +105,20 @@
     }
 
     .brand-title {
+      border: 0;
+      background: transparent;
+      padding: 0;
       color: #f5f7fb;
       font-family: "Audiowide", "Segoe UI", sans-serif;
       font-size: clamp(17px, 2vw, 26px);
       letter-spacing: 0;
       white-space: nowrap;
       text-shadow: 0 0 18px rgba(126, 248, 255, 0.16);
+      cursor: pointer;
+    }
+
+    .brand-title:hover {
+      color: var(--mint);
     }
 
     .topbar-actions {
@@ -270,6 +278,24 @@
         linear-gradient(180deg, #050712 0%, #08081a 52%, #050712 100%);
     }
 
+    body.game-mode {
+      padding: 76px 14px 18px;
+    }
+
+    body.tetris-mode #main-panel {
+      width: auto;
+      padding: 0;
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+      overflow: visible;
+    }
+
+    body.tetris-mode #main-panel::before {
+      opacity: 0;
+    }
+
     body.space-mode::before,
     body.space-mode::after {
       display: none;
@@ -318,9 +344,42 @@
       min-height: unset;
     }
 
+    body.game-mode #main-panel {
+      padding: 12px;
+      gap: 8px;
+    }
+
+    body.game-mode #tetris-screen,
+    body.game-mode #tank-screen,
+    body.game-mode #space-screen {
+      min-height: unset;
+    }
+
+    body.game-mode #tetris-screen .hud,
+    body.game-mode #tank-screen .hud {
+      gap: 6px;
+    }
+
+    body.game-mode #tetris-screen .hud-box,
+    body.game-mode #tank-screen .hud-box {
+      padding: 6px 10px;
+      min-height: 0;
+    }
+
+    body.game-mode #tetris-layout,
+    body.game-mode #tank-screen .tank-wrap {
+      margin-top: 8px;
+      padding: 10px;
+    }
+
+    body.game-mode .difficulty-row {
+      margin-top: 6px;
+      margin-bottom: 8px;
+    }
+
     @media (min-width: 841px) {
       body.space-mode {
-        padding-top: 112px;
+        padding-top: 76px;
       }
     }
 
@@ -599,6 +658,76 @@
       text-transform: uppercase;
     }
 
+    .fullscreen-toast {
+      position: fixed;
+      left: 50%;
+      top: 84px;
+      transform: translate(-50%, -12px);
+      z-index: 60;
+      opacity: 0;
+      pointer-events: none;
+      padding: 12px 16px;
+      border: 1px solid rgba(126, 248, 255, 0.34);
+      border-radius: 14px;
+      background: rgba(4, 9, 15, 0.92);
+      color: #f5fbff;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.38);
+      backdrop-filter: blur(16px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .fullscreen-toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    #tetris-screen .screen-head > div:first-child,
+    #tank-screen .screen-head > div:first-child,
+    #space-screen .screen-head > div:first-child {
+      display: none;
+    }
+
+    #tetris-screen .screen-head,
+    #tank-screen .screen-head,
+    #space-screen .screen-head {
+      justify-content: flex-end;
+    }
+
+    #tetris-screen .screen-head {
+      display: none;
+    }
+
+    #tetris-screen .screen-head .top-row,
+    #tank-screen .screen-head .top-row {
+      width: auto;
+      justify-content: flex-end;
+    }
+
+    #tetris-screen #start-btn,
+    #tetris-screen .hud,
+    #tetris-side,
+    #tetris-screen #msg {
+      display: none;
+    }
+
+    #tetris-layout,
+    .tank-wrap {
+      width: min(920px, 92%);
+      margin-left: auto;
+      margin-right: auto;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px 16px 0 0;
+      background: #0a0a1a;
+      box-shadow:
+        0 0 0 1px rgba(126, 248, 255, 0.08),
+        0 20px 60px rgba(0, 0, 0, 0.28),
+        inset 0 0 28px rgba(126, 248, 255, 0.04);
+    }
+
     @media (min-width: 841px) and (pointer: fine) {
       .deploy-banner {
         padding: 14px 18px;
@@ -787,6 +916,103 @@
       color: var(--muted);
       line-height: 1.7;
       font-size: 14px;
+    }
+
+    .game-card-strip {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: min(100%, var(--game-strip-width, 920px));
+      margin: 0 auto;
+      padding: 11px 14px;
+      border: 1px solid rgba(126, 248, 255, 0.22);
+      border-top: 0;
+      border-radius: 0 0 16px 16px;
+      background:
+        linear-gradient(180deg, rgba(13, 30, 43, 0.94), rgba(5, 13, 20, 0.96));
+      box-shadow: inset 0 1px 0 rgba(126, 248, 255, 0.08);
+    }
+
+    #tetris-screen .game-card-strip {
+      --game-strip-width: clamp(240px, calc((100vh - 170px) / 2.23), 360px);
+    }
+
+    #tetris-screen #board {
+      border-radius: 16px 16px 0 0;
+    }
+
+    #tank-screen .game-card-strip {
+      --game-strip-width: min(920px, 92%);
+    }
+
+    #tank-screen #tank-board {
+      border-radius: 16px 16px 0 0;
+    }
+
+    #space-screen .game-card-strip {
+      --game-strip-width: min(1040px, 96vw, calc((100vh - 150px) * 1.4167));
+    }
+
+    #space-screen .space-wrap {
+      border-radius: 16px 16px 0 0;
+    }
+
+    #tetris-screen:fullscreen .game-card-strip,
+    #tank-screen:fullscreen .game-card-strip,
+    #space-screen:fullscreen .game-card-strip,
+    #tetris-screen:-webkit-full-screen .game-card-strip,
+    #tank-screen:-webkit-full-screen .game-card-strip,
+    #space-screen:-webkit-full-screen .game-card-strip {
+      display: none;
+    }
+
+    .game-card-strip-name {
+      color: #f5fbff;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+
+    .game-card-strip button {
+      position: relative;
+      padding: 7px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .game-strip-fullscreen {
+      width: 34px;
+      height: 30px;
+      padding: 0 !important;
+      border-color: rgba(126, 248, 255, 0.55);
+      color: transparent;
+    }
+
+    .game-strip-fullscreen::before,
+    .game-strip-fullscreen::after {
+      content: "";
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-color: #7ef8ff;
+      border-style: solid;
+      filter: drop-shadow(0 0 5px rgba(126, 248, 255, 0.45));
+    }
+
+    .game-strip-fullscreen::before {
+      left: 8px;
+      top: 7px;
+      border-width: 2px 0 0 2px;
+    }
+
+    .game-strip-fullscreen::after {
+      right: 8px;
+      bottom: 7px;
+      border-width: 0 2px 2px 0;
     }
 
     .badge {
@@ -1150,6 +1376,113 @@
       line-height: 0;
     }
 
+    #tetris-screen #tetris-layout,
+    #tank-screen .tank-wrap {
+      width: min(920px, 92%);
+      margin-left: auto;
+      margin-right: auto;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px 16px 0 0;
+      background: #0a0a1a;
+      box-shadow:
+        0 0 0 1px rgba(126, 248, 255, 0.08),
+        0 20px 60px rgba(0, 0, 0, 0.28),
+        inset 0 0 28px rgba(126, 248, 255, 0.04);
+    }
+
+    #tetris-screen #tetris-layout {
+      width: min-content;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .tetris-cabinet {
+      position: relative;
+      width: min(100%, clamp(240px, calc((100vh - 170px) / 2.23), 360px));
+      border: 3px solid rgba(126, 248, 255, 0.72);
+      border-radius: 10px;
+      background: #050712;
+      overflow: hidden;
+      box-shadow:
+        0 0 24px rgba(126, 248, 255, 0.12),
+        inset 0 0 24px rgba(126, 248, 255, 0.05);
+    }
+
+    #tetris-screen #board {
+      width: 100%;
+      border: 0;
+      border-radius: 0;
+      background: #08081a;
+      box-shadow: none;
+    }
+
+    .tetris-start-panel {
+      position: absolute;
+      inset: 0 0 48px;
+      z-index: 3;
+      display: grid;
+      place-content: center;
+      gap: 20px;
+      padding: 22px;
+      background: rgba(5, 7, 18, 0.94);
+    }
+
+    .tetris-start-panel.hidden {
+      display: none;
+    }
+
+    .tetris-play-btn,
+    .tetris-controls-card {
+      width: 150px;
+      border: 3px solid rgba(126, 248, 255, 0.85);
+      border-radius: 6px;
+      background: rgba(4, 10, 18, 0.86);
+      color: #f5fbff;
+      text-align: center;
+      box-shadow: 0 0 18px rgba(126, 248, 255, 0.12);
+    }
+
+    .tetris-play-btn {
+      min-height: 50px;
+      font-weight: 900;
+    }
+
+    .tetris-controls-card {
+      padding: 14px 12px;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .tetris-controls-title {
+      margin-bottom: 8px;
+      color: var(--mint);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .tetris-bottom-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      padding: 9px 8px;
+      border-top: 3px solid rgba(126, 248, 255, 0.72);
+      background: rgba(3, 9, 14, 0.96);
+      color: #f5fbff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .tetris-bottom-bar span {
+      color: var(--mint);
+    }
+
     .space-overlay-controls {
       position: absolute;
       inset: 0;
@@ -1213,7 +1546,8 @@
     }
 
     .space-overlay-btn.menu-btn,
-    .space-overlay-btn.reload-btn {
+    .space-overlay-btn.reload-btn,
+    .space-overlay-btn.settings-btn {
       position: relative;
     }
 
@@ -1247,6 +1581,8 @@
 
     .space-overlay-btn.reload-btn::before,
     .space-overlay-btn.reload-btn::after,
+    .space-overlay-btn.settings-btn::before,
+    .space-overlay-btn.settings-btn::after,
     .space-overlay-btn.menu-btn::before,
     .space-overlay-btn.menu-btn::after {
       border: 0;
@@ -1276,6 +1612,82 @@
       border-bottom: 8px solid transparent;
       border-left: 11px solid #7ef8ff;
       transform: rotate(18deg);
+    }
+
+    .space-overlay-btn.settings-btn::before {
+      content: "";
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      width: 20px;
+      height: 20px;
+      border: 4px solid #7ef8ff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(126, 248, 255, 0.32);
+    }
+
+    .space-overlay-btn.settings-btn::after {
+      content: "";
+      position: absolute;
+      left: 21px;
+      top: 6px;
+      width: 4px;
+      height: 32px;
+      border-radius: 999px;
+      background: #7ef8ff;
+      box-shadow: 0 0 10px rgba(126, 248, 255, 0.32);
+      transform: rotate(45deg);
+    }
+
+    .space-settings-panel {
+      position: absolute;
+      top: 68px;
+      left: 12px;
+      z-index: 9;
+      display: none;
+      width: min(260px, calc(100% - 24px));
+      padding: 14px;
+      border: 1px solid rgba(126, 248, 255, 0.32);
+      border-radius: 14px;
+      background: rgba(4, 9, 15, 0.94);
+      color: #f5fbff;
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.38);
+      backdrop-filter: blur(14px);
+      pointer-events: auto;
+    }
+
+    .space-settings-panel.open {
+      display: grid;
+      gap: 12px;
+    }
+
+    .space-settings-title {
+      color: var(--mint);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .space-setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .space-setting-row input[type="range"] {
+      width: 120px;
+      accent-color: #7ef8ff;
+    }
+
+    .space-setting-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #7ef8ff;
     }
 
     .space-overlay-btn.fullscreen-btn-mini::before {
@@ -1367,6 +1779,7 @@
 
       .space-overlay-btn.menu-btn,
       .space-overlay-btn.reload-btn,
+      .space-overlay-btn.settings-btn,
       .space-overlay-btn.fullscreen-btn-mini {
         width: 38px;
         height: 38px;
@@ -1396,10 +1809,26 @@
         border-left-width: 9px;
       }
 
+      .space-overlay-btn.settings-btn::before {
+        left: 9px;
+        top: 9px;
+        width: 16px;
+        height: 16px;
+        border-width: 3px;
+      }
+
+      .space-overlay-btn.settings-btn::after {
+        left: 17px;
+        top: 5px;
+        height: 26px;
+      }
+
       #space-screen:fullscreen .space-overlay-btn.menu-btn,
       #space-screen:fullscreen .space-overlay-btn.reload-btn,
+      #space-screen:fullscreen .space-overlay-btn.settings-btn,
       #space-screen:-webkit-full-screen .space-overlay-btn.menu-btn,
-      #space-screen:-webkit-full-screen .space-overlay-btn.reload-btn {
+      #space-screen:-webkit-full-screen .space-overlay-btn.reload-btn,
+      #space-screen:-webkit-full-screen .space-overlay-btn.settings-btn {
         width: 34px;
         height: 34px;
       }
@@ -1869,6 +2298,28 @@
       height: 100%;
     }
 
+    #tetris-screen:fullscreen .screen-head > div:first-child,
+    #tank-screen:fullscreen .screen-head > div:first-child,
+    #fps-screen:fullscreen .screen-head > div:first-child,
+    #space-screen:fullscreen .screen-head > div:first-child,
+    #tetris-screen:-webkit-full-screen .screen-head > div:first-child,
+    #tank-screen:-webkit-full-screen .screen-head > div:first-child,
+    #fps-screen:-webkit-full-screen .screen-head > div:first-child,
+    #space-screen:-webkit-full-screen .screen-head > div:first-child {
+      display: none;
+    }
+
+    #tetris-screen:fullscreen .screen-head,
+    #tank-screen:fullscreen .screen-head,
+    #fps-screen:fullscreen .screen-head,
+    #space-screen:fullscreen .screen-head,
+    #tetris-screen:-webkit-full-screen .screen-head,
+    #tank-screen:-webkit-full-screen .screen-head,
+    #fps-screen:-webkit-full-screen .screen-head,
+    #space-screen:-webkit-full-screen .screen-head {
+      justify-content: flex-end;
+    }
+
     #tetris-screen:fullscreen .control-action,
     #tetris-screen:-webkit-full-screen .control-action {
       font-size: 13px;
@@ -2104,11 +2555,15 @@
 
     @media (max-height: 980px) and (min-width: 841px) {
       body {
-        padding: 18px 14px 26px;
+        padding: 92px 14px 26px;
+      }
+
+      body.game-mode {
+        padding: 76px 12px 14px;
       }
 
       body.space-mode {
-        padding: 112px 14px 26px;
+        padding: 76px 12px 14px;
       }
 
       .title {
@@ -2441,7 +2896,7 @@
   <header class="site-topbar">
     <div class="topbar-left">
       <button class="nav-menu-btn" id="site-menu-btn" type="button" aria-label="Menu"></button>
-      <div class="brand-title">Retro Games</div>
+      <button class="brand-title" id="brand-home" type="button">Retro Games</button>
     </div>
     <div class="topbar-actions">
       <button class="nav-auth-btn" id="admin-launch" type="button">Login</button>
@@ -2536,50 +2991,32 @@
 
         <div id="tetris-layout">
           <div id="tetris-left">
-            <canvas id="board" width="200" height="400"></canvas>
+            <div class="tetris-cabinet">
+              <canvas id="board" width="200" height="400"></canvas>
+              <div class="tetris-start-panel" id="tetris-start-panel">
+                <button class="tetris-play-btn" id="tetris-play-btn" type="button">Play</button>
+                <div class="tetris-controls-card">
+                  <div class="tetris-controls-title">Controls</div>
+                  <div>Move: A / D or arrows</div>
+                  <div>Rotate: W or Up</div>
+                  <div>Soft drop: S or Down</div>
+                  <div>Hard drop: Space</div>
+                </div>
+              </div>
+              <div class="tetris-bottom-bar">
+                <div>Score: <span id="tetris-score-bottom">0</span></div>
+                <div>Goal: <span id="tetris-goal-val">500</span></div>
+                <div>Level: <span id="tetris-level-val">1</span></div>
+              </div>
+            </div>
             <div id="msg">Press Start to play</div>
           </div>
 
-          <aside id="tetris-side">
-            <div class="mini-panel next-panel">
-              <div class="hud-label">Next</div>
-              <canvas id="next-canvas" width="80" height="80"></canvas>
-            </div>
-            <div class="mini-panel controls-panel">
-              <div class="hud-label">Controls</div>
-              <div class="control-list">
-                <div class="control-row">
-                  <span class="control-action">Move</span>
-                  <span class="key-badges">
-                    <span class="key-chip">Left</span>
-                    <span class="key-chip">Right</span>
-                    <span class="key-chip">A</span>
-                    <span class="key-chip">D</span>
-                  </span>
-                </div>
-                <div class="control-row">
-                  <span class="control-action">Rotate</span>
-                  <span class="key-badges">
-                    <span class="key-chip">Up</span>
-                    <span class="key-chip">W</span>
-                  </span>
-                </div>
-                <div class="control-row">
-                  <span class="control-action">Soft Drop</span>
-                  <span class="key-badges">
-                    <span class="key-chip">Down</span>
-                    <span class="key-chip">S</span>
-                  </span>
-                </div>
-                <div class="control-row">
-                  <span class="control-action">Hard Drop</span>
-                  <span class="key-badges">
-                    <span class="key-chip">Space</span>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </aside>
+        </div>
+
+        <div class="game-card-strip">
+          <span class="game-card-strip-name">Tetris</span>
+          <button class="secondary game-strip-fullscreen" id="menu-tetris-fullscreen" type="button" aria-label="Fullscreen" title="Fullscreen"></button>
         </div>
 
         <div class="mobile-controls" id="tetris-mobile-controls">
@@ -2643,6 +3080,11 @@
         <div class="tank-wrap">
           <canvas id="tank-board" width="920" height="560"></canvas>
           <div id="tank-msg">Press Start Battle to play</div>
+        </div>
+
+        <div class="game-card-strip">
+          <span class="game-card-strip-name">Mini Tank</span>
+          <button class="secondary game-strip-fullscreen" id="menu-tank-fullscreen" type="button" aria-label="Fullscreen" title="Fullscreen"></button>
         </div>
 
         <div class="mobile-controls" id="tank-mobile-controls">
@@ -2753,11 +3195,25 @@
         <div class="space-wrap">
           <div class="space-overlay-controls">
             <div class="space-overlay-group top-left">
-              <button class="space-overlay-btn menu-btn" id="back-from-space" type="button" aria-label="Menu" title="Menu"></button>
               <button class="space-overlay-btn reload-btn" id="space-start-btn" type="button" aria-label="Reload Game" title="Reload Game"></button>
+              <button class="space-overlay-btn settings-btn" id="space-settings-btn" type="button" aria-label="Settings" title="Settings"></button>
             </div>
           </div>
-          <button class="space-overlay-btn fullscreen-btn-mini space-corner-fullscreen" id="space-overlay-fullscreen" type="button" aria-label="Fullscreen" title="Fullscreen"></button>
+          <div class="space-settings-panel" id="space-settings-panel">
+            <div class="space-settings-title">Settings</div>
+            <label class="space-setting-row">
+              <span>Auto shoot</span>
+              <input id="space-auto-shoot" type="checkbox" checked />
+            </label>
+            <label class="space-setting-row">
+              <span>Volume</span>
+              <input id="space-volume" type="range" min="0" max="100" value="70" />
+            </label>
+            <label class="space-setting-row">
+              <span>Music</span>
+              <input id="space-music" type="checkbox" checked />
+            </label>
+          </div>
           <iframe
             id="space-frame"
             class="space-frame"
@@ -2766,6 +3222,11 @@
             loading="lazy"
             allow="fullscreen"
           ></iframe>
+        </div>
+
+        <div class="game-card-strip">
+          <span class="game-card-strip-name">Space Shooter</span>
+          <button class="secondary game-strip-fullscreen" id="menu-space-fullscreen" type="button" aria-label="Fullscreen" title="Fullscreen"></button>
         </div>
       </div>
     </section>
@@ -2862,6 +3323,8 @@
     <button class="primary" id="deploy-refresh-btn" type="button">Refresh now</button>
   </div>
 
+  <div class="fullscreen-toast" id="fullscreen-toast" aria-live="polite">To exit full screen press Esc</div>
+
   <script>
     const menuScreen = document.getElementById("menu-screen");
     const tetrisScreen = document.getElementById("tetris-screen");
@@ -2878,6 +3341,11 @@
     const fpsFullscreenButton = document.getElementById("fps-fullscreen-btn");
     const spaceFrame = document.getElementById("space-frame");
     const spaceOverlayFullscreenButton = document.getElementById("space-overlay-fullscreen");
+    const spaceSettingsButton = document.getElementById("space-settings-btn");
+    const spaceSettingsPanel = document.getElementById("space-settings-panel");
+    const spaceAutoShoot = document.getElementById("space-auto-shoot");
+    const spaceVolume = document.getElementById("space-volume");
+    const spaceMusic = document.getElementById("space-music");
     const tetrisHud = tetrisScreen.querySelector(".hud");
     const tetrisLayout = document.getElementById("tetris-layout");
     const tetrisSide = document.getElementById("tetris-side");
@@ -2916,6 +3384,8 @@
     const deployBanner = document.getElementById("deploy-banner");
     const deployMeta = document.getElementById("deploy-meta");
     const deployRefreshButton = document.getElementById("deploy-refresh-btn");
+    const fullscreenToast = document.getElementById("fullscreen-toast");
+    let fullscreenToastTimer = null;
     const ADMIN_AUTH_KEY = "psgames-admin-auth";
     const ADMIN_OWNER_KEY = "psgames-owner-auth";
     const ADMIN_LABEL_KEY = "psgames-login-label";
@@ -3225,6 +3695,8 @@
       tankScreen.classList.toggle("hidden", name !== "tank");
       fpsScreen.classList.toggle("hidden", name !== "fps");
       spaceScreen.classList.toggle("hidden", name !== "space");
+      document.body.classList.toggle("game-mode", name !== "menu");
+      document.body.classList.toggle("tetris-mode", name === "tetris");
       document.body.classList.toggle("space-mode", name === "space");
       if (name !== "tetris") stopTetris();
       if (name !== "tank") stopTank();
@@ -3249,6 +3721,31 @@
       return document.fullscreenElement === element;
     }
 
+    function showFullscreenToast() {
+      if (!fullscreenToast) return;
+      clearTimeout(fullscreenToastTimer);
+      fullscreenToast.classList.add("show");
+      fullscreenToastTimer = setTimeout(() => {
+        fullscreenToast.classList.remove("show");
+      }, 2400);
+    }
+
+    function requestElementFullscreen(element) {
+      if (!element) return;
+      try {
+        if (element.requestFullscreen) {
+          const result = element.requestFullscreen();
+          if (result && result.catch) result.catch((err) => console.error("Fullscreen failed", err));
+        } else if (element.webkitRequestFullscreen) {
+          element.webkitRequestFullscreen();
+        }
+        showFullscreenToast();
+      } catch (err) {
+        console.error("Fullscreen failed", err);
+      }
+      setTimeout(syncGamepad, 100);
+    }
+
     async function toggleFullscreen(element) {
       try {
         const isFs = document.fullscreenElement === element ||
@@ -3257,8 +3754,7 @@
           if (document.exitFullscreen) await document.exitFullscreen();
           else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
         } else {
-          if (element.requestFullscreen) await element.requestFullscreen();
-          else if (element.webkitRequestFullscreen) element.webkitRequestFullscreen();
+          requestElementFullscreen(element);
         }
       } catch (err) {
         console.error("Fullscreen failed", err);
@@ -3354,34 +3850,84 @@
       document.documentElement.style.setProperty("--tetris-live-board-width", finalWidth + "px");
     }
 
-    document.getElementById("open-tetris").addEventListener("click", () => {
+    function openTetrisScreen() {
       showScreen("tetris");
+      stopTetris();
+      board = newBoard();
+      piece = null;
+      next = randomPiece();
+      score = 0;
+      lines = 0;
+      tetrisLevel = 1;
+      tetrisGoal = getTetrisGoal(tetrisLevel);
+      document.getElementById("tetris-start-panel").classList.remove("hidden");
+      setMsg("");
       drawBoard();
       drawNext();
       updateUI();
-    });
+    }
 
-    document.getElementById("open-tank").addEventListener("click", () => {
+    function openTankScreen() {
       showScreen("tank");
       drawTankStartScreen();
       requestAnimationFrame(syncTankLayout);
+    }
+
+    function openSpaceScreen() {
+      showScreen("space");
+    }
+
+    document.getElementById("open-tetris").addEventListener("click", openTetrisScreen);
+    document.getElementById("open-tank").addEventListener("click", openTankScreen);
+    document.getElementById("open-space").addEventListener("click", openSpaceScreen);
+
+    document.getElementById("menu-tetris-fullscreen").addEventListener("click", () => {
+      openTetrisScreen();
+      requestElementFullscreen(tetrisScreen);
     });
 
-    document.getElementById("open-space").addEventListener("click", () => {
-      showScreen("space");
+    document.getElementById("menu-tank-fullscreen").addEventListener("click", () => {
+      openTankScreen();
+      requestElementFullscreen(tankScreen);
+    });
+
+    document.getElementById("menu-space-fullscreen").addEventListener("click", () => {
+      openSpaceScreen();
+      requestElementFullscreen(spaceScreen);
     });
 
     document.getElementById("back-from-tetris").addEventListener("click", returnToMenu);
     document.getElementById("back-from-tank").addEventListener("click", returnToMenu);
     document.getElementById("back-from-fps").addEventListener("click", returnToMenu);
-    document.getElementById("back-from-space").addEventListener("click", returnToMenu);
+    document.getElementById("back-from-space")?.addEventListener("click", returnToMenu);
+    document.getElementById("brand-home").addEventListener("click", returnToMenu);
     tetrisFullscreenButton.addEventListener("click", () => toggleFullscreen(tetrisScreen));
     tankFullscreenButton.addEventListener("click", () => toggleFullscreen(tankScreen));
     fpsFullscreenButton.addEventListener("click", () => toggleFullscreen(fpsScreen));
-    spaceOverlayFullscreenButton.addEventListener("click", () => toggleFullscreen(spaceScreen));
+    spaceOverlayFullscreenButton?.addEventListener("click", () => toggleFullscreen(spaceScreen));
     document.getElementById("space-start-btn").addEventListener("click", () => {
       spaceFrame.src = spaceFrame.src;
     });
+
+    function sendSpaceSettings() {
+      if (!spaceFrame || !spaceFrame.contentWindow) return;
+      spaceFrame.contentWindow.postMessage({
+        type: "space-settings",
+        autoShoot: Boolean(spaceAutoShoot?.checked),
+        volume: Number(spaceVolume?.value || 0) / 100,
+        music: Boolean(spaceMusic?.checked)
+      }, "*");
+    }
+
+    spaceSettingsButton?.addEventListener("click", () => {
+      spaceSettingsPanel?.classList.toggle("open");
+      sendSpaceSettings();
+    });
+    [spaceAutoShoot, spaceVolume, spaceMusic].forEach((input) => {
+      input?.addEventListener("input", sendSpaceSettings);
+      input?.addEventListener("change", sendSpaceSettings);
+    });
+    spaceFrame?.addEventListener("load", () => setTimeout(sendSpaceSettings, 120));
 
     // ── Gamepad overlay helpers ──────────────────────────────
     const tankGamepad = document.getElementById("tank-gamepad");
@@ -3555,7 +4101,7 @@
       [[0, 1, 1], [1, 1, 0]]
     ];
 
-    let board, piece, next, score, lines, gameLoop, running;
+    let board, piece, next, score, lines, tetrisLevel, tetrisGoal, gameLoop, running;
     let audioCtx = null;
 
     function initAudio() {
@@ -3714,9 +4260,30 @@
       });
     }
 
+    function getTetrisGoal(level = tetrisLevel || 1) {
+      return 500 * level * (level + 1) / 2;
+    }
+
+    function syncTetrisLevel() {
+      let changed = false;
+      while ((score || 0) >= (tetrisGoal || getTetrisGoal(1))) {
+        tetrisLevel = (tetrisLevel || 1) + 1;
+        tetrisGoal = getTetrisGoal(tetrisLevel);
+        changed = true;
+      }
+      if (changed) {
+        setMsg("Level " + tetrisLevel + "!", 1400);
+        restartTetrisTimer();
+      }
+    }
+
     function updateUI() {
+      syncTetrisLevel();
       document.getElementById("lines-val").textContent = lines ?? 0;
       document.getElementById("score-val").textContent = score ?? 0;
+      document.getElementById("tetris-score-bottom").textContent = score ?? 0;
+      document.getElementById("tetris-goal-val").textContent = tetrisGoal ?? getTetrisGoal(1);
+      document.getElementById("tetris-level-val").textContent = tetrisLevel ?? 1;
       syncTetrisLayout();
     }
 
@@ -3731,7 +4298,8 @@
     }
 
     function getTetrisDelay() {
-      return cheatState.tetrisSlow ? 1100 : 500;
+      if (cheatState.tetrisSlow) return 1100;
+      return Math.max(120, 620 - ((tetrisLevel || 1) - 1) * 55);
     }
 
     function restartTetrisTimer() {
@@ -3774,6 +4342,7 @@
           clearInterval(gameLoop);
           setMsg("Game over! Score: " + score);
           document.getElementById("start-btn").textContent = "Restart";
+          document.getElementById("tetris-start-panel").classList.remove("hidden");
           return;
         }
       }
@@ -3786,12 +4355,15 @@
       board = newBoard();
       score = 0;
       lines = 0;
+      tetrisLevel = 1;
+      tetrisGoal = getTetrisGoal(tetrisLevel);
       piece = randomPiece();
       next = randomPiece();
       running = true;
       clearInterval(gameLoop);
       gameLoop = setInterval(tick, getTetrisDelay());
       document.getElementById("start-btn").textContent = "Restart";
+      document.getElementById("tetris-start-panel").classList.add("hidden");
       setMsg("");
       updateUI();
       drawNext();
@@ -3808,6 +4380,7 @@
       showScreen("tetris");
       startGame();
     });
+    document.getElementById("tetris-play-btn").addEventListener("click", startGame);
 
     function runTetrisAction(action) {
       if (!running || !piece || tetrisScreen.classList.contains("hidden")) return;
@@ -5748,6 +6321,8 @@
     next = null;
     score = 0;
     lines = 0;
+    tetrisLevel = 1;
+    tetrisGoal = getTetrisGoal(tetrisLevel);
     refreshAdminButtons();
     refreshFullscreenLabels();
     syncLayouts();
